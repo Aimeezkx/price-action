@@ -1,0 +1,32 @@
+{
+  "name": "monitoring-dashboard",
+  "version": "1.0.0",
+  "description": "Unified monitoring dashboard for document learning app",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1",
+    "recharts": "^2.7.2",
+    "date-fns": "^2.30.0",
+    "axios": "^1.4.0",
+    "react-query": "^3.39.3",
+    "tailwindcss": "^3.3.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@types/node": "^20.4.5",
+    "@vitejs/plugin-react": "^4.0.3",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.5"
+  }
+}

@@ -1,0 +1,178 @@
+groups:
+- name: platform_alerts
+  rules:
+  # Web platform alerts
+  - alert: WebHighResponseTime
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{platform="web"}[5m])) > 2
+    for: 2m
+    labels:
+      severity: warning
+      platform: web
+    annotations:
+      summary: "High response time on web platform"
+      description: "95th percentile response time is {{ $value }}s"
+
+  - alert: WebHighErrorRate
+    expr: rate(http_requests_total{platform="web",status=~"5.."}[5m]) / rate(http_requests_total{platform="web"}[5m]) > 0.05
+    for: 1m
+    labels:
+      severity: critical
+      platform: web
+    annotations:
+      summary: "High error rate on web platform"
+      description: "Error rate is {{ $value | humanizePercentage }}"
+
+  - alert: WebHighMemoryUsage
+    expr: process_resident_memory_bytes{platform="web"} > 500000000
+    for: 5m
+    labels:
+      severity: warning
+      platform: web
+    annotations:
+      summary: "High memory usage on web platform"
+      description: "Memory usage is {{ $value | humanizeBytes }}"
+
+  # iOS platform alerts
+  - alert: iOSHighCrashRate
+    expr: rate(app_crashes_total{platform="ios"}[1h]) > 0.01
+    for: 5m
+    labels:
+      severity: critical
+      platform: ios
+    annotations:
+      summary: "High crash rate on iOS platform"
+      description: "Crash rate is {{ $value | humanizePercentage }}"
+
+  - alert: iOSHighAppLaunchTime
+    expr: histogram_quantile(0.95, rate(app_launch_duration_seconds_bucket{platform="ios"}[5m])) > 3
+    for: 2m
+    labels:
+      severity: warning
+      platform: ios
+    annotations:
+      summary: "High app launch time on iOS"
+      description: "95th percentile launch time is {{ $value }}s"
+
+  - alert: iOSHighBatteryDrain
+    expr: battery_drain_rate{platform="ios"} > 10
+    for: 10m
+    labels:
+      severity: warning
+      platform: ios
+    annotations:
+      summary: "High battery drain on iOS"
+      description: "Battery drain rate is {{ $value }}% per hour"
+
+  # Backend alerts
+  - alert: BackendHighResponseTime
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{platform="backend"}[5m])) > 1
+    for: 2m
+    labels:
+      severity: warning
+      platform: backend
+    annotations:
+      summary: "High response time on backend"
+      description: "95th percentile response time is {{ $value }}s"
+
+  - alert: BackendHighErrorRate
+    expr: rate(http_requests_total{platform="backend",status=~"5.."}[5m]) / rate(http_requests_total{platform="backend"}[5m]) > 0.01
+    for: 1m
+    labels:
+      severity: critical
+      platform: backend
+    annotations:
+      summary: "High error rate on backend"
+      description: "Error rate is {{ $value | humanizePercentage }}"
+
+  - alert: BackendDatabaseConnectionsHigh
+    expr: pg_stat_activity_count > 80
+    for: 2m
+    labels:
+      severity: warning
+      platform: backend
+    annotations:
+      summary: "High database connections"
+      description: "Database connections: {{ $value }}"
+
+  - alert: BackendQueueLengthHigh
+    expr: queue_length > 1000
+    for: 5m
+    labels:
+      severity: warning
+      platform: backend
+    annotations:
+      summary: "High queue length"
+      description: "Queue length: {{ $value }}"
+
+  # System alerts
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+      platform: system
+    annotations:
+      summary: "High CPU usage"
+      description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: HighMemoryUsage
+    expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+      platform: system
+    annotations:
+      summary: "High memory usage"
+      description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: HighDiskUsage
+    expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+    for: 5m
+    labels:
+      severity: critical
+      platform: system
+    annotations:
+      summary: "High disk usage"
+      description: "Disk usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: ServiceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+      platform: system
+    annotations:
+      summary: "Service is down"
+      description: "{{ $labels.job }} service is down on {{ $labels.instance }}"
+
+- name: user_experience_alerts
+  rules:
+  - alert: HighUserFeedbackNegativeSentiment
+    expr: (feedback_negative_count / feedback_total_count) > 0.3
+    for: 10m
+    labels:
+      severity: warning
+      platform: user-experience
+    annotations:
+      summary: "High negative feedback sentiment"
+      description: "{{ $value | humanizePercentage }} of feedback is negative"
+
+  - alert: LowUserEngagement
+    expr: avg_over_time(daily_active_users[7d]) < avg_over_time(daily_active_users[30d]) * 0.7
+    for: 1d
+    labels:
+      severity: warning
+      platform: user-experience
+    annotations:
+      summary: "Low user engagement"
+      description: "Daily active users have dropped significantly"
+
+  - alert: HighAbandonmentRate
+    expr: (session_abandonment_count / session_total_count) > 0.5
+    for: 30m
+    labels:
+      severity: warning
+      platform: user-experience
+    annotations:
+      summary: "High session abandonment rate"
+      description: "{{ $value | humanizePercentage }} of sessions are being abandoned"
