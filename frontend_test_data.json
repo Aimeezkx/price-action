@@ -1,0 +1,25 @@
+{
+  "documents": [
+    {
+      "id": 1,
+      "title": "Sample Trading Document",
+      "status": "processed",
+      "page_count": 100,
+      "chapters": 5,
+      "knowledge_points": 15,
+      "flashcards": 25
+    }
+  ],
+  "api_endpoints": {
+    "base_url": "http://localhost:8000",
+    "upload": "/api/documents/upload",
+    "documents": "/api/documents",
+    "search": "/api/search"
+  },
+  "test_queries": [
+    "trading strategies",
+    "price action",
+    "market trends",
+    "technical analysis"
+  ]
+}

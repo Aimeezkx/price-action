@@ -1,0 +1,52 @@
+{
+  "last_updated": "2025-08-15T21:15:21.545745",
+  "summary": {
+    "report_period_days": 30,
+    "generated_at": "2025-08-15T21:15:21.547519",
+    "overall_statistics": {
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "error_tests": 0,
+      "skipped_tests": 0,
+      "pass_rate_percent": 100.0,
+      "avg_duration_ms": 250.0,
+      "total_duration_ms": 250.0
+    },
+    "suite_statistics": {
+      "total_runs": 1,
+      "avg_suite_duration_ms": 250.0,
+      "avg_pass_rate_percent": 100.0
+    },
+    "trends": {
+      "daily_stats": [
+        {
+          "date": "2025-08-15",
+          "total_tests": 1,
+          "passed_tests": 1,
+          "pass_rate": 100.0,
+          "avg_duration_ms": 250.0
+        }
+      ],
+      "category_stats": [
+        {
+          "category": "unit",
+          "total_tests": 1,
+          "passed_tests": 1,
+          "pass_rate": 100.0,
+          "avg_duration_ms": 250.0
+        }
+      ],
+      "period_days": 30
+    },
+    "flaky_tests": [],
+    "slowest_tests": [],
+    "failure_analysis": {
+      "common_failures": [],
+      "failing_tests": [],
+      "period_days": 30
+    }
+  },
+  "flaky_tests_count": 0,
+  "total_test_runs": 1
+}

@@ -1,0 +1,324 @@
+name: Accessibility & Usability Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  accessibility-usability-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: |
+          frontend/package-lock.json
+          backend/package-lock.json
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Setup test database
+      run: |
+        cd backend
+        python -m pytest --setup-only
+    
+    - name: Start backend server
+      run: |
+        cd backend
+        python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+        echo $! > backend.pid
+      env:
+        DATABASE_URL: sqlite:///./test.db
+        ENVIRONMENT: test
+    
+    - name: Start frontend development server
+      run: |
+        cd frontend
+        npm run dev &
+        echo $! > frontend.pid
+      env:
+        VITE_API_BASE_URL: http://localhost:8000
+    
+    - name: Wait for servers to be ready
+      run: |
+        npx wait-on http://localhost:8000/health --timeout 60000
+        npx wait-on http://localhost:3000 --timeout 60000
+    
+    - name: Run accessibility tests
+      run: |
+        cd frontend
+        npm run test:accessibility
+      env:
+        TEST_BASE_URL: http://localhost:3000
+        CI: true
+        TEST_HEADLESS: true
+    
+    - name: Run usability tests
+      run: |
+        cd frontend
+        npm run test:usability
+      env:
+        TEST_BASE_URL: http://localhost:3000
+        CI: true
+        TEST_HEADLESS: true
+    
+    - name: Run comprehensive accessibility suite
+      run: |
+        cd frontend
+        npm run test:accessibility-full
+      env:
+        TEST_BASE_URL: http://localhost:3000
+        OUTPUT_DIR: ./test-reports/accessibility-usability
+    
+    - name: Upload test reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-usability-reports-node-${{ matrix.node-version }}
+        path: |
+          frontend/test-reports/accessibility-usability/
+          frontend/coverage/
+        retention-days: 30
+    
+    - name: Upload test results to GitHub
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Accessibility & Usability Tests (Node ${{ matrix.node-version }})
+        path: frontend/test-reports/accessibility-usability/jest-report.xml
+        reporter: jest-junit
+        fail-on-error: false
+    
+    - name: Comment PR with accessibility results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const summaryPath = path.join('frontend/test-reports/accessibility-usability/accessibility-usability-summary.md');
+            if (fs.existsSync(summaryPath)) {
+              const summary = fs.readFileSync(summaryPath, 'utf8');
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🔍 Accessibility & Usability Test Results\n\n${summary}\n\n*Automated test results for Node.js ${{ matrix.node-version }}*`
+              });
+            }
+          } catch (error) {
+            console.log('Could not post comment:', error);
+          }
+    
+    - name: Check accessibility score threshold
+      run: |
+        cd frontend
+        node -e "
+          const fs = require('fs');
+          const path = './test-reports/accessibility-usability/test-session-summary.json';
+          
+          if (fs.existsSync(path)) {
+            const summary = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const threshold = 80; // Minimum acceptable score
+            
+            if (summary.overallScore && summary.overallScore.combined < threshold) {
+              console.error(\`❌ Accessibility score \${summary.overallScore.combined} is below threshold \${threshold}\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Accessibility score \${summary.overallScore?.combined || 'N/A'} meets requirements\`);
+            }
+          } else {
+            console.log('⚠️ No accessibility score available');
+          }
+        "
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        # Stop servers
+        if [ -f frontend/frontend.pid ]; then
+          kill $(cat frontend/frontend.pid) || true
+        fi
+        if [ -f backend/backend.pid ]; then
+          kill $(cat backend/backend.pid) || true
+        fi
+        
+        # Clean up test files
+        rm -f frontend/frontend.pid backend/backend.pid
+        rm -f backend/test.db
+
+  accessibility-regression-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout PR code
+      uses: actions/checkout@v4
+    
+    - name: Checkout base branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.base_ref }}
+        path: base
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies (PR)
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Install dependencies (Base)
+      run: |
+        cd base/frontend
+        npm ci
+    
+    - name: Start servers and run base tests
+      run: |
+        # Start base version
+        cd base
+        cd backend && python -m uvicorn main:app --port 8001 &
+        cd frontend && npm run dev -- --port 3001 &
+        
+        # Wait for servers
+        npx wait-on http://localhost:8001/health --timeout 60000
+        npx wait-on http://localhost:3001 --timeout 60000
+        
+        # Run base accessibility tests
+        cd frontend
+        npm run test:accessibility-full
+        mv test-reports/accessibility-usability base-reports
+      env:
+        TEST_BASE_URL: http://localhost:3001
+        OUTPUT_DIR: ./base-reports
+    
+    - name: Start servers and run PR tests
+      run: |
+        # Start PR version
+        cd backend && python -m uvicorn main:app --port 8000 &
+        cd frontend && npm run dev &
+        
+        # Wait for servers
+        npx wait-on http://localhost:8000/health --timeout 60000
+        npx wait-on http://localhost:3000 --timeout 60000
+        
+        # Run PR accessibility tests
+        cd frontend
+        npm run test:accessibility-full
+      env:
+        TEST_BASE_URL: http://localhost:3000
+        OUTPUT_DIR: ./test-reports/accessibility-usability
+    
+    - name: Compare accessibility results
+      run: |
+        node -e "
+          const fs = require('fs');
+          
+          const basePath = 'base/frontend/base-reports/test-session-summary.json';
+          const prPath = 'frontend/test-reports/accessibility-usability/test-session-summary.json';
+          
+          if (fs.existsSync(basePath) && fs.existsSync(prPath)) {
+            const baseResults = JSON.parse(fs.readFileSync(basePath, 'utf8'));
+            const prResults = JSON.parse(fs.readFileSync(prPath, 'utf8'));
+            
+            const baseScore = baseResults.overallScore?.combined || 0;
+            const prScore = prResults.overallScore?.combined || 0;
+            const difference = prScore - baseScore;
+            
+            console.log(\`Base accessibility score: \${baseScore}\`);
+            console.log(\`PR accessibility score: \${prScore}\`);
+            console.log(\`Difference: \${difference > 0 ? '+' : ''}\${difference}\`);
+            
+            if (difference < -5) {
+              console.error('❌ Accessibility score decreased significantly');
+              process.exit(1);
+            } else if (difference > 0) {
+              console.log('✅ Accessibility score improved!');
+            } else {
+              console.log('✅ Accessibility score maintained');
+            }
+          } else {
+            console.log('⚠️ Could not compare accessibility scores');
+          }
+        "
+    
+    - name: Upload regression comparison
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-regression-comparison
+        path: |
+          base/frontend/base-reports/
+          frontend/test-reports/accessibility-usability/
+        retention-days: 7
+
+  accessibility-lighthouse-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        npm install -g @lhci/cli
+    
+    - name: Start application
+      run: |
+        cd backend && python -m uvicorn main:app &
+        cd frontend && npm run build && npm run preview &
+        npx wait-on http://localhost:4173 --timeout 60000
+    
+    - name: Run Lighthouse CI
+      run: |
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+    
+    - name: Upload Lighthouse reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lighthouse-reports
+        path: .lighthouseci/
+        retention-days: 30

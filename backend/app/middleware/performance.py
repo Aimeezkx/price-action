@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict, deque
 from fastapi import Request, Response
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 

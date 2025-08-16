@@ -1,0 +1,72 @@
+{
+  "created_at": "2024-01-01T00:00:00Z",
+  "benchmarks": {
+    "document_processing": {
+      "name": "document_processing",
+      "average_time": 25.5,
+      "measurements": [
+        {
+          "filename": "small.pdf",
+          "pages": 5,
+          "processing_time": 12.3,
+          "max_time": 15,
+          "passed": true
+        },
+        {
+          "filename": "medium.pdf", 
+          "pages": 20,
+          "processing_time": 38.7,
+          "max_time": 45,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "search_performance": {
+      "name": "search_performance",
+      "average_time": 0.35,
+      "measurements": [
+        {
+          "query": "machine learning",
+          "response_time": 0.32,
+          "result_count": 15,
+          "accuracy": 0.92,
+          "passed": true
+        },
+        {
+          "query": "neural networks",
+          "response_time": 0.38,
+          "result_count": 12,
+          "accuracy": 0.89,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "frontend_loading": {
+      "name": "frontend_loading",
+      "average_time": 1.8,
+      "measurements": [
+        {
+          "page": "home",
+          "load_time": 1.5,
+          "max_time": 2.0,
+          "passed": true
+        },
+        {
+          "page": "documents",
+          "load_time": 2.1,
+          "max_time": 2.5,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  },
+  "metadata": {
+    "source": "baseline_creation",
+    "total_benchmarks": 3,
+    "environment": "ci",
+    "commit": "baseline"
+  }
+}

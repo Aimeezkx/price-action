@@ -1,0 +1,130 @@
+{
+  "testing_pipeline": {
+    "version": "1.0.0",
+    "description": "Automated testing pipeline configuration",
+    "environments": {
+      "ci": {
+        "database_url": "postgresql://postgres:testpass@localhost:5432/testdb",
+        "redis_url": "redis://localhost:6379",
+        "backend_url": "http://localhost:8000",
+        "frontend_url": "http://localhost:3000"
+      },
+      "staging": {
+        "database_url": "postgresql://postgres:stagingpass@localhost:5433/testdb_staging",
+        "redis_url": "redis://localhost:6380/1",
+        "backend_url": "http://localhost:8001",
+        "frontend_url": "http://localhost:3001"
+      }
+    },
+    "test_suites": {
+      "unit_tests": {
+        "enabled": true,
+        "timeout": 300,
+        "coverage_threshold": 90,
+        "parallel": true,
+        "components": ["backend", "frontend"]
+      },
+      "integration_tests": {
+        "enabled": true,
+        "timeout": 600,
+        "requires_database": true,
+        "requires_redis": true,
+        "test_data_required": true
+      },
+      "e2e_tests": {
+        "enabled": true,
+        "timeout": 900,
+        "browsers": ["chromium", "firefox", "webkit"],
+        "headless": true,
+        "screenshot_on_failure": true
+      },
+      "performance_tests": {
+        "enabled": true,
+        "timeout": 1200,
+        "regression_threshold": 0.2,
+        "baseline_file": "performance-baseline.json",
+        "benchmarks": [
+          "document_processing",
+          "search_performance", 
+          "frontend_loading",
+          "api_response_times"
+        ]
+      },
+      "security_tests": {
+        "enabled": true,
+        "timeout": 600,
+        "tools": ["bandit", "safety", "pytest-security"],
+        "fail_on_high_severity": true
+      },
+      "load_tests": {
+        "enabled": false,
+        "timeout": 1800,
+        "trigger_conditions": ["schedule", "manual"],
+        "max_users": 100,
+        "duration": 300
+      }
+    },
+    "notifications": {
+      "slack": {
+        "enabled": true,
+        "webhook_url_env": "SLACK_WEBHOOK_URL",
+        "channels": {
+          "failures": "#testing-alerts",
+          "regressions": "#performance-alerts",
+          "security": "#security-alerts"
+        }
+      },
+      "email": {
+        "enabled": true,
+        "smtp_config": {
+          "server_env": "SMTP_SERVER",
+          "port_env": "SMTP_PORT",
+          "username_env": "EMAIL_USERNAME",
+          "password_env": "EMAIL_PASSWORD"
+        },
+        "recipients": {
+          "failures": ["dev-team@company.com"],
+          "security": ["security-team@company.com", "dev-team@company.com"]
+        }
+      },
+      "github_issues": {
+        "enabled": true,
+        "token_env": "GITHUB_TOKEN",
+        "repository_env": "GITHUB_REPOSITORY",
+        "labels": {
+          "critical_failures": ["critical", "bug", "automated-testing"],
+          "security_issues": ["security", "high-priority"],
+          "performance_regressions": ["performance", "regression"]
+        }
+      }
+    },
+    "reporting": {
+      "formats": ["html", "json", "junit"],
+      "coverage_formats": ["xml", "html"],
+      "artifacts_retention_days": 30,
+      "dashboard_enabled": true
+    },
+    "quality_gates": {
+      "unit_test_coverage": {
+        "minimum": 90,
+        "fail_build": true
+      },
+      "integration_test_success": {
+        "minimum": 100,
+        "fail_build": true
+      },
+      "performance_regression": {
+        "threshold": 20,
+        "fail_build": false
+      },
+      "security_high_severity": {
+        "maximum": 0,
+        "fail_build": true
+      },
+      "e2e_test_success": {
+        "minimum": 95,
+        "fail_build": true
+      }
+    }
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "name": "Document Learning App Integration Tests",
+  "version": "1.0.0",
+  "description": "Comprehensive integration testing configuration",
+  
+  "test_suites": {
+    "backend": {
+      "path": "backend/tests/integration/",
+      "runner": "pytest",
+      "config": {
+        "timeout": 1800,
+        "parallel": false,
+        "coverage": true,
+        "markers": ["integration"],
+        "output_format": "junit-xml"
+      },
+      "test_files": [
+        "test_document_processing_pipeline.py",
+        "test_api_integration.py", 
+        "test_database_operations.py",
+        "test_file_upload_storage.py",
+        "test_cross_component_workflows.py"
+      ]
+    },
+    
+    "frontend": {
+      "path": "frontend/src/test/integration/",
+      "runner": "vitest",
+      "config": {
+        "timeout": 300,
+        "coverage": true,
+        "environment": "jsdom",
+        "setup_files": ["src/test/setup.ts"]
+      },
+      "test_files": [
+        "api-integration.test.ts"
+      ]
+    }
+  },
+  
+  "test_categories": {
+    "smoke": {
+      "description": "Quick validation tests",
+      "patterns": [
+        "test_complete_document_processing_workflow",
+        "test_document_upload_api_workflow",
+        "should upload document and show success message"
+      ],
+      "timeout": 300
+    },
+    
+    "performance": {
+      "description": "Performance and load tests",
+      "patterns": [
+        "performance",
+        "concurrent",
+        "benchmark"
+      ],
+      "timeout": 600
+    },
+    
+    "security": {
+      "description": "Security and validation tests",
+      "patterns": [
+        "security",
+        "validation",
+        "malicious"
+      ],
+      "timeout": 300
+    },
+    
+    "data_integrity": {
+      "description": "Database and data consistency tests",
+      "patterns": [
+        "database",
+        "transaction",
+        "cascade",
+        "consistency"
+      ],
+      "timeout": 600
+    }
+  },
+  
+  "environments": {
+    "local": {
+      "database_url": "sqlite+aiosqlite:///:memory:",
+      "storage_backend": "local",
+      "external_services": "mocked",
+      "log_level": "DEBUG"
+    },
+    
+    "ci": {
+      "database_url": "postgresql://test:test@localhost:5432/test_db",
+      "storage_backend": "local",
+      "external_services": "mocked",
+      "log_level": "INFO",
+      "parallel": true
+    },
+    
+    "staging": {
+      "database_url": "${STAGING_DATABASE_URL}",
+      "storage_backend": "s3",
+      "external_services": "real",
+      "log_level": "WARNING"
+    }
+  },
+  
+  "requirements": {
+    "python_version": ">=3.9",
+    "node_version": ">=18.0.0",
+    "dependencies": {
+      "backend": [
+        "pytest>=7.0.0",
+        "pytest-asyncio>=0.21.0",
+        "pytest-cov>=4.0.0",
+        "pytest-xdist>=3.0.0",
+        "httpx>=0.24.0",
+        "sqlalchemy>=2.0.0"
+      ],
+      "frontend": [
+        "vitest>=0.34.0",
+        "@testing-library/react>=13.0.0",
+        "@testing-library/jest-dom>=5.16.0",
+        "msw>=1.2.0",
+        "jsdom>=22.0.0"
+      ]
+    }
+  },
+  
+  "reporting": {
+    "formats": ["junit-xml", "html", "json"],
+    "output_directory": "test-results/integration/",
+    "coverage": {
+      "threshold": 80,
+      "formats": ["html", "lcov", "text"]
+    },
+    "artifacts": [
+      "test-results/",
+      "htmlcov/",
+      "logs/",
+      "screenshots/"
+    ]
+  },
+  
+  "ci_integration": {
+    "github_actions": {
+      "workflow_file": ".github/workflows/integration-tests.yml",
+      "triggers": ["push", "pull_request"],
+      "matrix": {
+        "python_version": ["3.9", "3.10", "3.11"],
+        "node_version": ["18", "20"]
+      }
+    },
+    
+    "notifications": {
+      "slack_webhook": "${SLACK_WEBHOOK_URL}",
+      "email": ["team@example.com"],
+      "on_failure": true,
+      "on_success": false
+    }
+  },
+  
+  "test_data": {
+    "fixtures": {
+      "documents": "tests/fixtures/documents/",
+      "users": "tests/fixtures/users.json",
+      "cards": "tests/fixtures/cards.json"
+    },
+    
+    "cleanup": {
+      "after_each_test": true,
+      "after_suite": true,
+      "preserve_on_failure": true
+    }
+  },
+  
+  "monitoring": {
+    "metrics": [
+      "test_duration",
+      "test_success_rate",
+      "coverage_percentage",
+      "api_response_times"
+    ],
+    
+    "alerts": {
+      "test_failure_threshold": 5,
+      "performance_regression_threshold": "20%",
+      "coverage_drop_threshold": "5%"
+    }
+  }
+}

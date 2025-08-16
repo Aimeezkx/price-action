@@ -15,6 +15,7 @@ from app.api.reviews import router as reviews_router
 from app.api.export import router as export_router
 from app.api.monitoring import router as monitoring_router
 from app.api.sync import router as sync_router
+from app.api.bug_tracking import router as bug_tracking_router
 from app.middleware.performance import PerformanceMiddleware
 from app.utils.logging import setup_privacy_logging, SecurityLogger
 
@@ -78,6 +79,7 @@ app.include_router(reviews_router)
 app.include_router(export_router)
 app.include_router(monitoring_router)
 app.include_router(sync_router)
+app.include_router(bug_tracking_router)
 
 
 @app.get("/")

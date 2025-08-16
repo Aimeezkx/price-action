@@ -1,213 +1,328 @@
-"""
-Privacy-compliant external service integration
-"""
+"""Privacy service for data protection and sanitization."""
 
-import asyncio
-import logging
-from typing import Any, Dict, List, Optional, Union
-from uuid import UUID
+import re
+from typing import Dict, List, Optional, Any, Pattern
+from dataclasses import dataclass
+from enum import Enum
 
-from app.core.config import settings
-from app.utils.logging import SecurityLogger
-
-security_logger = SecurityLogger(__name__)
-
-
-class PrivacyCompliantService:
-    """Base class for privacy-compliant external service integration"""
-    
-    def __init__(self, service_name: str):
-        self.service_name = service_name
-        self.logger = logging.getLogger(f"{__name__}.{service_name}")
-    
-    def is_privacy_mode_enabled(self) -> bool:
-        """Check if privacy mode is enabled"""
-        return settings.privacy_mode
-    
-    async def call_external_service(self, data: Any, endpoint: str) -> Optional[Any]:
-        """Call external service with privacy checks"""
-        if self.is_privacy_mode_enabled():
-            self.logger.info(f"Privacy mode enabled - skipping external service call to {endpoint}")
-            return None
-        
-        # Log the external service call
-        security_logger.log_security_event(
-            "external_service_call",
-            {
-                "service": self.service_name,
-                "endpoint": endpoint,
-                "data_type": type(data).__name__
-            },
-            "INFO"
-        )
-        
-        # In a real implementation, this would make the actual API call
-        # For now, return None to indicate no external processing
-        return None
+try:
+    from app.core.config import settings
+except ImportError:
+    # Fallback for testing
+    class MockSettings:
+        privacy_mode = False
+    settings = MockSettings()
 
 
-class LLMService(PrivacyCompliantService):
-    """Privacy-compliant LLM service integration"""
+class PrivacyLevel(Enum):
+    """Privacy protection levels."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    MAXIMUM = "maximum"
+
+
+@dataclass
+class SanitizationRule:
+    """Rule for data sanitization."""
+    pattern: Pattern[str]
+    replacement: str
+    description: str
+    privacy_level: PrivacyLevel
+
+
+class PrivacyService:
+    """Service for privacy protection and data sanitization."""
     
     def __init__(self):
-        super().__init__("llm_service")
+        self.sanitization_rules = self._initialize_default_rules()
+        self.custom_rules = {}
     
-    async def extract_knowledge(self, text: str, document_id: UUID) -> Optional[List[Dict[str, Any]]]:
-        """Extract knowledge using LLM with privacy compliance"""
-        if self.is_privacy_mode_enabled():
-            self.logger.info("Privacy mode enabled - using local knowledge extraction")
-            return await self._local_knowledge_extraction(text)
-        
-        # In non-privacy mode, would call external LLM API
-        self.logger.info("Privacy mode disabled - would call external LLM API")
-        return await self._local_knowledge_extraction(text)  # Fallback for now
+    def _initialize_default_rules(self) -> List[SanitizationRule]:
+        """Initialize default sanitization rules."""
+        return [
+            # Email addresses
+            SanitizationRule(
+                pattern=re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
+                replacement='***@***.***',
+                description='Email address',
+                privacy_level=PrivacyLevel.LOW
+            ),
+            
+            # Phone numbers (various formats)
+            SanitizationRule(
+                pattern=re.compile(r'\b\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b'),
+                replacement='***-***-****',
+                description='Phone number',
+                privacy_level=PrivacyLevel.LOW
+            ),
+            
+            # Social Security Numbers
+            SanitizationRule(
+                pattern=re.compile(r'\b\d{3}-\d{2}-\d{4}\b'),
+                replacement='***-**-****',
+                description='Social Security Number',
+                privacy_level=PrivacyLevel.HIGH
+            ),
+            
+            # Credit card numbers
+            SanitizationRule(
+                pattern=re.compile(r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'),
+                replacement='****-****-****-****',
+                description='Credit card number',
+                privacy_level=PrivacyLevel.HIGH
+            ),
+            
+            # IP addresses
+            SanitizationRule(
+                pattern=re.compile(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'),
+                replacement='***.***.***.***',
+                description='IP address',
+                privacy_level=PrivacyLevel.MEDIUM
+            ),
+            
+            # Names (basic pattern - two capitalized words)
+            SanitizationRule(
+                pattern=re.compile(r'\b[A-Z][a-z]+\s+[A-Z][a-z]+\b'),
+                replacement='*** ***',
+                description='Person name',
+                privacy_level=PrivacyLevel.MEDIUM
+            ),
+            
+            # Dates (YYYY-MM-DD format)
+            SanitizationRule(
+                pattern=re.compile(r'\b\d{4}-\d{2}-\d{2}\b'),
+                replacement='****-**-**',
+                description='Date',
+                privacy_level=PrivacyLevel.LOW
+            ),
+            
+            # Medical record numbers
+            SanitizationRule(
+                pattern=re.compile(r'\b(?:MRN|MR|Medical Record)[\s#:]*\d+\b', re.IGNORECASE),
+                replacement='MRN: [REDACTED]',
+                description='Medical record number',
+                privacy_level=PrivacyLevel.HIGH
+            ),
+            
+            # Account numbers
+            SanitizationRule(
+                pattern=re.compile(r'\b(?:Account|Acct)[\s#:]*\d{6,}\b', re.IGNORECASE),
+                replacement='Account: [REDACTED]',
+                description='Account number',
+                privacy_level=PrivacyLevel.MEDIUM
+            ),
+            
+            # Driver's license numbers
+            SanitizationRule(
+                pattern=re.compile(r'\b(?:DL|License)[\s#:]*[A-Z0-9]{6,}\b', re.IGNORECASE),
+                replacement='License: [REDACTED]',
+                description='Driver license number',
+                privacy_level=PrivacyLevel.HIGH
+            ),
+            
+            # Addresses (basic pattern)
+            SanitizationRule(
+                pattern=re.compile(r'\b\d+\s+[A-Z][a-z]+\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court)\b', re.IGNORECASE),
+                replacement='[ADDRESS REDACTED]',
+                description='Street address',
+                privacy_level=PrivacyLevel.MEDIUM
+            ),
+        ]
     
-    async def _local_knowledge_extraction(self, text: str) -> List[Dict[str, Any]]:
-        """Local knowledge extraction as fallback"""
-        # Simple rule-based extraction for privacy mode
-        knowledge_points = []
+    def configure_sanitization_patterns(self, custom_patterns: Dict[str, str]):
+        """Configure custom sanitization patterns."""
+        self.custom_rules = {}
+        for pattern_str, replacement in custom_patterns.items():
+            try:
+                pattern = re.compile(pattern_str)
+                self.custom_rules[pattern_str] = SanitizationRule(
+                    pattern=pattern,
+                    replacement=replacement,
+                    description=f'Custom pattern: {pattern_str}',
+                    privacy_level=PrivacyLevel.MEDIUM
+                )
+            except re.error as e:
+                # Log invalid pattern but don't fail
+                print(f"Invalid regex pattern '{pattern_str}': {e}")
+    
+    def sanitize_content(self, content: str, privacy_level: PrivacyLevel = PrivacyLevel.MEDIUM) -> str:
+        """Sanitize content based on privacy level."""
+        if not content:
+            return content
         
-        # Look for definition patterns
-        import re
+        sanitized = content
         
-        # Pattern: "X is Y" or "X means Y"
-        definition_patterns = [
-            r'([A-Z][a-zA-Z\s]+)\s+is\s+([^.]+\.)',
-            r'([A-Z][a-zA-Z\s]+)\s+means\s+([^.]+\.)',
-            r'([A-Z][a-zA-Z\s]+):\s+([^.]+\.)'
+        # Apply default rules
+        for rule in self.sanitization_rules:
+            if rule.privacy_level.value <= privacy_level.value or privacy_level == PrivacyLevel.MAXIMUM:
+                sanitized = rule.pattern.sub(rule.replacement, sanitized)
+        
+        # Apply custom rules
+        for rule in self.custom_rules.values():
+            if rule.privacy_level.value <= privacy_level.value or privacy_level == PrivacyLevel.MAXIMUM:
+                sanitized = rule.pattern.sub(rule.replacement, sanitized)
+        
+        return sanitized
+    
+    def sanitize_filename(self, filename: str) -> str:
+        """Sanitize filename to remove sensitive information."""
+        if not filename:
+            return filename
+        
+        # Apply sanitization rules to filename
+        sanitized = self.sanitize_content(filename, PrivacyLevel.HIGH)
+        
+        # Additional filename-specific sanitization
+        sensitive_keywords = [
+            'medical', 'patient', 'confidential', 'private', 'personal',
+            'ssn', 'social', 'security', 'tax', 'financial', 'bank',
+            'credit', 'card', 'password', 'secret', 'classified'
         ]
         
-        for pattern in definition_patterns:
-            matches = re.finditer(pattern, text)
+        for keyword in sensitive_keywords:
+            # Case-insensitive replacement
+            pattern = re.compile(re.escape(keyword), re.IGNORECASE)
+            sanitized = pattern.sub('[REDACTED]', sanitized)
+        
+        return sanitized
+    
+    def sanitize_sql_query(self, query: str) -> str:
+        """Sanitize SQL query for logging."""
+        if not query:
+            return query
+        
+        # Remove potential sensitive data from SQL queries
+        sanitized = self.sanitize_content(query, PrivacyLevel.HIGH)
+        
+        # Replace string literals that might contain sensitive data
+        sanitized = re.sub(r"'[^']*'", "'[REDACTED]'", sanitized)
+        sanitized = re.sub(r'"[^"]*"', '"[REDACTED]"', sanitized)
+        
+        return sanitized
+    
+    def sanitize_api_response(self, response_data: Any) -> Any:
+        """Sanitize API response data."""
+        if isinstance(response_data, str):
+            return self.sanitize_content(response_data)
+        elif isinstance(response_data, dict):
+            return {key: self.sanitize_api_response(value) for key, value in response_data.items()}
+        elif isinstance(response_data, list):
+            return [self.sanitize_api_response(item) for item in response_data]
+        else:
+            return response_data
+    
+    def detect_sensitive_data(self, content: str) -> List[Dict[str, Any]]:
+        """Detect sensitive data in content."""
+        detections = []
+        
+        for rule in self.sanitization_rules:
+            matches = rule.pattern.finditer(content)
             for match in matches:
-                term = match.group(1).strip()
-                definition = match.group(2).strip()
-                
-                if len(term) > 2 and len(definition) > 10:
-                    knowledge_points.append({
-                        "kind": "definition",
-                        "text": f"{term}: {definition}",
-                        "entities": [term],
-                        "confidence": 0.7
-                    })
+                detections.append({
+                    'type': rule.description,
+                    'value': match.group(),
+                    'start': match.start(),
+                    'end': match.end(),
+                    'privacy_level': rule.privacy_level.value
+                })
         
-        return knowledge_points
-
-
-class OCRService(PrivacyCompliantService):
-    """Privacy-compliant OCR service integration"""
+        return detections
     
-    def __init__(self):
-        super().__init__("ocr_service")
+    def is_privacy_mode_enabled(self) -> bool:
+        """Check if privacy mode is enabled."""
+        return getattr(settings, 'privacy_mode', False)
     
-    async def extract_text_from_image(self, image_path: str) -> Optional[str]:
-        """Extract text from image with privacy compliance"""
+    def get_privacy_level(self) -> PrivacyLevel:
+        """Get current privacy level."""
         if self.is_privacy_mode_enabled():
-            self.logger.info("Privacy mode enabled - skipping OCR processing")
-            return None
+            return PrivacyLevel.MAXIMUM
+        else:
+            return PrivacyLevel.MEDIUM
+    
+    def sanitize_for_logging(self, data: Any, context: str = None) -> Any:
+        """Sanitize data specifically for logging."""
+        privacy_level = PrivacyLevel.HIGH if self.is_privacy_mode_enabled() else PrivacyLevel.MEDIUM
         
-        # In non-privacy mode, would call external OCR API
-        self.logger.info("Privacy mode disabled - would call external OCR API")
-        return None  # No OCR processing for now
-
-
-class EmbeddingService(PrivacyCompliantService):
-    """Privacy-compliant embedding service"""
+        if isinstance(data, str):
+            sanitized = self.sanitize_content(data, privacy_level)
+            
+            # Additional context-specific sanitization
+            if context == 'filename':
+                sanitized = self.sanitize_filename(sanitized)
+            elif context == 'sql':
+                sanitized = self.sanitize_sql_query(sanitized)
+            
+            return sanitized
+        elif isinstance(data, dict):
+            return {key: self.sanitize_for_logging(value, context) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.sanitize_for_logging(item, context) for item in data]
+        else:
+            return data
     
-    def __init__(self):
-        super().__init__("embedding_service")
-        self._local_model = None
-    
-    async def generate_embeddings(self, texts: List[str]) -> Optional[List[List[float]]]:
-        """Generate embeddings with privacy compliance"""
-        if self.is_privacy_mode_enabled():
-            return await self._local_embeddings(texts)
+    def create_privacy_report(self, content: str) -> Dict[str, Any]:
+        """Create privacy analysis report for content."""
+        detections = self.detect_sensitive_data(content)
         
-        # In non-privacy mode, could use external embedding API
-        return await self._local_embeddings(texts)  # Use local for now
-    
-    async def _local_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings using local model"""
-        try:
-            # Import here to avoid loading if not needed
-            from sentence_transformers import SentenceTransformer
-            
-            if self._local_model is None:
-                self.logger.info("Loading local embedding model")
-                self._local_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-            
-            # Generate embeddings
-            embeddings = self._local_model.encode(texts)
-            return embeddings.tolist()
-            
-        except ImportError:
-            self.logger.error("sentence-transformers not available for local embeddings")
-            return [[0.0] * 384 for _ in texts]  # Return zero vectors as fallback
-        except Exception as e:
-            self.logger.error(f"Error generating local embeddings: {e}")
-            return [[0.0] * 384 for _ in texts]
-
-
-class PrivacyManager:
-    """Central privacy management"""
-    
-    def __init__(self):
-        self.llm_service = LLMService()
-        self.ocr_service = OCRService()
-        self.embedding_service = EmbeddingService()
-    
-    def get_privacy_status(self) -> Dict[str, Any]:
-        """Get current privacy configuration status"""
+        # Group by type
+        by_type = {}
+        for detection in detections:
+            type_name = detection['type']
+            if type_name not in by_type:
+                by_type[type_name] = []
+            by_type[type_name].append(detection)
+        
+        # Calculate risk score
+        risk_score = 0
+        for detection in detections:
+            if detection['privacy_level'] == PrivacyLevel.HIGH.value:
+                risk_score += 3
+            elif detection['privacy_level'] == PrivacyLevel.MEDIUM.value:
+                risk_score += 2
+            else:
+                risk_score += 1
+        
         return {
-            "privacy_mode": settings.privacy_mode,
-            "anonymize_logs": settings.anonymize_logs,
-            "use_llm": settings.use_llm,
-            "enable_file_scanning": settings.enable_file_scanning,
-            "external_services": {
-                "llm": not settings.privacy_mode and settings.use_llm,
-                "ocr": not settings.privacy_mode,
-                "embeddings": "local_only"
-            }
+            'total_detections': len(detections),
+            'by_type': by_type,
+            'risk_score': risk_score,
+            'risk_level': self._calculate_risk_level(risk_score),
+            'recommendations': self._get_privacy_recommendations(by_type)
         }
     
-    async def process_with_privacy_compliance(self, operation: str, data: Any, **kwargs) -> Any:
-        """Process data with privacy compliance"""
-        if settings.privacy_mode:
-            security_logger.log_security_event(
-                "privacy_mode_processing",
-                {
-                    "operation": operation,
-                    "data_type": type(data).__name__
-                },
-                "INFO"
-            )
-        
-        # Route to appropriate service based on operation
-        if operation == "extract_knowledge":
-            return await self.llm_service.extract_knowledge(data, kwargs.get('document_id'))
-        elif operation == "ocr_image":
-            return await self.ocr_service.extract_text_from_image(data)
-        elif operation == "generate_embeddings":
-            return await self.embedding_service.generate_embeddings(data)
+    def _calculate_risk_level(self, risk_score: int) -> str:
+        """Calculate risk level based on score."""
+        if risk_score >= 10:
+            return 'HIGH'
+        elif risk_score >= 5:
+            return 'MEDIUM'
+        elif risk_score > 0:
+            return 'LOW'
         else:
-            self.logger.warning(f"Unknown operation: {operation}")
-            return None
+            return 'NONE'
     
-    def validate_privacy_settings(self) -> List[str]:
-        """Validate privacy settings and return any warnings"""
-        warnings = []
+    def _get_privacy_recommendations(self, detections_by_type: Dict[str, List]) -> List[str]:
+        """Get privacy recommendations based on detections."""
+        recommendations = []
         
-        if not settings.privacy_mode and settings.use_llm:
-            warnings.append("Privacy mode disabled with LLM enabled - data may be sent to external services")
+        if 'Social Security Number' in detections_by_type:
+            recommendations.append('Consider enabling maximum privacy mode for documents containing SSNs')
         
-        if not settings.anonymize_logs:
-            warnings.append("Log anonymization disabled - sensitive data may appear in logs")
+        if 'Credit card number' in detections_by_type:
+            recommendations.append('Financial information detected - ensure secure storage and transmission')
         
-        if not settings.enable_file_scanning:
-            warnings.append("File scanning disabled - malicious files may not be detected")
+        if 'Medical record number' in detections_by_type:
+            recommendations.append('Medical information detected - verify HIPAA compliance requirements')
         
-        return warnings
+        if 'Email address' in detections_by_type:
+            recommendations.append('Email addresses detected - consider data retention policies')
+        
+        if len(detections_by_type) > 3:
+            recommendations.append('Multiple types of sensitive data detected - consider comprehensive privacy review')
+        
+        return recommendations
 
 
-# Global privacy manager instance
-privacy_manager = PrivacyManager()
+# Global privacy service instance
+privacy_service = PrivacyService()

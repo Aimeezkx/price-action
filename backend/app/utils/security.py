@@ -1,230 +1,394 @@
-"""
-Security utilities for file validation and data protection
-"""
+"""Security utilities and functions."""
 
-import hashlib
-import logging
-import mimetypes
-import os
 import re
+import hashlib
+import secrets
+import subprocess
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Any
+import bcrypt
+import html
+from datetime import datetime, timedelta
 
-from fastapi import HTTPException, UploadFile
+try:
+    from app.core.config import settings
+except ImportError:
+    # Fallback for testing
+    class MockSettings:
+        secret_key = "test_secret_key_for_testing_only"
+    settings = MockSettings()
 
-from app.core.config import settings
 
-logger = logging.getLogger(__name__)
+class SecurityError(Exception):
+    """Exception raised for security-related errors."""
+    pass
 
 
-class SecurityValidator:
-    """Security validation utilities"""
+def hash_password(password: str) -> str:
+    """Hash password using bcrypt."""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify password against hash."""
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception:
+        return False
+
+
+def generate_secure_token(length: int = 32) -> str:
+    """Generate cryptographically secure random token."""
+    return secrets.token_urlsafe(length)
+
+
+def sanitize_input(input_string: str) -> str:
+    """Sanitize user input to prevent injection attacks."""
+    if not isinstance(input_string, str):
+        return str(input_string)
     
-    # Allowed MIME types for each file extension
-    ALLOWED_MIME_TYPES = {
-        'pdf': ['application/pdf'],
-        'docx': [
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/msword'
-        ],
-        'md': ['text/markdown', 'text/plain']
-    }
+    # Remove null bytes
+    sanitized = input_string.replace('\x00', '')
     
-    # Maximum file sizes by type (in bytes)
-    MAX_FILE_SIZES = {
-        'pdf': 100 * 1024 * 1024,  # 100MB
-        'docx': 50 * 1024 * 1024,  # 50MB
-        'md': 10 * 1024 * 1024     # 10MB
-    }
+    # Escape SQL injection characters
+    sql_dangerous = ["'", '"', ';', '--', '/*', '*/', 'xp_', 'sp_']
+    for dangerous in sql_dangerous:
+        sanitized = sanitized.replace(dangerous, '')
     
-    # Dangerous file patterns to reject
-    DANGEROUS_PATTERNS = [
-        rb'<script',
-        rb'javascript:',
-        rb'vbscript:',
-        rb'onload=',
-        rb'onerror=',
-        rb'eval\(',
-        rb'exec\(',
-        rb'system\(',
-        rb'shell_exec',
-        rb'passthru',
-        rb'<?php',
-        rb'<%',
-        rb'<jsp:',
+    # Remove XSS patterns
+    xss_patterns = [
+        r'<script[^>]*>.*?</script>',
+        r'javascript:',
+        r'vbscript:',
+        r'on\w+\s*=',
+        r'<iframe[^>]*>.*?</iframe>',
+        r'<object[^>]*>.*?</object>',
+        r'<embed[^>]*>.*?</embed>',
     ]
     
-    @classmethod
-    async def validate_upload_file(cls, file: UploadFile) -> Tuple[str, str]:
-        """
-        Validate uploaded file for security and format compliance
-        
-        Returns:
-            Tuple of (file_type, safe_filename)
-            
-        Raises:
-            HTTPException: If file validation fails
-        """
-        if not file.filename:
-            raise HTTPException(status_code=400, detail="No filename provided")
-            
-        # Get file extension
-        file_ext = cls._get_file_extension(file.filename)
-        if file_ext not in settings.allowed_file_types:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"File type '{file_ext}' not allowed. Allowed types: {settings.allowed_file_types}"
-            )
-        
-        # Validate filename
-        safe_filename = cls._sanitize_filename(file.filename)
-        
-        # Check file size
-        file_size = 0
-        content_chunks = []
-        
-        while chunk := await file.read(8192):
-            content_chunks.append(chunk)
-            file_size += len(chunk)
-            
-            if file_size > cls.MAX_FILE_SIZES.get(file_ext, settings.max_file_size):
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"File too large. Maximum size for {file_ext}: {cls.MAX_FILE_SIZES.get(file_ext, settings.max_file_size)} bytes"
-                )
-        
-        # Reconstruct file content
-        file_content = b''.join(content_chunks)
-        
-        # Reset file pointer for further processing
-        await file.seek(0)
-        
-        # Validate MIME type
-        cls._validate_mime_type(file_content, file_ext, file.content_type)
-        
-        # Scan for malicious content
-        if settings.enable_file_scanning:
-            cls._scan_for_malicious_content(file_content, file_ext)
-        
-        return file_ext, safe_filename
+    for pattern in xss_patterns:
+        sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
     
-    @classmethod
-    def _get_file_extension(cls, filename: str) -> str:
-        """Extract and validate file extension"""
-        ext = Path(filename).suffix.lower().lstrip('.')
-        if not ext:
-            raise HTTPException(status_code=400, detail="File must have an extension")
-        return ext
+    # Additional cleanup for remaining dangerous characters
+    sanitized = sanitized.replace('<', '').replace('>', '')
+    sanitized = sanitized.replace('DROP TABLE', '').replace('drop table', '')
     
-    @classmethod
-    def _sanitize_filename(cls, filename: str) -> str:
-        """Sanitize filename to prevent path traversal and other attacks"""
-        # Remove path components
-        filename = os.path.basename(filename)
-        
-        # Remove dangerous characters
-        filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
-        
-        # Remove control characters
-        filename = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', filename)
-        
-        # Limit length
-        if len(filename) > 255:
-            name, ext = os.path.splitext(filename)
-            filename = name[:250] + ext
-        
-        # Ensure filename is not empty
-        if not filename or filename.startswith('.'):
-            filename = f"document_{hashlib.md5(filename.encode()).hexdigest()[:8]}.txt"
-        
-        return filename
+    return sanitized.strip()
+
+
+def escape_html(text: str) -> str:
+    """Escape HTML characters to prevent XSS."""
+    return html.escape(text, quote=True)
+
+
+def validate_sql_query(query: str) -> bool:
+    """Validate SQL query for dangerous patterns."""
+    if not isinstance(query, str):
+        return False
     
-    @classmethod
-    def _validate_mime_type(cls, content: bytes, file_ext: str, declared_type: Optional[str]):
-        """Validate file MIME type matches extension"""
-        # Check magic bytes for common formats
-        if file_ext == 'pdf' and not content.startswith(b'%PDF-'):
-            raise HTTPException(status_code=400, detail="Invalid PDF file format")
-        
-        if file_ext == 'docx':
-            # DOCX files are ZIP archives with specific structure
-            if not content.startswith(b'PK'):
-                raise HTTPException(status_code=400, detail="Invalid DOCX file format")
-        
-        # Validate declared MIME type if provided
-        if declared_type:
-            allowed_types = cls.ALLOWED_MIME_TYPES.get(file_ext, [])
-            if declared_type not in allowed_types:
-                logger.warning(f"MIME type mismatch: declared={declared_type}, expected={allowed_types}")
+    query_lower = query.lower().strip()
     
-    @classmethod
-    def _scan_for_malicious_content(cls, content: bytes, file_ext: str):
-        """Scan file content for malicious patterns"""
-        # Convert to lowercase for case-insensitive matching
-        content_lower = content.lower()
-        
-        for pattern in cls.DANGEROUS_PATTERNS:
-            if pattern in content_lower:
-                logger.warning(f"Dangerous pattern detected in {file_ext} file: {pattern}")
-                raise HTTPException(
-                    status_code=400,
-                    detail="File contains potentially malicious content"
-                )
-        
-        # Additional checks for specific file types
-        if file_ext == 'pdf':
-            cls._scan_pdf_content(content)
-        elif file_ext == 'md':
-            cls._scan_markdown_content(content)
+    # Check for dangerous SQL patterns
+    dangerous_patterns = [
+        r';\s*drop\s+table',
+        r';\s*delete\s+from',
+        r';\s*insert\s+into',
+        r';\s*update\s+.*\s+set',
+        r'union\s+select',
+        r'or\s+1\s*=\s*1',
+        r'or\s+\'1\'\s*=\s*\'1\'',
+        r'exec\s+xp_',
+        r'exec\s+sp_',
+        r'information_schema',
+        r'sys\.',
+        r'master\.',
+        r'waitfor\s+delay',
+        r'pg_sleep',
+        r'sleep\s*\(',
+        r'benchmark\s*\(',
+    ]
     
-    @classmethod
-    def _scan_pdf_content(cls, content: bytes):
-        """Additional PDF-specific security checks"""
-        # Check for embedded JavaScript
-        if b'/JS' in content or b'/JavaScript' in content:
-            raise HTTPException(
-                status_code=400,
-                detail="PDF contains JavaScript which is not allowed"
-            )
-        
-        # Check for forms and actions
-        if b'/Action' in content or b'/OpenAction' in content:
-            logger.warning("PDF contains actions - potential security risk")
+    for pattern in dangerous_patterns:
+        if re.search(pattern, query_lower):
+            return False
     
-    @classmethod
-    def _scan_markdown_content(cls, content: bytes):
-        """Additional Markdown-specific security checks"""
+    return True
+
+
+def scan_file_for_malware(file_path: Path) -> bool:
+    """Scan file for malware using available scanners."""
+    try:
+        # Check if ClamAV is available
+        if virus_scanner_available():
+            result = scan_with_clamav(file_path)
+            return result.get('infected', False)
+        
+        # Fallback to basic signature detection
+        return detect_malicious_content(file_path)
+    
+    except Exception:
+        # If scanning fails, err on the side of caution
+        return True
+
+
+def virus_scanner_available() -> bool:
+    """Check if virus scanner is available."""
+    try:
+        subprocess.run(['clamscan', '--version'], 
+                      capture_output=True, 
+                      check=True, 
+                      timeout=5)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
+
+def scan_with_clamav(file_path: Path) -> Dict[str, Any]:
+    """Scan file with ClamAV."""
+    try:
+        result = subprocess.run([
+            'clamscan', 
+            '--no-summary',
+            '--infected',
+            str(file_path)
+        ], capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 1:  # Virus found
+            return {
+                'infected': True,
+                'virus': result.stdout.strip(),
+                'scanner': 'clamav'
+            }
+        elif result.returncode == 0:  # Clean
+            return {
+                'infected': False,
+                'scanner': 'clamav'
+            }
+        else:  # Error
+            return {
+                'infected': True,  # Err on the side of caution
+                'error': result.stderr.strip(),
+                'scanner': 'clamav'
+            }
+    
+    except subprocess.TimeoutExpired:
+        return {'infected': True, 'error': 'Scan timeout', 'scanner': 'clamav'}
+    except Exception as e:
+        return {'infected': True, 'error': str(e), 'scanner': 'clamav'}
+
+
+def detect_malicious_content(file_path: Path) -> bool:
+    """Detect malicious content using signature-based detection."""
+    try:
+        with open(file_path, 'rb') as f:
+            content = f.read(1024 * 1024)  # Read first 1MB
+        
+        # Check for executable signatures
+        executable_signatures = [
+            b'MZ',  # PE executable
+            b'\x7fELF',  # ELF executable
+            b'\xca\xfe\xba\xbe',  # Java class file
+            b'\xfe\xed\xfa\xce',  # Mach-O executable (32-bit)
+            b'\xfe\xed\xfa\xcf',  # Mach-O executable (64-bit)
+        ]
+        
+        for signature in executable_signatures:
+            if content.startswith(signature):
+                return True
+        
+        # Check for script content
         try:
-            text = content.decode('utf-8', errors='ignore')
+            text_content = content.decode('utf-8', errors='ignore').lower()
+            malicious_patterns = [
+                'eval(',
+                'exec(',
+                'system(',
+                'shell_exec(',
+                'passthru(',
+                'file_get_contents(',
+                'curl_exec(',
+                'base64_decode(',
+                'gzinflate(',
+                'str_rot13(',
+                'javascript:',
+                'vbscript:',
+                '<script',
+                '<?php',
+                '<%',
+                'document.write(',
+                'document.cookie',
+                'window.location',
+            ]
             
-            # Check for HTML script tags
-            if '<script' in text.lower():
-                raise HTTPException(
-                    status_code=400,
-                    detail="Markdown contains script tags which are not allowed"
-                )
-            
-            # Check for data URLs that could contain malicious content
-            if 'data:' in text.lower():
-                logger.warning("Markdown contains data URLs - potential security risk")
-                
-        except Exception as e:
-            logger.error(f"Error scanning markdown content: {e}")
-
-
-def generate_secure_filename(original_filename: str, document_id: str) -> str:
-    """Generate a secure filename for storage"""
-    ext = Path(original_filename).suffix.lower()
-    # Use document ID + hash of original filename for uniqueness
-    filename_hash = hashlib.sha256(original_filename.encode()).hexdigest()[:16]
-    return f"{document_id}_{filename_hash}{ext}"
-
-
-def hash_sensitive_data(data: str) -> str:
-    """Hash sensitive data for logging"""
-    if not data:
-        return "[empty]"
+            for pattern in malicious_patterns:
+                if pattern in text_content:
+                    return True
+        
+        except UnicodeDecodeError:
+            pass  # Binary file, already checked signatures
+        
+        return False
     
-    # Hash the data and return first 8 characters for identification
-    hashed = hashlib.sha256(data.encode()).hexdigest()
-    return f"[hash:{hashed[:8]}]"
+    except Exception:
+        return True  # Err on the side of caution
+
+
+def generate_csrf_token() -> str:
+    """Generate CSRF token."""
+    return generate_secure_token(32)
+
+
+def validate_csrf_token(token: str, expected: str) -> bool:
+    """Validate CSRF token."""
+    if not token or not expected:
+        return False
+    return secrets.compare_digest(token, expected)
+
+
+def rate_limit_key(identifier: str, action: str) -> str:
+    """Generate rate limiting key."""
+    return f"rate_limit:{action}:{identifier}"
+
+
+def check_rate_limit(identifier: str, action: str, limit: int, window: int) -> bool:
+    """Check if action is rate limited."""
+    # This would typically use Redis or similar
+    # For now, return False (not rate limited) as placeholder
+    return False
+
+
+def secure_filename(filename: str) -> str:
+    """Generate secure filename."""
+    # Remove path components
+    filename = filename.split('/')[-1].split('\\')[-1]
+    
+    # Remove dangerous characters
+    filename = re.sub(r'[^\w\-_\.]', '_', filename)
+    
+    # Limit length
+    if len(filename) > 255:
+        name, ext = filename.rsplit('.', 1) if '.' in filename else (filename, '')
+        max_name_length = 255 - len(ext) - 1 if ext else 255
+        filename = name[:max_name_length] + ('.' + ext if ext else '')
+    
+    return filename
+
+
+def validate_email(email: str) -> bool:
+    """Validate email address format."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+
+def validate_password_strength(password: str) -> Dict[str, Any]:
+    """Validate password strength."""
+    result = {
+        'is_valid': True,
+        'score': 0,
+        'issues': []
+    }
+    
+    if len(password) < 8:
+        result['issues'].append('Password must be at least 8 characters long')
+        result['is_valid'] = False
+    else:
+        result['score'] += 1
+    
+    if not re.search(r'[a-z]', password):
+        result['issues'].append('Password must contain lowercase letters')
+        result['is_valid'] = False
+    else:
+        result['score'] += 1
+    
+    if not re.search(r'[A-Z]', password):
+        result['issues'].append('Password must contain uppercase letters')
+        result['is_valid'] = False
+    else:
+        result['score'] += 1
+    
+    if not re.search(r'\d', password):
+        result['issues'].append('Password must contain numbers')
+        result['is_valid'] = False
+    else:
+        result['score'] += 1
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        result['issues'].append('Password must contain special characters')
+        result['is_valid'] = False
+    else:
+        result['score'] += 1
+    
+    # Check for common passwords
+    common_passwords = [
+        'password', '123456', 'password123', 'admin', 'qwerty',
+        'letmein', 'welcome', 'monkey', '1234567890'
+    ]
+    
+    if password.lower() in common_passwords:
+        result['issues'].append('Password is too common')
+        result['is_valid'] = False
+        result['score'] = max(0, result['score'] - 2)
+    
+    return result
+
+
+def get_client_ip(request) -> str:
+    """Get client IP address from request."""
+    # Check for forwarded IP first
+    forwarded_for = request.headers.get('X-Forwarded-For')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+    
+    # Check for real IP
+    real_ip = request.headers.get('X-Real-IP')
+    if real_ip:
+        return real_ip
+    
+    # Fall back to remote address
+    return getattr(request.client, 'host', '127.0.0.1')
+
+
+def log_security_event(event_type: str, details: Dict[str, Any], severity: str = 'INFO'):
+    """Log security event."""
+    from app.utils.logging import security_logger
+    
+    log_entry = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'event_type': event_type,
+        'severity': severity,
+        'details': details
+    }
+    
+    if severity == 'CRITICAL':
+        security_logger.critical(f"Security Event: {log_entry}")
+    elif severity == 'HIGH':
+        security_logger.error(f"Security Event: {log_entry}")
+    elif severity == 'MEDIUM':
+        security_logger.warning(f"Security Event: {log_entry}")
+    else:
+        security_logger.info(f"Security Event: {log_entry}")
+
+
+def mask_sensitive_data(data: str, mask_char: str = '*') -> str:
+    """Mask sensitive data for logging."""
+    if not data:
+        return data
+    
+    # Email addresses
+    data = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', 
+                  lambda m: m.group(0)[:2] + mask_char * 3 + '@' + mask_char * 3 + '.' + mask_char * 3, 
+                  data)
+    
+    # Phone numbers
+    data = re.sub(r'\b\d{3}-\d{3}-\d{4}\b', mask_char * 3 + '-' + mask_char * 3 + '-' + mask_char * 4, data)
+    data = re.sub(r'\b\+\d{1,3}-\d{3}-\d{3}-\d{4}\b', '+' + mask_char * 3 + '-' + mask_char * 3 + '-' + mask_char * 3 + '-' + mask_char * 4, data)
+    
+    # SSN
+    data = re.sub(r'\b\d{3}-\d{2}-\d{4}\b', mask_char * 3 + '-' + mask_char * 2 + '-' + mask_char * 4, data)
+    
+    # Credit card numbers
+    data = re.sub(r'\b\d{4}-\d{4}-\d{4}-\d{4}\b', mask_char * 4 + '-' + mask_char * 4 + '-' + mask_char * 4 + '-' + mask_char * 4, data)
+    
+    return data

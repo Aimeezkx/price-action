@@ -1,0 +1,45 @@
+[
+  {
+    "script_id": "repro_e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4_pytest",
+    "issue_id": "e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4",
+    "script_type": "pytest",
+    "script_content": "\"\"\"\nReproduction script for issue: Large PDF processing timeout\n\nIssue ID: e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4\nThis script reproduces the bug to verify it exists before fixing.\n\"\"\"\n\nimport pytest\nimport json\nfrom datetime import datetime\n\nclass TestIssueReproduction:\n    \"\"\"Reproduction test for issue e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4\"\"\"\n    \n    def test_reproduce_issue_e9ab8a5e_e510_48d0_9ea3_a1c7739f04c4(self):\n        \"\"\"\n        Reproduce: Large PDF processing timeout\n        \n        Expected: PDF documents up to 100MB should be processed successfully within 2 minutes\n        Actual: Processing fails with timeout error after 30 seconds for documents >50MB\n        \"\"\"\n        # Setup test environment\n        # TODO: Add specific test setup based on issue details\n        \n        # Execute reproduction steps\n        # TODO: Add reproduction execution logic\n        \n        # This test should fail until the bug is fixed\n        # When the bug is fixed, this assertion should be updated\n        with pytest.raises(Exception, match=r\".*Processing fails with timeout error after 30 secon.*\"):\n            # The operation that causes the bug\n            result = self._execute_problematic_operation()\n            \n        # TODO: Update this test when bug is fixed to assert correct behavior\n        \n    def _execute_problematic_operation(self):\n        \"\"\"Execute the operation that demonstrates the bug\"\"\"\n        # TODO: Implement the specific operation based on reproduction steps\n        # Step 1: Upload a large PDF document (>50MB)\n        # TODO: Implement this step\n        # Step 2: Check processing status in the UI\n        # TODO: Implement this step\n        pass\n        \n    def setup_method(self):\n        \"\"\"Setup for each test method\"\"\"\n        pass  # TODO: Add method setup\n        \n    def teardown_method(self):\n        \"\"\"Cleanup after each test method\"\"\"\n        pass  # TODO: Add method cleanup\n",
+    "setup_commands": [
+      "# Setup commands for reproduction",
+      "pip install -r requirements.txt"
+    ],
+    "cleanup_commands": [
+      "# Cleanup commands",
+      "rm -f *.log",
+      "rm -f *.tmp"
+    ],
+    "expected_outcome": "Should reproduce: Processing fails with timeout error after 30 seconds for documents >50MB",
+    "created_at": "2025-08-15T21:28:47.139910",
+    "last_run": null,
+    "success_rate": 0.0,
+    "run_count": 0
+  },
+  {
+    "script_id": "repro_e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4_playwright",
+    "issue_id": "e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4",
+    "script_type": "playwright",
+    "script_content": "\"\"\"\nPlaywright reproduction script for UI issue: Large PDF processing timeout\n\nIssue ID: e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4\nThis script reproduces the UI bug using browser automation.\n\"\"\"\n\nimport pytest\nfrom playwright.async_api import Page, expect\n\nclass TestUIReproduction:\n    \"\"\"UI reproduction test for issue e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4\"\"\"\n    \n    @pytest.mark.asyncio\n    async def test_reproduce_ui_issue_e9ab8a5e_e510_48d0_9ea3_a1c7739f04c4(self, page: Page):\n        \"\"\"\n        Reproduce UI issue: Large PDF processing timeout\n        \n        Expected: PDF documents up to 100MB should be processed successfully within 2 minutes\n        Actual: Processing fails with timeout error after 30 seconds for documents >50MB\n        \"\"\"\n        # Navigate to the problematic page\n        await page.goto(\"http://localhost:3000\")\n        \n        # Execute reproduction steps\n        # Upload a large PDF document (>50MB)\n        # TODO: Implement UI interaction\n        # Check processing status in the UI\n        # TODO: Implement UI interaction\n        \n        # Capture screenshot of the issue\n        await page.screenshot(path=f\"reproduction_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png\")\n        \n        # This assertion should fail until the bug is fixed\n        # TODO: Update when bug is fixed\n        try:\n            # TODO: Add UI assertions for: PDF documents up to 100MB should be processed successfully within 2 minutes\n            pytest.fail(\"Expected UI issue did not occur - bug may be fixed\")\n        except Exception as e:\n            # Expected failure - bug is reproduced\n            print(f\"Successfully reproduced issue: {e}\")\n",
+    "setup_commands": [
+      "# Setup commands for reproduction",
+      "pip install -r requirements.txt",
+      "playwright install",
+      "npm install"
+    ],
+    "cleanup_commands": [
+      "# Cleanup commands",
+      "rm -f *.log",
+      "rm -f *.tmp",
+      "rm -f test-results/*.png"
+    ],
+    "expected_outcome": "Should reproduce: Processing fails with timeout error after 30 seconds for documents >50MB",
+    "created_at": "2025-08-15T21:28:47.140289",
+    "last_run": null,
+    "success_rate": 0.0,
+    "run_count": 0
+  }
+]

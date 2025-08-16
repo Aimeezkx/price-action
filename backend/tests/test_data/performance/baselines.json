@@ -1,0 +1,38 @@
+[
+  {
+    "metric_name": "document_processing_time",
+    "test_case": "small_document_processing",
+    "baseline_value": 5.2,
+    "unit": "seconds",
+    "confidence_interval": [
+      4.1,
+      6.3
+    ],
+    "sample_size": 50,
+    "environment": "test",
+    "created_at": "2025-08-15T21:14:40.587501",
+    "last_updated": "2025-08-15T21:14:40.587508",
+    "metadata": {
+      "file_size_mb": 2.0,
+      "page_count": 5
+    }
+  },
+  {
+    "metric_name": "search_response_time",
+    "test_case": "full_text_search",
+    "baseline_value": 145.0,
+    "unit": "milliseconds",
+    "confidence_interval": [
+      120.0,
+      170.0
+    ],
+    "sample_size": 100,
+    "environment": "test",
+    "created_at": "2025-08-15T21:14:40.587511",
+    "last_updated": "2025-08-15T21:14:40.587513",
+    "metadata": {
+      "corpus_size": 100,
+      "query_length": 3
+    }
+  }
+]

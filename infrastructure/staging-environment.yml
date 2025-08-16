@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  postgres-staging:
+    image: postgres:15
+    container_name: postgres-staging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-testdb_staging}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stagingpass}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+      - ./backend/alembic/versions:/docker-entrypoint-initdb.d/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-testdb_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+  redis-staging:
+    image: redis:7-alpine
+    container_name: redis-staging
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+  backend-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - ENVIRONMENT=staging
+    container_name: backend-staging
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:stagingpass@postgres-staging:5432/testdb_staging}
+      - REDIS_URL=${REDIS_URL:-redis://redis-staging:6379/1}
+      - ENVIRONMENT=${ENVIRONMENT:-staging}
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-staging-secret-key-not-for-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3001,http://127.0.0.1:3001}
+      - UPLOAD_DIR=${UPLOAD_DIR:-/app/uploads}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-100MB}
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+      - TESTING_MODE=${TESTING_MODE:-true}
+      - MOCK_EXTERNAL_APIS=${MOCK_EXTERNAL_APIS:-true}
+      - PYTHONPATH=/app
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    volumes:
+      - ./backend:/app:ro
+      - staging_uploads:/app/uploads
+      - staging_logs:/app/logs
+      - ./scripts:/app/scripts:ro
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - staging-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        sleep 10 &&
+        echo 'Running database migrations...' &&
+        python -m alembic upgrade head &&
+        echo 'Starting application...' &&
+        uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  frontend-staging:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:${BACKEND_PORT:-8001}
+        - VITE_ENVIRONMENT=staging
+    container_name: frontend-staging
+    environment:
+      - VITE_API_BASE_URL=${API_BASE_URL:-http://localhost:8001}
+      - VITE_ENVIRONMENT=${ENVIRONMENT:-staging}
+      - NODE_ENV=development
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    volumes:
+      - ./frontend:/app:ro
+      - /app/node_modules
+      - frontend_staging_cache:/app/.vite
+    depends_on:
+      - backend-staging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - staging-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Installing dependencies...' &&
+        npm ci &&
+        echo 'Starting development server...' &&
+        npm run dev -- --host 0.0.0.0 --port 3000
+      "
+
+  nginx-staging:
+    image: nginx:alpine
+    container_name: nginx-staging
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infrastructure/staging/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-staging
+      - frontend-staging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+  # Test runner service for integration tests
+  test-runner:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: test-runner-staging
+    environment:
+      - DATABASE_URL=postgresql://postgres:stagingpass@postgres-staging:5432/testdb_staging
+      - REDIS_URL=redis://redis-staging:6379/1
+      - ENVIRONMENT=testing
+      - API_BASE_URL=http://backend-staging:8000
+      - FRONTEND_URL=http://frontend-staging:3000
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app:ro
+      - ./frontend:/frontend:ro
+      - ./scripts:/scripts:ro
+      - test_results:/test_results
+    depends_on:
+      backend-staging:
+        condition: service_healthy
+      frontend-staging:
+        condition: service_healthy
+    networks:
+      - staging-network
+    profiles:
+      - testing
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...' &&
+        sleep 30 &&
+        echo 'Running integration tests...' &&
+        python -m pytest tests/integration/ -v --tb=short --junit-xml=/test_results/integration-results.xml
+      "
+
+volumes:
+  postgres_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local
+  staging_uploads:
+    driver: local
+  staging_logs:
+    driver: local
+  frontend_staging_cache:
+    driver: local
+  test_results:
+    driver: local
+
+networks:
+  staging-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

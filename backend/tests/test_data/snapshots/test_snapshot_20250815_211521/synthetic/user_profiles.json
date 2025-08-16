@@ -1,0 +1,342 @@
+[
+  {
+    "id": "c566049e-9644-4c18-ae10-3580d1011714",
+    "username": "test_user_0",
+    "email": "user0@example.com",
+    "full_name": "Test User 0",
+    "created_at": "2024-11-12T21:14:40.582011",
+    "preferences": {
+      "language": "fr",
+      "theme": "light",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 11,
+      "total_cards_reviewed": 585,
+      "study_streak_days": 82
+    }
+  },
+  {
+    "id": "f71160bc-b600-485f-973d-3db00cd3bb75",
+    "username": "test_user_1",
+    "email": "user1@example.com",
+    "full_name": "Test User 1",
+    "created_at": "2024-11-05T21:14:40.582318",
+    "preferences": {
+      "language": "en",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 22,
+      "total_cards_reviewed": 865,
+      "study_streak_days": 32
+    }
+  },
+  {
+    "id": "cae824a2-0cf2-4f3b-8af7-e5e8a34c158f",
+    "username": "test_user_2",
+    "email": "user2@example.com",
+    "full_name": "Test User 2",
+    "created_at": "2025-04-11T21:14:40.582336",
+    "preferences": {
+      "language": "fr",
+      "theme": "light",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 40,
+      "total_cards_reviewed": 25,
+      "study_streak_days": 36
+    }
+  },
+  {
+    "id": "d9cf3047-519c-456b-b932-9b7c6af519ab",
+    "username": "test_user_3",
+    "email": "user3@example.com",
+    "full_name": "Test User 3",
+    "created_at": "2025-06-04T21:14:40.582350",
+    "preferences": {
+      "language": "en",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 7,
+      "total_cards_reviewed": 879,
+      "study_streak_days": 94
+    }
+  },
+  {
+    "id": "d0ac912e-aa61-4eef-90d6-1854e02b1a51",
+    "username": "test_user_4",
+    "email": "user4@example.com",
+    "full_name": "Test User 4",
+    "created_at": "2025-05-18T21:14:40.582363",
+    "preferences": {
+      "language": "es",
+      "theme": "dark",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 43,
+      "total_cards_reviewed": 578,
+      "study_streak_days": 19
+    }
+  },
+  {
+    "id": "00d4ad26-17ab-4f62-a645-374feb5ec08b",
+    "username": "test_user_5",
+    "email": "user5@example.com",
+    "full_name": "Test User 5",
+    "created_at": "2024-09-30T21:14:40.582377",
+    "preferences": {
+      "language": "en",
+      "theme": "dark",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 30,
+      "total_cards_reviewed": 738,
+      "study_streak_days": 2
+    }
+  },
+  {
+    "id": "edec1456-b652-4e8e-83ef-bcb76fa1e853",
+    "username": "test_user_6",
+    "email": "user6@example.com",
+    "full_name": "Test User 6",
+    "created_at": "2025-08-03T21:14:40.582390",
+    "preferences": {
+      "language": "en",
+      "theme": "dark",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 20,
+      "total_cards_reviewed": 100,
+      "study_streak_days": 64
+    }
+  },
+  {
+    "id": "d4245b70-04d9-42c7-b10e-a20a85b3f00d",
+    "username": "test_user_7",
+    "email": "user7@example.com",
+    "full_name": "Test User 7",
+    "created_at": "2025-06-30T21:14:40.582403",
+    "preferences": {
+      "language": "fr",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 35,
+      "total_cards_reviewed": 572,
+      "study_streak_days": 41
+    }
+  },
+  {
+    "id": "68f76b81-67a5-4b6a-9ee9-2e6c44e0b610",
+    "username": "test_user_8",
+    "email": "user8@example.com",
+    "full_name": "Test User 8",
+    "created_at": "2024-08-18T21:14:40.582416",
+    "preferences": {
+      "language": "es",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 1,
+      "total_cards_reviewed": 204,
+      "study_streak_days": 54
+    }
+  },
+  {
+    "id": "6ddf2793-ff3c-47f8-ba53-18f01d0f4fd7",
+    "username": "test_user_9",
+    "email": "user9@example.com",
+    "full_name": "Test User 9",
+    "created_at": "2024-10-25T21:14:40.582429",
+    "preferences": {
+      "language": "en",
+      "theme": "light",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 23,
+      "total_cards_reviewed": 808,
+      "study_streak_days": 18
+    }
+  },
+  {
+    "id": "ef086f38-41c3-42ef-b17d-bfd022a511cf",
+    "username": "test_user_10",
+    "email": "user10@example.com",
+    "full_name": "Test User 10",
+    "created_at": "2024-12-25T21:14:40.582442",
+    "preferences": {
+      "language": "fr",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 41,
+      "total_cards_reviewed": 403,
+      "study_streak_days": 47
+    }
+  },
+  {
+    "id": "605d70d7-70c2-4f44-8fdf-3703a098beda",
+    "username": "test_user_11",
+    "email": "user11@example.com",
+    "full_name": "Test User 11",
+    "created_at": "2024-10-06T21:14:40.582455",
+    "preferences": {
+      "language": "fr",
+      "theme": "dark",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 29,
+      "total_cards_reviewed": 554,
+      "study_streak_days": 28
+    }
+  },
+  {
+    "id": "80a70412-6115-410a-b039-f3744da3a345",
+    "username": "test_user_12",
+    "email": "user12@example.com",
+    "full_name": "Test User 12",
+    "created_at": "2024-09-23T21:14:40.582471",
+    "preferences": {
+      "language": "en",
+      "theme": "dark",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 20,
+      "total_cards_reviewed": 953,
+      "study_streak_days": 95
+    }
+  },
+  {
+    "id": "c0b6a64d-37f5-4b12-bdb2-abb46218a8f4",
+    "username": "test_user_13",
+    "email": "user13@example.com",
+    "full_name": "Test User 13",
+    "created_at": "2024-12-28T21:14:40.582485",
+    "preferences": {
+      "language": "fr",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 9,
+      "total_cards_reviewed": 290,
+      "study_streak_days": 81
+    }
+  },
+  {
+    "id": "74ec520c-da6d-4fea-beb6-6cedd87043cc",
+    "username": "test_user_14",
+    "email": "user14@example.com",
+    "full_name": "Test User 14",
+    "created_at": "2024-09-08T21:14:40.582499",
+    "preferences": {
+      "language": "es",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 46,
+      "total_cards_reviewed": 158,
+      "study_streak_days": 65
+    }
+  },
+  {
+    "id": "9602aa40-76ad-431d-ab5c-745e11217304",
+    "username": "test_user_15",
+    "email": "user15@example.com",
+    "full_name": "Test User 15",
+    "created_at": "2024-11-13T21:14:40.582513",
+    "preferences": {
+      "language": "es",
+      "theme": "dark",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 36,
+      "total_cards_reviewed": 391,
+      "study_streak_days": 7
+    }
+  },
+  {
+    "id": "2ea2a3f6-dea5-402d-b939-fe2149f20769",
+    "username": "test_user_16",
+    "email": "user16@example.com",
+    "full_name": "Test User 16",
+    "created_at": "2025-05-31T21:14:40.582527",
+    "preferences": {
+      "language": "en",
+      "theme": "light",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 23,
+      "total_cards_reviewed": 779,
+      "study_streak_days": 91
+    }
+  },
+  {
+    "id": "b69b0fbe-994b-49da-874a-5e61db8f31fb",
+    "username": "test_user_17",
+    "email": "user17@example.com",
+    "full_name": "Test User 17",
+    "created_at": "2025-05-01T21:14:40.582540",
+    "preferences": {
+      "language": "fr",
+      "theme": "dark",
+      "notifications_enabled": true
+    },
+    "stats": {
+      "total_documents": 29,
+      "total_cards_reviewed": 607,
+      "study_streak_days": 58
+    }
+  },
+  {
+    "id": "d8dccecb-55d7-4482-8312-6a2d0cfbc43c",
+    "username": "test_user_18",
+    "email": "user18@example.com",
+    "full_name": "Test User 18",
+    "created_at": "2025-07-17T21:14:40.582553",
+    "preferences": {
+      "language": "en",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 2,
+      "total_cards_reviewed": 675,
+      "study_streak_days": 17
+    }
+  },
+  {
+    "id": "0d4c44cb-6a57-427f-9a82-5105f70c4955",
+    "username": "test_user_19",
+    "email": "user19@example.com",
+    "full_name": "Test User 19",
+    "created_at": "2024-10-05T21:14:40.582603",
+    "preferences": {
+      "language": "es",
+      "theme": "light",
+      "notifications_enabled": false
+    },
+    "stats": {
+      "total_documents": 15,
+      "total_cards_reviewed": 635,
+      "study_streak_days": 13
+    }
+  }
+]

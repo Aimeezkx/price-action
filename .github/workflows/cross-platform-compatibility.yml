@@ -1,0 +1,406 @@
+name: Cross-Platform Compatibility Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - browser
+          - ios
+          - sync
+          - responsive
+          - features
+      base_url:
+        description: 'Base URL for testing'
+        required: false
+        default: 'http://localhost:3000'
+        type: string
+
+jobs:
+  cross-platform-tests:
+    name: Cross-Platform Compatibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+
+      - name: Start backend server
+        run: |
+          cd backend
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          echo $! > backend.pid
+          # Wait for backend to start
+          timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done'
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ENVIRONMENT: test
+
+      - name: Start frontend server
+        run: |
+          cd frontend
+          npm run build
+          npm run preview -- --port 3000 --host 0.0.0.0 &
+          echo $! > frontend.pid
+          # Wait for frontend to start
+          timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
+
+      - name: Validate cross-platform implementation
+        run: |
+          cd frontend/src/test/cross-platform
+          node validate-implementation.js
+
+      - name: Run cross-platform compatibility tests
+        run: |
+          cd frontend/src/test/cross-platform
+          node run-cross-platform-tests.js \
+            --base-url ${{ github.event.inputs.base_url || 'http://localhost:3000' }} \
+            --test-suite ${{ github.event.inputs.test_suite || 'all' }} \
+            --output-dir ./test-results \
+            --verbose
+        env:
+          CI: true
+          NODE_ENV: test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-platform-test-results-node-${{ matrix.node-version }}
+          path: |
+            frontend/src/test/cross-platform/test-results/
+            frontend/src/test/cross-platform/test-results/**/*
+          retention-days: 30
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-platform-test-reports-node-${{ matrix.node-version }}
+          path: |
+            frontend/src/test/cross-platform/test-results/*.txt
+            frontend/src/test/cross-platform/test-results/*.json
+          retention-days: 30
+
+      - name: Stop servers
+        if: always()
+        run: |
+          # Stop frontend
+          if [ -f frontend/frontend.pid ]; then
+            kill $(cat frontend/frontend.pid) || true
+            rm frontend/frontend.pid
+          fi
+          
+          # Stop backend
+          if [ -f backend/backend.pid ]; then
+            kill $(cat backend/backend.pid) || true
+            rm backend/backend.pid
+          fi
+          
+          # Kill any remaining processes
+          pkill -f "uvicorn main:app" || true
+          pkill -f "vite preview" || true
+
+  browser-matrix-tests:
+    name: Browser Matrix Tests
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser: [chromium, firefox, webkit]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install ${{ matrix.browser }} --with-deps
+
+      - name: Start application (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          cd ../frontend
+          npm run build
+          npm run preview -- --port 3000 --host 0.0.0.0 &
+          # Wait for services
+          timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ENVIRONMENT: test
+
+      - name: Start application (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          Start-Process python -ArgumentList "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" -PassThru
+          cd ../frontend
+          npm run build
+          Start-Process npm -ArgumentList "run", "preview", "--", "--port", "3000", "--host", "0.0.0.0" -PassThru
+          # Wait for services
+          Start-Sleep -Seconds 10
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ENVIRONMENT: test
+
+      - name: Run browser-specific tests
+        run: |
+          cd frontend/src/test/cross-platform
+          node run-cross-platform-tests.js \
+            --test-suite browser \
+            --output-dir ./test-results-${{ matrix.os }}-${{ matrix.browser }} \
+            --verbose
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+          CI: true
+
+      - name: Upload browser test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-test-results-${{ matrix.os }}-${{ matrix.browser }}
+          path: frontend/src/test/cross-platform/test-results-${{ matrix.os }}-${{ matrix.browser }}/
+          retention-days: 14
+
+  mobile-responsiveness-tests:
+    name: Mobile Responsiveness Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install chromium --with-deps
+
+      - name: Start application
+        run: |
+          cd backend
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          cd ../frontend
+          npm run build
+          npm run preview -- --port 3000 --host 0.0.0.0 &
+          timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ENVIRONMENT: test
+
+      - name: Run responsive design tests
+        run: |
+          cd frontend/src/test/cross-platform
+          node run-cross-platform-tests.js \
+            --test-suite responsive \
+            --output-dir ./responsive-test-results \
+            --verbose
+
+      - name: Upload responsive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-test-results
+          path: frontend/src/test/cross-platform/responsive-test-results/
+          retention-days: 14
+
+  performance-benchmarks:
+    name: Cross-Platform Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+
+      - name: Start application
+        run: |
+          cd backend
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          cd ../frontend
+          npm run build
+          npm run preview -- --port 3000 --host 0.0.0.0 &
+          timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ENVIRONMENT: test
+
+      - name: Run performance benchmarks
+        run: |
+          cd frontend/src/test/cross-platform
+          # Run tests with performance metrics collection
+          node run-cross-platform-tests.js \
+            --test-suite all \
+            --output-dir ./performance-results \
+            --verbose
+        env:
+          COLLECT_PERFORMANCE_METRICS: true
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-benchmark-results
+          path: frontend/src/test/cross-platform/performance-results/
+          retention-days: 30
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [cross-platform-tests, browser-matrix-tests, mobile-responsiveness-tests, performance-benchmarks]
+    if: always()
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: all-test-results
+
+      - name: Generate test summary
+        run: |
+          echo "# Cross-Platform Compatibility Test Summary" > test-summary.md
+          echo "" >> test-summary.md
+          echo "## Test Results Overview" >> test-summary.md
+          echo "" >> test-summary.md
+          
+          # Count result files
+          total_files=$(find all-test-results -name "*.json" | wc -l)
+          echo "- Total test result files: $total_files" >> test-summary.md
+          
+          # List all artifacts
+          echo "" >> test-summary.md
+          echo "## Generated Artifacts" >> test-summary.md
+          echo "" >> test-summary.md
+          find all-test-results -type d -mindepth 1 -maxdepth 1 | while read dir; do
+            artifact_name=$(basename "$dir")
+            file_count=$(find "$dir" -type f | wc -l)
+            echo "- **$artifact_name**: $file_count files" >> test-summary.md
+          done
+          
+          echo "" >> test-summary.md
+          echo "## Job Status" >> test-summary.md
+          echo "" >> test-summary.md
+          echo "- Cross-Platform Tests: ${{ needs.cross-platform-tests.result }}" >> test-summary.md
+          echo "- Browser Matrix Tests: ${{ needs.browser-matrix-tests.result }}" >> test-summary.md
+          echo "- Mobile Responsiveness Tests: ${{ needs.mobile-responsiveness-tests.result }}" >> test-summary.md
+          echo "- Performance Benchmarks: ${{ needs.performance-benchmarks.result }}" >> test-summary.md
+          
+          cat test-summary.md
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: test-summary.md
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('test-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  notify-on-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [cross-platform-tests, browser-matrix-tests, mobile-responsiveness-tests, performance-benchmarks]
+    if: failure() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Notify team of test failures
+        run: |
+          echo "Cross-platform compatibility tests failed on main branch"
+          echo "Please check the test results and fix any issues"
+          # Add notification logic here (Slack, email, etc.)

@@ -1,0 +1,166 @@
+{
+  "load_testing": {
+    "description": "Configuration for load and stress testing framework",
+    "base_url": "http://localhost:8000",
+    "test_environments": {
+      "local": {
+        "base_url": "http://localhost:8000",
+        "max_concurrent_users": 20,
+        "test_duration_minutes": 10,
+        "memory_limit_mb": 1024,
+        "enable_recovery_tests": true
+      },
+      "staging": {
+        "base_url": "https://staging.example.com",
+        "max_concurrent_users": 50,
+        "test_duration_minutes": 30,
+        "memory_limit_mb": 2048,
+        "enable_recovery_tests": false
+      },
+      "production": {
+        "base_url": "https://api.example.com",
+        "max_concurrent_users": 100,
+        "test_duration_minutes": 60,
+        "memory_limit_mb": 4096,
+        "enable_recovery_tests": false
+      }
+    },
+    "test_scenarios": {
+      "concurrent_document_processing": {
+        "enabled": true,
+        "scenarios": [
+          {
+            "name": "low_concurrency",
+            "concurrent_uploads": 5,
+            "iterations": 2,
+            "expected_success_rate": 95
+          },
+          {
+            "name": "medium_concurrency", 
+            "concurrent_uploads": 15,
+            "iterations": 2,
+            "expected_success_rate": 90
+          },
+          {
+            "name": "high_concurrency",
+            "concurrent_uploads": 25,
+            "iterations": 1,
+            "expected_success_rate": 80
+          }
+        ]
+      },
+      "multi_user_simulation": {
+        "enabled": true,
+        "user_profiles": {
+          "casual_users": {
+            "percentage": 60,
+            "session_duration_minutes": [5, 15],
+            "actions_per_session": [3, 8],
+            "upload_frequency": 0.2,
+            "study_intensity": 2.0
+          },
+          "regular_users": {
+            "percentage": 30,
+            "session_duration_minutes": [15, 45],
+            "actions_per_session": [8, 20],
+            "upload_frequency": 0.4,
+            "study_intensity": 3.0
+          },
+          "power_users": {
+            "percentage": 10,
+            "session_duration_minutes": [45, 120],
+            "actions_per_session": [20, 50],
+            "upload_frequency": 0.7,
+            "study_intensity": 4.0
+          }
+        }
+      },
+      "database_load": {
+        "enabled": true,
+        "test_data_size": {
+          "documents": 100,
+          "knowledge_points": 1000,
+          "cards": 2000
+        },
+        "scenarios": [
+          {
+            "name": "read_heavy",
+            "threads": 15,
+            "operations_per_thread": 30,
+            "read_write_ratio": 0.9
+          },
+          {
+            "name": "write_heavy",
+            "threads": 10,
+            "operations_per_thread": 25,
+            "read_write_ratio": 0.3
+          },
+          {
+            "name": "mixed_workload",
+            "threads": 20,
+            "operations_per_thread": 20,
+            "read_write_ratio": 0.7
+          }
+        ]
+      },
+      "memory_resource_limits": {
+        "enabled": true,
+        "scenarios": [
+          {
+            "name": "gradual_growth",
+            "growth_iterations": 10,
+            "growth_size_mb": 50
+          },
+          {
+            "name": "concurrent_allocation",
+            "num_workers": 5,
+            "allocation_per_worker_mb": 100
+          },
+          {
+            "name": "document_processing_memory",
+            "num_documents": 200
+          }
+        ]
+      },
+      "system_recovery": {
+        "enabled": true,
+        "failure_types": [
+          "network_timeout",
+          "memory_exhaustion", 
+          "high_cpu_load",
+          "concurrent_request_flood",
+          "corrupted_data"
+        ],
+        "max_recovery_time_seconds": 60,
+        "stability_check_duration_seconds": 30
+      }
+    },
+    "performance_thresholds": {
+      "document_processing": {
+        "max_processing_time_seconds": 60,
+        "max_memory_usage_mb": 500
+      },
+      "api_response_times": {
+        "document_list": 2.0,
+        "search": 1.0,
+        "card_review": 0.5
+      },
+      "database_operations": {
+        "max_query_time_seconds": 2.0,
+        "max_connection_time_seconds": 0.5
+      },
+      "system_resources": {
+        "max_memory_percent": 85,
+        "max_cpu_percent": 90,
+        "max_disk_usage_percent": 95
+      }
+    },
+    "reporting": {
+      "output_directory": "load_test_reports",
+      "generate_charts": true,
+      "include_detailed_logs": true,
+      "alert_on_failure": true,
+      "email_notifications": false
+    }
+  }
+}

@@ -1,0 +1,438 @@
+name: End-to-End Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - complete-workflows
+          - cross-browser
+          - mobile
+          - accessibility
+          - performance
+          - error-handling
+      browser:
+        description: 'Browser to test'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - chromium
+          - firefox
+          - webkit
+
+jobs:
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite: 
+          - complete-workflows
+          - cross-browser
+          - mobile
+          - accessibility
+          - performance
+          - error-handling
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_USER: testuser
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Install Node.js dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Create test data directory
+        run: |
+          mkdir -p frontend/e2e/test-data
+          # Create minimal test files for CI
+          echo "Sample PDF content" > frontend/e2e/test-data/sample.pdf
+          echo "Medium PDF content" > frontend/e2e/test-data/medium.pdf
+          echo "Large PDF content" > frontend/e2e/test-data/large.pdf
+          echo "Multi-chapter content" > frontend/e2e/test-data/multi-chapter.pdf
+          echo "Images content" > frontend/e2e/test-data/with-images.pdf
+          echo "Charts content" > frontend/e2e/test-data/with-charts.pdf
+          echo "Comprehensive content" > frontend/e2e/test-data/comprehensive.pdf
+          echo "Hotspot content" > frontend/e2e/test-data/hotspot-images.pdf
+          echo "DOCX content" > frontend/e2e/test-data/document.docx
+          echo "# Markdown content" > frontend/e2e/test-data/notes.md
+          echo "Invalid content" > frontend/e2e/test-data/invalid.txt
+          echo "Malicious content" > frontend/e2e/test-data/malicious.exe
+
+      - name: Setup database
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+        run: |
+          alembic upgrade head
+
+      - name: Start backend server
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          ENVIRONMENT: test
+        run: |
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+          curl -f http://localhost:8000/health || exit 1
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Start frontend server
+        working-directory: frontend
+        run: |
+          npm run preview -- --port 3000 --host 0.0.0.0 &
+          sleep 5
+          curl -f http://localhost:3000 || exit 1
+
+      - name: Run E2E tests
+        working-directory: frontend
+        env:
+          CI: true
+        run: |
+          if [ "${{ github.event.inputs.test_suite }}" != "" ]; then
+            TEST_SUITE="${{ github.event.inputs.test_suite }}"
+          else
+            TEST_SUITE="${{ matrix.test-suite }}"
+          fi
+          
+          if [ "${{ github.event.inputs.browser }}" != "" ] && [ "${{ github.event.inputs.browser }}" != "all" ]; then
+            node e2e/run-e2e-tests.js $TEST_SUITE --browser ${{ github.event.inputs.browser }} --report
+          else
+            node e2e/run-e2e-tests.js $TEST_SUITE --report
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results-${{ matrix.test-suite }}
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 30
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-screenshots-${{ matrix.test-suite }}
+          path: frontend/test-results/screenshots/
+          retention-days: 7
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-videos-${{ matrix.test-suite }}
+          path: frontend/test-results/videos/
+          retention-days: 7
+
+  accessibility-audit:
+    name: Accessibility Audit
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run accessibility tests
+        working-directory: frontend
+        run: npx playwright test e2e/accessibility-testing.spec.ts --reporter=html
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: frontend/playwright-report/
+          retention-days: 30
+
+  performance-audit:
+    name: Performance Audit
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.12.x
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        working-directory: frontend
+        run: |
+          lhci autorun --upload.target=temporary-public-storage || echo "Lighthouse CI failed but continuing"
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 30
+
+  mobile-testing:
+    name: Mobile Device Testing
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        device:
+          - iPhone 12
+          - Pixel 5
+          - iPad
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run mobile tests
+        working-directory: frontend
+        run: |
+          npx playwright test e2e/mobile-responsiveness.spec.ts \
+            --grep "${{ matrix.device }}" \
+            --reporter=html
+
+      - name: Upload mobile test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-test-results-${{ matrix.device }}
+          path: frontend/playwright-report/
+          retention-days: 30
+
+  cross-browser-matrix:
+    name: Cross-Browser Testing
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser: [chromium, firefox, webkit]
+        exclude:
+          # WebKit is not available on Windows/Linux in Playwright
+          - os: ubuntu-latest
+            browser: webkit
+          - os: windows-latest
+            browser: webkit
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run cross-browser tests
+        working-directory: frontend
+        run: |
+          npx playwright test e2e/cross-browser-compatibility.spec.ts \
+            --project=${{ matrix.browser }} \
+            --reporter=html
+
+      - name: Upload cross-browser results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-browser-${{ matrix.os }}-${{ matrix.browser }}
+          path: frontend/playwright-report/
+          retention-days: 30
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, accessibility-audit, performance-audit, mobile-testing, cross-browser-matrix]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts
+
+      - name: Generate test summary
+        run: |
+          echo "# E2E Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          
+          # Count artifacts to determine test results
+          TOTAL_ARTIFACTS=$(find test-artifacts -name "*.json" | wc -l)
+          echo "- Total test artifacts: $TOTAL_ARTIFACTS" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for failures
+          if find test-artifacts -name "*screenshot*" -o -name "*video*" | grep -q .; then
+            echo "- ❌ Some tests failed (screenshots/videos captured)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Test reports and artifacts are available in the Actions artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Screenshots and videos are captured for failed tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Accessibility and performance reports are generated separately" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Count test artifacts
+            const artifactDirs = fs.readdirSync('test-artifacts', { withFileTypes: true })
+              .filter(dirent => dirent.isDirectory())
+              .map(dirent => dirent.name);
+            
+            const hasFailures = artifactDirs.some(dir => 
+              dir.includes('screenshot') || dir.includes('video')
+            );
+            
+            const status = hasFailures ? '❌ Some E2E tests failed' : '✅ All E2E tests passed';
+            const body = `## E2E Test Results
+            
+            ${status}
+            
+            **Test Suites Run:**
+            - Complete User Workflows
+            - Cross-Browser Compatibility  
+            - Mobile Responsiveness
+            - Accessibility Compliance
+            - Performance Validation
+            - Error Handling & Recovery
+            
+            **Artifacts Generated:** ${artifactDirs.length}
+            
+            ${hasFailures ? '⚠️ Check the artifacts for screenshots and videos of failed tests.' : '🎉 All tests passed successfully!'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

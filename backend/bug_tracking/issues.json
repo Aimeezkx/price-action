@@ -1,0 +1,192 @@
+[
+  {
+    "id": "9f5d3018-763d-44b5-a2e3-74991d5c230b",
+    "title": "Test CLI Issue",
+    "description": "Testing CLI functionality",
+    "severity": "medium",
+    "category": "bug",
+    "status": "open",
+    "test_case": "test_cli",
+    "reproduction_steps": [],
+    "expected_behavior": "Should work",
+    "actual_behavior": "Testing",
+    "environment": {
+      "test": "cli"
+    },
+    "error_trace": null,
+    "created_at": "2025-08-15T21:28:30.498850",
+    "updated_at": "2025-08-15T21:28:30.498879",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  },
+  {
+    "id": "e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4",
+    "title": "Large PDF processing timeout",
+    "description": "Documents larger than 50MB fail to process due to timeout limits. This affects user experience and prevents processing of academic papers and technical documents.",
+    "severity": "high",
+    "category": "performance",
+    "status": "resolved",
+    "test_case": "test_large_pdf_processing",
+    "reproduction_steps": [
+      {
+        "step_number": 1,
+        "action": "Upload a large PDF document (>50MB)",
+        "expected_result": "Document should be processed within 60 seconds",
+        "actual_result": "Processing times out after 30 seconds",
+        "screenshot_path": null,
+        "data_used": {
+          "filename": "large_document.pdf",
+          "size_mb": 75,
+          "pages": 200
+        }
+      },
+      {
+        "step_number": 2,
+        "action": "Check processing status in the UI",
+        "expected_result": "Status should show 'Processing Complete'",
+        "actual_result": "Status shows 'Processing Failed - Timeout'",
+        "screenshot_path": "/screenshots/timeout_error.png",
+        "data_used": null
+      }
+    ],
+    "expected_behavior": "PDF documents up to 100MB should be processed successfully within 2 minutes",
+    "actual_behavior": "Processing fails with timeout error after 30 seconds for documents >50MB",
+    "environment": {
+      "os": "Ubuntu 20.04",
+      "python_version": "3.9.0",
+      "memory": "8GB",
+      "cpu": "Intel i7-8700K",
+      "browser": "Chrome 96.0"
+    },
+    "error_trace": "\nTimeoutError: Document processing exceeded maximum time limit\n  at DocumentProcessor.process_pdf (document_processor.py:145)\n  at ProcessingQueue.handle_job (queue_service.py:89)\n  at Worker.run (worker.py:34)\n        ",
+    "created_at": "2025-08-15T21:28:47.137808",
+    "updated_at": "2025-08-15T21:28:47.146927",
+    "assigned_to": "developer@example.com",
+    "tags": [
+      "performance",
+      "pdf-processing",
+      "timeout"
+    ],
+    "related_issues": [],
+    "fix_commit": "a1b2c3d4e5f6789",
+    "verification_test": "bug_tracking/regression_test_e9ab8a5e-e510-48d0-9ea3-a1c7739f04c4.py"
+  },
+  {
+    "id": "34c9ac25-e9cc-4728-8bb2-7e335238430f",
+    "title": "Automated detection: memory_leak",
+    "description": "Detected from log: 2023-12-01 10:15:45 ERROR Memory leak detected in PDF parser - heap usage: 2.1GB",
+    "severity": "high",
+    "category": "performance",
+    "status": "open",
+    "test_case": "automated_log_analysis",
+    "reproduction_steps": [],
+    "expected_behavior": "No errors in logs",
+    "actual_behavior": "2023-12-01 10:15:45 ERROR Memory leak detected in PDF parser - heap usage: 2.1GB",
+    "environment": {
+      "source": "log_analysis"
+    },
+    "error_trace": "2023-12-01 10:15:45 ERROR Memory leak detected in PDF parser - heap usage: 2.1GB",
+    "created_at": "2025-08-15T21:28:47.142106",
+    "updated_at": "2025-08-15T21:28:47.142107",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  },
+  {
+    "id": "c7a0e233-46b4-4f4c-b0be-941489d0b382",
+    "title": "Automated detection: security_vulnerability",
+    "description": "Detected from log: 2023-12-01 10:16:30 ERROR Unauthorized access attempt from IP 192.168.1.100",
+    "severity": "high",
+    "category": "security",
+    "status": "open",
+    "test_case": "automated_log_analysis",
+    "reproduction_steps": [],
+    "expected_behavior": "No errors in logs",
+    "actual_behavior": "2023-12-01 10:16:30 ERROR Unauthorized access attempt from IP 192.168.1.100",
+    "environment": {
+      "source": "log_analysis"
+    },
+    "error_trace": "2023-12-01 10:16:30 ERROR Unauthorized access attempt from IP 192.168.1.100",
+    "created_at": "2025-08-15T21:28:47.142679",
+    "updated_at": "2025-08-15T21:28:47.142680",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  },
+  {
+    "id": "bd7a42cd-ccb4-4e75-a13a-5a1fda0b056c",
+    "title": "Automated detection: performance_degradation",
+    "description": "Detected from log: 2023-12-01 10:17:15 ERROR Database connection timeout after 30 seconds",
+    "severity": "high",
+    "category": "performance",
+    "status": "open",
+    "test_case": "automated_log_analysis",
+    "reproduction_steps": [],
+    "expected_behavior": "No errors in logs",
+    "actual_behavior": "2023-12-01 10:17:15 ERROR Database connection timeout after 30 seconds",
+    "environment": {
+      "source": "log_analysis"
+    },
+    "error_trace": "2023-12-01 10:17:15 ERROR Database connection timeout after 30 seconds",
+    "created_at": "2025-08-15T21:28:47.143310",
+    "updated_at": "2025-08-15T21:28:47.143312",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  },
+  {
+    "id": "4090f282-3183-470b-9155-da936e872583",
+    "title": "Test failure: test_document_chapter_extraction",
+    "description": "Test failed with: AssertionError: Expected 8 chapters, got 5",
+    "severity": "high",
+    "category": "bug",
+    "status": "open",
+    "test_case": "test_document_chapter_extraction",
+    "reproduction_steps": [],
+    "expected_behavior": "Test should pass",
+    "actual_behavior": "AssertionError: Expected 8 chapters, got 5",
+    "environment": {
+      "source": "test_failure"
+    },
+    "error_trace": "Traceback (most recent call last):\n  File 'test_chapter.py', line 45, in test_extraction\n    assert len(chapters) == 8\nAssertionError: Expected 8 chapters, got 5",
+    "created_at": "2025-08-15T21:28:47.144016",
+    "updated_at": "2025-08-15T21:28:47.144017",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  },
+  {
+    "id": "0b424728-a5bd-43ee-91d8-053ebdc0a748",
+    "title": "Test failure: test_search_performance",
+    "description": "Test failed with: TimeoutError: Search took 5.2 seconds, expected < 1.0s",
+    "severity": "high",
+    "category": "performance",
+    "status": "open",
+    "test_case": "test_search_performance",
+    "reproduction_steps": [],
+    "expected_behavior": "Test should pass",
+    "actual_behavior": "TimeoutError: Search took 5.2 seconds, expected < 1.0s",
+    "environment": {
+      "source": "test_failure"
+    },
+    "error_trace": "Traceback (most recent call last):\n  File 'test_search.py', line 23, in test_performance\n    assert response_time < 1.0\nTimeoutError: Search took 5.2 seconds",
+    "created_at": "2025-08-15T21:28:47.144698",
+    "updated_at": "2025-08-15T21:28:47.144699",
+    "assigned_to": null,
+    "tags": [],
+    "related_issues": [],
+    "fix_commit": null,
+    "verification_test": null
+  }
+]

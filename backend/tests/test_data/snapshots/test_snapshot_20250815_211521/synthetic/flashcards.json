@@ -1,0 +1,902 @@
+[
+  {
+    "id": "2aa9d994-8bc8-4d7d-8bfd-fca1a7e9429c",
+    "document_id": "89492063-85dc-45c1-abd2-a631c107b8c9",
+    "type": "basic",
+    "front": "Question 0: What is the main concept?",
+    "back": "Answer 0: The main concept is...",
+    "difficulty": 0.8641074585560373,
+    "created_at": "2025-06-09T21:14:40.585049"
+  },
+  {
+    "id": "47499bb5-709b-48c5-b219-208f45bd460c",
+    "document_id": "5bcafe7e-1aaf-4f91-9724-980f4a5f15e8",
+    "type": "basic",
+    "front": "Question 1: What is the main concept?",
+    "back": "Answer 1: The main concept is...",
+    "difficulty": 0.20042692856116928,
+    "created_at": "2025-06-08T21:14:40.585063"
+  },
+  {
+    "id": "9c06c264-a3b4-4b48-a4cd-4fa5c96d364e",
+    "document_id": "3a812045-afcb-49fc-b3c7-aa79da29263a",
+    "type": "cloze",
+    "front": "Question 2: What is the main concept?",
+    "back": "Answer 2: The main concept is...",
+    "difficulty": 0.8180813724297096,
+    "created_at": "2025-08-03T21:14:40.585073"
+  },
+  {
+    "id": "b143457b-c694-4d42-aacf-2b2fbb4c3e43",
+    "document_id": "4e1ce818-b521-45df-b3d5-1a41f6263438",
+    "type": "basic",
+    "front": "Question 3: What is the main concept?",
+    "back": "Answer 3: The main concept is...",
+    "difficulty": 0.9765188135672535,
+    "created_at": "2025-06-17T21:14:40.585085"
+  },
+  {
+    "id": "e499f799-652c-448f-a77a-39639e9aef52",
+    "document_id": "48c5b054-28aa-4440-a389-8bd5bcdef2e0",
+    "type": "cloze",
+    "front": "Question 4: What is the main concept?",
+    "back": "Answer 4: The main concept is...",
+    "difficulty": 0.6481655807996917,
+    "created_at": "2025-06-20T21:14:40.585095"
+  },
+  {
+    "id": "c055ff57-6ee5-4543-bd9b-43e84adb4ca9",
+    "document_id": "b1d185ae-22d0-459e-829e-24782e914219",
+    "type": "basic",
+    "front": "Question 5: What is the main concept?",
+    "back": "Answer 5: The main concept is...",
+    "difficulty": 0.6528883219586975,
+    "created_at": "2025-07-12T21:14:40.585106"
+  },
+  {
+    "id": "b3cc4ebd-4148-4fe8-b2e1-4b6dd9b4713a",
+    "document_id": "88ff31ae-b599-41c2-a447-583417ba7a90",
+    "type": "basic",
+    "front": "Question 6: What is the main concept?",
+    "back": "Answer 6: The main concept is...",
+    "difficulty": 0.42256660390027045,
+    "created_at": "2025-07-27T21:14:40.585117"
+  },
+  {
+    "id": "1dd8bf58-fe90-4d26-802b-d51c18c823f2",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "basic",
+    "front": "Question 7: What is the main concept?",
+    "back": "Answer 7: The main concept is...",
+    "difficulty": 0.965549045000118,
+    "created_at": "2025-07-15T21:14:40.585127"
+  },
+  {
+    "id": "ee3c217c-42ff-4846-820b-5257680d9875",
+    "document_id": "7a7ccf20-6506-4283-8df8-2b0d74821925",
+    "type": "multiple_choice",
+    "front": "Question 8: What is the main concept?",
+    "back": "Answer 8: The main concept is...",
+    "difficulty": 0.7770126613715712,
+    "created_at": "2025-05-29T21:14:40.585138"
+  },
+  {
+    "id": "21f44c8a-9bf4-4b51-901f-44be6366f6f2",
+    "document_id": "88ff31ae-b599-41c2-a447-583417ba7a90",
+    "type": "multiple_choice",
+    "front": "Question 9: What is the main concept?",
+    "back": "Answer 9: The main concept is...",
+    "difficulty": 0.46717886819117316,
+    "created_at": "2025-06-28T21:14:40.585148"
+  },
+  {
+    "id": "144dd951-49cb-47fc-b584-b9365f00ae75",
+    "document_id": "80b053b7-2174-44c1-b03a-ad9de8b69877",
+    "type": "cloze",
+    "front": "Question 10: What is the main concept?",
+    "back": "Answer 10: The main concept is...",
+    "difficulty": 0.6730112232929141,
+    "created_at": "2025-05-21T21:14:40.585159"
+  },
+  {
+    "id": "3c32eaa0-3082-4fe7-a1ec-6c8043c1db57",
+    "document_id": "ae4ed022-1567-4d34-b1cf-924f8b5b2be0",
+    "type": "multiple_choice",
+    "front": "Question 11: What is the main concept?",
+    "back": "Answer 11: The main concept is...",
+    "difficulty": 0.6588034350123798,
+    "created_at": "2025-07-01T21:14:40.585169"
+  },
+  {
+    "id": "28ed805d-9569-4c1a-baca-967e8b34883b",
+    "document_id": "f42a69dd-af54-421d-8a39-078c5adb6250",
+    "type": "cloze",
+    "front": "Question 12: What is the main concept?",
+    "back": "Answer 12: The main concept is...",
+    "difficulty": 0.8177507359172013,
+    "created_at": "2025-06-22T21:14:40.585180"
+  },
+  {
+    "id": "633b8077-4a24-42e5-931b-0c85f6c9d9e4",
+    "document_id": "860947d5-f17e-46a9-96c9-47884ac9122a",
+    "type": "multiple_choice",
+    "front": "Question 13: What is the main concept?",
+    "back": "Answer 13: The main concept is...",
+    "difficulty": 0.8283676899027791,
+    "created_at": "2025-05-26T21:14:40.585190"
+  },
+  {
+    "id": "ac0b8ef3-1e9a-4e85-ae4f-c8cfb9c9adf6",
+    "document_id": "89492063-85dc-45c1-abd2-a631c107b8c9",
+    "type": "multiple_choice",
+    "front": "Question 14: What is the main concept?",
+    "back": "Answer 14: The main concept is...",
+    "difficulty": 0.16825330074090816,
+    "created_at": "2025-07-19T21:14:40.585201"
+  },
+  {
+    "id": "2ac6d05d-9b0a-4bba-bb17-9aaafddb5149",
+    "document_id": "860947d5-f17e-46a9-96c9-47884ac9122a",
+    "type": "basic",
+    "front": "Question 15: What is the main concept?",
+    "back": "Answer 15: The main concept is...",
+    "difficulty": 0.4694396837839917,
+    "created_at": "2025-05-20T21:14:40.585211"
+  },
+  {
+    "id": "2a5143d4-5ff8-4dca-9519-e81d890a66a2",
+    "document_id": "6abc2313-e779-45aa-bedb-89bbfb24fb33",
+    "type": "cloze",
+    "front": "Question 16: What is the main concept?",
+    "back": "Answer 16: The main concept is...",
+    "difficulty": 0.3896049049910304,
+    "created_at": "2025-07-09T21:14:40.585221"
+  },
+  {
+    "id": "2de1d1eb-98bf-44ab-9e7c-449a31ed3d0c",
+    "document_id": "96d22260-2d14-4b21-b958-2daa1ec1542c",
+    "type": "multiple_choice",
+    "front": "Question 17: What is the main concept?",
+    "back": "Answer 17: The main concept is...",
+    "difficulty": 0.7287034580432045,
+    "created_at": "2025-08-08T21:14:40.585232"
+  },
+  {
+    "id": "cf49bd59-eaa3-4bce-a98a-a5db2929fa6c",
+    "document_id": "4e1ce818-b521-45df-b3d5-1a41f6263438",
+    "type": "cloze",
+    "front": "Question 18: What is the main concept?",
+    "back": "Answer 18: The main concept is...",
+    "difficulty": 0.7935805092455859,
+    "created_at": "2025-05-26T21:14:40.585242"
+  },
+  {
+    "id": "a233ef21-6e69-4cc3-9a70-750d7101529e",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "basic",
+    "front": "Question 19: What is the main concept?",
+    "back": "Answer 19: The main concept is...",
+    "difficulty": 0.7016928741472078,
+    "created_at": "2025-06-20T21:14:40.585253"
+  },
+  {
+    "id": "c48c476a-728e-4185-b4eb-4f0c2bc5b8a7",
+    "document_id": "bfd54d77-5ee3-4b03-9d79-f557662aadef",
+    "type": "multiple_choice",
+    "front": "Question 20: What is the main concept?",
+    "back": "Answer 20: The main concept is...",
+    "difficulty": 0.8793580113998749,
+    "created_at": "2025-06-03T21:14:40.585264"
+  },
+  {
+    "id": "2d3847d7-15cf-4a0b-8f2f-551df50e7252",
+    "document_id": "ccf7df01-7d26-4fe0-a9a1-bb13a6846ef0",
+    "type": "cloze",
+    "front": "Question 21: What is the main concept?",
+    "back": "Answer 21: The main concept is...",
+    "difficulty": 0.9802373301227197,
+    "created_at": "2025-08-10T21:14:40.585274"
+  },
+  {
+    "id": "75c953a1-325c-46a0-80b5-ffd57af1f4a0",
+    "document_id": "40dba215-d7c6-4157-a843-286546710e45",
+    "type": "basic",
+    "front": "Question 22: What is the main concept?",
+    "back": "Answer 22: The main concept is...",
+    "difficulty": 0.8512965151021147,
+    "created_at": "2025-06-30T21:14:40.585285"
+  },
+  {
+    "id": "7cb2bde8-9ad8-496a-960c-dc20173aa650",
+    "document_id": "5bcafe7e-1aaf-4f91-9724-980f4a5f15e8",
+    "type": "cloze",
+    "front": "Question 23: What is the main concept?",
+    "back": "Answer 23: The main concept is...",
+    "difficulty": 0.8012888307631302,
+    "created_at": "2025-06-27T21:14:40.585295"
+  },
+  {
+    "id": "871c325d-8691-417a-82e2-0f7c50fa16dd",
+    "document_id": "88ff31ae-b599-41c2-a447-583417ba7a90",
+    "type": "cloze",
+    "front": "Question 24: What is the main concept?",
+    "back": "Answer 24: The main concept is...",
+    "difficulty": 0.7537646420006747,
+    "created_at": "2025-08-06T21:14:40.585305"
+  },
+  {
+    "id": "e5579e55-92c8-40d9-ac8f-e40e97239614",
+    "document_id": "a77bd46f-bea2-48af-8554-92e110ddc631",
+    "type": "basic",
+    "front": "Question 25: What is the main concept?",
+    "back": "Answer 25: The main concept is...",
+    "difficulty": 0.9049451974032,
+    "created_at": "2025-07-02T21:14:40.585315"
+  },
+  {
+    "id": "0a0ec20e-2261-45cc-a060-ee1f5fc4e233",
+    "document_id": "3a812045-afcb-49fc-b3c7-aa79da29263a",
+    "type": "basic",
+    "front": "Question 26: What is the main concept?",
+    "back": "Answer 26: The main concept is...",
+    "difficulty": 0.8654119937538397,
+    "created_at": "2025-07-15T21:14:40.585326"
+  },
+  {
+    "id": "d809bdc1-92e5-4b45-8c72-33ba8d5f7f5f",
+    "document_id": "89492063-85dc-45c1-abd2-a631c107b8c9",
+    "type": "multiple_choice",
+    "front": "Question 27: What is the main concept?",
+    "back": "Answer 27: The main concept is...",
+    "difficulty": 0.44738427699810823,
+    "created_at": "2025-07-27T21:14:40.585336"
+  },
+  {
+    "id": "286da2e5-c4ee-4d84-9329-1ca6ba1d13e4",
+    "document_id": "87af1dd2-7ebf-4d57-b148-60add2a548d6",
+    "type": "multiple_choice",
+    "front": "Question 28: What is the main concept?",
+    "back": "Answer 28: The main concept is...",
+    "difficulty": 0.37495937381011635,
+    "created_at": "2025-06-03T21:14:40.585347"
+  },
+  {
+    "id": "3dc98bd2-7aae-4891-b450-b43f2caa1c6a",
+    "document_id": "96d22260-2d14-4b21-b958-2daa1ec1542c",
+    "type": "multiple_choice",
+    "front": "Question 29: What is the main concept?",
+    "back": "Answer 29: The main concept is...",
+    "difficulty": 0.2790466322970851,
+    "created_at": "2025-06-15T21:14:40.585357"
+  },
+  {
+    "id": "7e5a123b-33f0-41bb-b145-49e10aabb773",
+    "document_id": "89492063-85dc-45c1-abd2-a631c107b8c9",
+    "type": "multiple_choice",
+    "front": "Question 30: What is the main concept?",
+    "back": "Answer 30: The main concept is...",
+    "difficulty": 0.5932119941247532,
+    "created_at": "2025-06-20T21:14:40.585367"
+  },
+  {
+    "id": "7e059231-17a6-4f7b-9bb9-84d9a56ede00",
+    "document_id": "a80a7242-ccb2-4ae0-a4de-734a5acb0012",
+    "type": "cloze",
+    "front": "Question 31: What is the main concept?",
+    "back": "Answer 31: The main concept is...",
+    "difficulty": 0.2568614894546425,
+    "created_at": "2025-07-30T21:14:40.585378"
+  },
+  {
+    "id": "266d797c-2832-49a8-ae59-ff1e0898239d",
+    "document_id": "409c60d9-e58d-42af-a339-d5aead68ca42",
+    "type": "cloze",
+    "front": "Question 32: What is the main concept?",
+    "back": "Answer 32: The main concept is...",
+    "difficulty": 0.3552671934267072,
+    "created_at": "2025-07-14T21:14:40.585388"
+  },
+  {
+    "id": "a25ac9c5-7742-44d6-b3a4-46337bc09227",
+    "document_id": "8ad46411-ad74-4f4c-aee0-4b054f143885",
+    "type": "cloze",
+    "front": "Question 33: What is the main concept?",
+    "back": "Answer 33: The main concept is...",
+    "difficulty": 0.9469159120019225,
+    "created_at": "2025-07-19T21:14:40.585398"
+  },
+  {
+    "id": "26a96691-40ca-48e7-a4c1-7c47a2aeab1a",
+    "document_id": "96d22260-2d14-4b21-b958-2daa1ec1542c",
+    "type": "basic",
+    "front": "Question 34: What is the main concept?",
+    "back": "Answer 34: The main concept is...",
+    "difficulty": 0.22644949273953405,
+    "created_at": "2025-06-14T21:14:40.585408"
+  },
+  {
+    "id": "1f7865f6-fa70-4eca-be46-c646760a0599",
+    "document_id": "e04ebfc4-a443-450e-b634-18f1d72e1444",
+    "type": "cloze",
+    "front": "Question 35: What is the main concept?",
+    "back": "Answer 35: The main concept is...",
+    "difficulty": 0.8381427552522258,
+    "created_at": "2025-06-22T21:14:40.585419"
+  },
+  {
+    "id": "bc28739c-95c2-4976-a207-f3f3c4ea94da",
+    "document_id": "16dd2eeb-66b7-4332-a486-a78953015af2",
+    "type": "basic",
+    "front": "Question 36: What is the main concept?",
+    "back": "Answer 36: The main concept is...",
+    "difficulty": 0.968376471408836,
+    "created_at": "2025-06-28T21:14:40.585429"
+  },
+  {
+    "id": "15fb188e-6672-40d4-b586-9ca065c6be95",
+    "document_id": "4bd390e4-30f8-4d31-9df3-8566f0fceea0",
+    "type": "basic",
+    "front": "Question 37: What is the main concept?",
+    "back": "Answer 37: The main concept is...",
+    "difficulty": 0.12449017881761469,
+    "created_at": "2025-07-29T21:14:40.585439"
+  },
+  {
+    "id": "4dbe852e-c085-4acf-990d-97a1adcec3ef",
+    "document_id": "a77bd46f-bea2-48af-8554-92e110ddc631",
+    "type": "cloze",
+    "front": "Question 38: What is the main concept?",
+    "back": "Answer 38: The main concept is...",
+    "difficulty": 0.25061528004791955,
+    "created_at": "2025-07-19T21:14:40.585450"
+  },
+  {
+    "id": "493e7aac-7cb5-4698-afe2-1218d4e7e3b5",
+    "document_id": "56185806-7b22-4378-9092-3c94963d7bc9",
+    "type": "cloze",
+    "front": "Question 39: What is the main concept?",
+    "back": "Answer 39: The main concept is...",
+    "difficulty": 0.6196067413392132,
+    "created_at": "2025-06-03T21:14:40.585460"
+  },
+  {
+    "id": "4a36eb7d-c6cd-4481-bbf7-8c7b8585b9bb",
+    "document_id": "ca2c819f-8ce8-4b1a-b7f9-81a1d5e86234",
+    "type": "cloze",
+    "front": "Question 40: What is the main concept?",
+    "back": "Answer 40: The main concept is...",
+    "difficulty": 0.34652082829159625,
+    "created_at": "2025-07-31T21:14:40.585471"
+  },
+  {
+    "id": "06298c85-ee79-43be-99da-8c6f91f09863",
+    "document_id": "0f89bbd0-7bb4-4569-8998-30a4ad21c095",
+    "type": "multiple_choice",
+    "front": "Question 41: What is the main concept?",
+    "back": "Answer 41: The main concept is...",
+    "difficulty": 0.51844955892229,
+    "created_at": "2025-08-08T21:14:40.585481"
+  },
+  {
+    "id": "3b84bf0d-cf8a-42b6-a585-13d4183b2f2b",
+    "document_id": "e04ebfc4-a443-450e-b634-18f1d72e1444",
+    "type": "basic",
+    "front": "Question 42: What is the main concept?",
+    "back": "Answer 42: The main concept is...",
+    "difficulty": 0.4801563484645912,
+    "created_at": "2025-06-27T21:14:40.585491"
+  },
+  {
+    "id": "59e48497-ab27-40c6-ae23-013163a9f4dc",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "cloze",
+    "front": "Question 43: What is the main concept?",
+    "back": "Answer 43: The main concept is...",
+    "difficulty": 0.2898041161491046,
+    "created_at": "2025-05-24T21:14:40.585502"
+  },
+  {
+    "id": "db5997bf-79ab-463c-a555-d0a6ee443426",
+    "document_id": "ccf7df01-7d26-4fe0-a9a1-bb13a6846ef0",
+    "type": "cloze",
+    "front": "Question 44: What is the main concept?",
+    "back": "Answer 44: The main concept is...",
+    "difficulty": 0.791619113900809,
+    "created_at": "2025-06-11T21:14:40.585512"
+  },
+  {
+    "id": "7f6638d7-9fcb-4566-b8ee-5738618b4ee8",
+    "document_id": "94ad02b3-d2ca-4bcc-95ed-f8409d941a0d",
+    "type": "multiple_choice",
+    "front": "Question 45: What is the main concept?",
+    "back": "Answer 45: The main concept is...",
+    "difficulty": 0.9423944007363333,
+    "created_at": "2025-08-11T21:14:40.585522"
+  },
+  {
+    "id": "e17a55af-00f5-487c-9e81-17f7e55cfd3d",
+    "document_id": "0f89bbd0-7bb4-4569-8998-30a4ad21c095",
+    "type": "cloze",
+    "front": "Question 46: What is the main concept?",
+    "back": "Answer 46: The main concept is...",
+    "difficulty": 0.94656129589222,
+    "created_at": "2025-06-26T21:14:40.585532"
+  },
+  {
+    "id": "34264a0b-458b-4ff3-85fa-997ae14a90ae",
+    "document_id": "e53f60f2-6c26-4ae4-9a5a-6a1dc19e4345",
+    "type": "cloze",
+    "front": "Question 47: What is the main concept?",
+    "back": "Answer 47: The main concept is...",
+    "difficulty": 0.877737722632741,
+    "created_at": "2025-08-14T21:14:40.585543"
+  },
+  {
+    "id": "97a5ef46-4fdc-4d5f-8724-6bed5f2b49d6",
+    "document_id": "c06b6923-6743-4412-abc1-b4fafb06d26b",
+    "type": "multiple_choice",
+    "front": "Question 48: What is the main concept?",
+    "back": "Answer 48: The main concept is...",
+    "difficulty": 0.49411852784785215,
+    "created_at": "2025-08-14T21:14:40.585553"
+  },
+  {
+    "id": "a0185126-8c4b-4112-90c0-63f7f46a58a8",
+    "document_id": "94ad02b3-d2ca-4bcc-95ed-f8409d941a0d",
+    "type": "basic",
+    "front": "Question 49: What is the main concept?",
+    "back": "Answer 49: The main concept is...",
+    "difficulty": 0.3556094963560542,
+    "created_at": "2025-07-07T21:14:40.585563"
+  },
+  {
+    "id": "12b4caeb-7f06-4638-97af-9c9b815a3898",
+    "document_id": "ccf7df01-7d26-4fe0-a9a1-bb13a6846ef0",
+    "type": "multiple_choice",
+    "front": "Question 50: What is the main concept?",
+    "back": "Answer 50: The main concept is...",
+    "difficulty": 0.16965169675549976,
+    "created_at": "2025-06-10T21:14:40.585574"
+  },
+  {
+    "id": "bdf52d76-2a5c-4145-a737-71d5922014b5",
+    "document_id": "46ffae17-4d3f-4b94-b988-55d299f50f61",
+    "type": "multiple_choice",
+    "front": "Question 51: What is the main concept?",
+    "back": "Answer 51: The main concept is...",
+    "difficulty": 0.3886498209449649,
+    "created_at": "2025-07-08T21:14:40.585584"
+  },
+  {
+    "id": "ab601238-b7e9-484f-9769-05cc4355ebcc",
+    "document_id": "a80a7242-ccb2-4ae0-a4de-734a5acb0012",
+    "type": "basic",
+    "front": "Question 52: What is the main concept?",
+    "back": "Answer 52: The main concept is...",
+    "difficulty": 0.2930272232504849,
+    "created_at": "2025-08-03T21:14:40.585594"
+  },
+  {
+    "id": "dc524bf1-94a0-49ad-9757-b36805c9e95c",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "basic",
+    "front": "Question 53: What is the main concept?",
+    "back": "Answer 53: The main concept is...",
+    "difficulty": 0.5709713476435777,
+    "created_at": "2025-07-22T21:14:40.585604"
+  },
+  {
+    "id": "26595f01-0954-494d-a367-5183b2ee765b",
+    "document_id": "e04ebfc4-a443-450e-b634-18f1d72e1444",
+    "type": "multiple_choice",
+    "front": "Question 54: What is the main concept?",
+    "back": "Answer 54: The main concept is...",
+    "difficulty": 0.3205528147058989,
+    "created_at": "2025-05-19T21:14:40.585617"
+  },
+  {
+    "id": "e993803f-d33c-4cc6-8849-a6cac6b812af",
+    "document_id": "6ee20e6c-cbb6-42fc-925b-bdfcce7cae58",
+    "type": "multiple_choice",
+    "front": "Question 55: What is the main concept?",
+    "back": "Answer 55: The main concept is...",
+    "difficulty": 0.3321485412264722,
+    "created_at": "2025-07-05T21:14:40.585628"
+  },
+  {
+    "id": "98be4c92-5c0e-402c-bc85-869ebffd077d",
+    "document_id": "56185806-7b22-4378-9092-3c94963d7bc9",
+    "type": "cloze",
+    "front": "Question 56: What is the main concept?",
+    "back": "Answer 56: The main concept is...",
+    "difficulty": 0.6533108819521831,
+    "created_at": "2025-07-04T21:14:40.585638"
+  },
+  {
+    "id": "a25cf799-33a8-485c-a156-2280baba334f",
+    "document_id": "e67f1aa7-ef56-4dba-a38d-07ad26ecfb6d",
+    "type": "basic",
+    "front": "Question 57: What is the main concept?",
+    "back": "Answer 57: The main concept is...",
+    "difficulty": 0.5763122651463847,
+    "created_at": "2025-05-22T21:14:40.585649"
+  },
+  {
+    "id": "cb82e013-17a1-4997-93d0-765d5118b5ce",
+    "document_id": "6abc2313-e779-45aa-bedb-89bbfb24fb33",
+    "type": "cloze",
+    "front": "Question 58: What is the main concept?",
+    "back": "Answer 58: The main concept is...",
+    "difficulty": 0.2842906298062714,
+    "created_at": "2025-05-28T21:14:40.585660"
+  },
+  {
+    "id": "9198a6dd-c538-4847-a307-219d1fe6e4ab",
+    "document_id": "a87becac-ea37-45bf-8eea-dbb7c6c516d5",
+    "type": "basic",
+    "front": "Question 59: What is the main concept?",
+    "back": "Answer 59: The main concept is...",
+    "difficulty": 0.5514712763619034,
+    "created_at": "2025-06-09T21:14:40.585672"
+  },
+  {
+    "id": "a266f9ae-ca25-4c08-b1f8-aab9e2861b72",
+    "document_id": "5bcafe7e-1aaf-4f91-9724-980f4a5f15e8",
+    "type": "cloze",
+    "front": "Question 60: What is the main concept?",
+    "back": "Answer 60: The main concept is...",
+    "difficulty": 0.6226543156830073,
+    "created_at": "2025-06-20T21:14:40.585682"
+  },
+  {
+    "id": "c2416de0-8b30-45bb-8065-8c57ea0ce4dd",
+    "document_id": "e53f60f2-6c26-4ae4-9a5a-6a1dc19e4345",
+    "type": "cloze",
+    "front": "Question 61: What is the main concept?",
+    "back": "Answer 61: The main concept is...",
+    "difficulty": 0.4281670810782101,
+    "created_at": "2025-06-01T21:14:40.585693"
+  },
+  {
+    "id": "85504aaa-aadf-4cdb-b171-02c398a3ec86",
+    "document_id": "5bcafe7e-1aaf-4f91-9724-980f4a5f15e8",
+    "type": "multiple_choice",
+    "front": "Question 62: What is the main concept?",
+    "back": "Answer 62: The main concept is...",
+    "difficulty": 0.4634103749568581,
+    "created_at": "2025-06-06T21:14:40.585705"
+  },
+  {
+    "id": "5e8da9bc-b23f-4024-9fac-bfd7d31bab9a",
+    "document_id": "c06b6923-6743-4412-abc1-b4fafb06d26b",
+    "type": "basic",
+    "front": "Question 63: What is the main concept?",
+    "back": "Answer 63: The main concept is...",
+    "difficulty": 0.7050302794461495,
+    "created_at": "2025-05-27T21:14:40.585715"
+  },
+  {
+    "id": "8c904af1-30c2-4e4a-a831-f675f0c47d5c",
+    "document_id": "94ad02b3-d2ca-4bcc-95ed-f8409d941a0d",
+    "type": "basic",
+    "front": "Question 64: What is the main concept?",
+    "back": "Answer 64: The main concept is...",
+    "difficulty": 0.6403218709020035,
+    "created_at": "2025-05-19T21:14:40.585725"
+  },
+  {
+    "id": "f681784e-52dd-4c90-a773-961aad89d86e",
+    "document_id": "87af1dd2-7ebf-4d57-b148-60add2a548d6",
+    "type": "basic",
+    "front": "Question 65: What is the main concept?",
+    "back": "Answer 65: The main concept is...",
+    "difficulty": 0.9907152399137684,
+    "created_at": "2025-06-13T21:14:40.585736"
+  },
+  {
+    "id": "916b2772-cd23-42f1-932d-37ccc8c735c9",
+    "document_id": "b4676e4a-ea47-48b7-90ea-780632397c60",
+    "type": "cloze",
+    "front": "Question 66: What is the main concept?",
+    "back": "Answer 66: The main concept is...",
+    "difficulty": 0.506613793874729,
+    "created_at": "2025-07-16T21:14:40.585746"
+  },
+  {
+    "id": "19d92caa-9a6f-405f-877f-c055feb5e911",
+    "document_id": "77626ba4-d9ca-417e-8b49-e580814dcc8a",
+    "type": "multiple_choice",
+    "front": "Question 67: What is the main concept?",
+    "back": "Answer 67: The main concept is...",
+    "difficulty": 0.8735588171870611,
+    "created_at": "2025-05-18T21:14:40.585757"
+  },
+  {
+    "id": "46e19a4d-fb38-40b9-aeb7-291769cac259",
+    "document_id": "ccf7df01-7d26-4fe0-a9a1-bb13a6846ef0",
+    "type": "multiple_choice",
+    "front": "Question 68: What is the main concept?",
+    "back": "Answer 68: The main concept is...",
+    "difficulty": 0.843412055435626,
+    "created_at": "2025-06-13T21:14:40.585769"
+  },
+  {
+    "id": "117a27b6-619b-4ddc-99e5-f64f361cad4d",
+    "document_id": "b4676e4a-ea47-48b7-90ea-780632397c60",
+    "type": "multiple_choice",
+    "front": "Question 69: What is the main concept?",
+    "back": "Answer 69: The main concept is...",
+    "difficulty": 0.503638587436577,
+    "created_at": "2025-07-10T21:14:40.585780"
+  },
+  {
+    "id": "6d0f79e2-150c-4a18-a923-858fb8990f4f",
+    "document_id": "7c7ecf9d-43f6-43b1-80c7-7decc76432cc",
+    "type": "basic",
+    "front": "Question 70: What is the main concept?",
+    "back": "Answer 70: The main concept is...",
+    "difficulty": 0.2261354790775904,
+    "created_at": "2025-06-08T21:14:40.585790"
+  },
+  {
+    "id": "fddd569c-5aa0-46bb-9fc9-1639179f8a84",
+    "document_id": "a80a7242-ccb2-4ae0-a4de-734a5acb0012",
+    "type": "multiple_choice",
+    "front": "Question 71: What is the main concept?",
+    "back": "Answer 71: The main concept is...",
+    "difficulty": 0.6840290117390556,
+    "created_at": "2025-07-17T21:14:40.585800"
+  },
+  {
+    "id": "59dd541f-ed3c-4a3e-ae32-aad40d3f2067",
+    "document_id": "409c60d9-e58d-42af-a339-d5aead68ca42",
+    "type": "cloze",
+    "front": "Question 72: What is the main concept?",
+    "back": "Answer 72: The main concept is...",
+    "difficulty": 0.6755938602000051,
+    "created_at": "2025-06-01T21:14:40.585812"
+  },
+  {
+    "id": "a8564d41-d652-493d-843b-59d8d67016b1",
+    "document_id": "a80a7242-ccb2-4ae0-a4de-734a5acb0012",
+    "type": "basic",
+    "front": "Question 73: What is the main concept?",
+    "back": "Answer 73: The main concept is...",
+    "difficulty": 0.5833086856596625,
+    "created_at": "2025-06-21T21:14:40.585822"
+  },
+  {
+    "id": "cf6115c5-1e48-4535-9658-eebea11f9fd6",
+    "document_id": "3a812045-afcb-49fc-b3c7-aa79da29263a",
+    "type": "multiple_choice",
+    "front": "Question 74: What is the main concept?",
+    "back": "Answer 74: The main concept is...",
+    "difficulty": 0.3711987145207649,
+    "created_at": "2025-08-05T21:14:40.585832"
+  },
+  {
+    "id": "73539c7a-a880-49ff-9bd2-23b675bfa1a1",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "multiple_choice",
+    "front": "Question 75: What is the main concept?",
+    "back": "Answer 75: The main concept is...",
+    "difficulty": 0.4008733434898858,
+    "created_at": "2025-08-06T21:14:40.585842"
+  },
+  {
+    "id": "4ff8a8b5-72b7-4545-9eb4-fb86da81006e",
+    "document_id": "7a7ccf20-6506-4283-8df8-2b0d74821925",
+    "type": "basic",
+    "front": "Question 76: What is the main concept?",
+    "back": "Answer 76: The main concept is...",
+    "difficulty": 0.35330860812385334,
+    "created_at": "2025-07-22T21:14:40.585852"
+  },
+  {
+    "id": "20ab793c-2aad-4333-b6d6-2cdb6b79723f",
+    "document_id": "80b053b7-2174-44c1-b03a-ad9de8b69877",
+    "type": "multiple_choice",
+    "front": "Question 77: What is the main concept?",
+    "back": "Answer 77: The main concept is...",
+    "difficulty": 0.49876910014740194,
+    "created_at": "2025-05-30T21:14:40.585863"
+  },
+  {
+    "id": "50bc59b9-ae82-4aad-b355-537766b37f3a",
+    "document_id": "56185806-7b22-4378-9092-3c94963d7bc9",
+    "type": "basic",
+    "front": "Question 78: What is the main concept?",
+    "back": "Answer 78: The main concept is...",
+    "difficulty": 0.6127036068121748,
+    "created_at": "2025-07-14T21:14:40.585874"
+  },
+  {
+    "id": "5cf28f80-6194-45b7-895b-975c9f4754d6",
+    "document_id": "6ee20e6c-cbb6-42fc-925b-bdfcce7cae58",
+    "type": "cloze",
+    "front": "Question 79: What is the main concept?",
+    "back": "Answer 79: The main concept is...",
+    "difficulty": 0.41583064765751576,
+    "created_at": "2025-06-08T21:14:40.585884"
+  },
+  {
+    "id": "065a083d-e34d-4ce7-83a5-6283c47e20ac",
+    "document_id": "012af80b-f2e5-4518-9dbb-e63452dad2a4",
+    "type": "basic",
+    "front": "Question 80: What is the main concept?",
+    "back": "Answer 80: The main concept is...",
+    "difficulty": 0.5332165725272043,
+    "created_at": "2025-08-14T21:14:40.585895"
+  },
+  {
+    "id": "627f1daf-793e-47a4-85c5-b9e9ec2a1753",
+    "document_id": "9e7ce3a7-89ba-48d5-9445-29c2f62e2554",
+    "type": "basic",
+    "front": "Question 81: What is the main concept?",
+    "back": "Answer 81: The main concept is...",
+    "difficulty": 0.4855827568848077,
+    "created_at": "2025-06-25T21:14:40.585906"
+  },
+  {
+    "id": "833dd097-915b-490d-b4ff-fc3863b04843",
+    "document_id": "5bcafe7e-1aaf-4f91-9724-980f4a5f15e8",
+    "type": "basic",
+    "front": "Question 82: What is the main concept?",
+    "back": "Answer 82: The main concept is...",
+    "difficulty": 0.4272773869924199,
+    "created_at": "2025-06-30T21:14:40.585917"
+  },
+  {
+    "id": "84e9c910-fff6-4638-8083-13365dd8ed96",
+    "document_id": "94ad02b3-d2ca-4bcc-95ed-f8409d941a0d",
+    "type": "basic",
+    "front": "Question 83: What is the main concept?",
+    "back": "Answer 83: The main concept is...",
+    "difficulty": 0.30433529297280915,
+    "created_at": "2025-05-17T21:14:40.585928"
+  },
+  {
+    "id": "c949223f-4c83-461f-a155-209336d9d0dc",
+    "document_id": "96d22260-2d14-4b21-b958-2daa1ec1542c",
+    "type": "cloze",
+    "front": "Question 84: What is the main concept?",
+    "back": "Answer 84: The main concept is...",
+    "difficulty": 0.6342594227397442,
+    "created_at": "2025-07-20T21:14:40.585938"
+  },
+  {
+    "id": "0367c69c-d6bf-4e12-92cb-47f24f089d99",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "multiple_choice",
+    "front": "Question 85: What is the main concept?",
+    "back": "Answer 85: The main concept is...",
+    "difficulty": 0.44714003174795114,
+    "created_at": "2025-08-01T21:14:40.585951"
+  },
+  {
+    "id": "8bd0beaa-8852-416f-8c37-be495c731d8a",
+    "document_id": "40dba215-d7c6-4157-a843-286546710e45",
+    "type": "cloze",
+    "front": "Question 86: What is the main concept?",
+    "back": "Answer 86: The main concept is...",
+    "difficulty": 0.9310865214250783,
+    "created_at": "2025-06-22T21:14:40.585962"
+  },
+  {
+    "id": "64f66a98-8d02-4f70-952f-c7a2f2f28a09",
+    "document_id": "4bd390e4-30f8-4d31-9df3-8566f0fceea0",
+    "type": "cloze",
+    "front": "Question 87: What is the main concept?",
+    "back": "Answer 87: The main concept is...",
+    "difficulty": 0.7761395124744402,
+    "created_at": "2025-06-14T21:14:40.585972"
+  },
+  {
+    "id": "19fc64a8-576d-48b1-b027-d2c46d290e38",
+    "document_id": "b4676e4a-ea47-48b7-90ea-780632397c60",
+    "type": "cloze",
+    "front": "Question 88: What is the main concept?",
+    "back": "Answer 88: The main concept is...",
+    "difficulty": 0.6898590445756985,
+    "created_at": "2025-08-13T21:14:40.585982"
+  },
+  {
+    "id": "25f874e2-4bed-4f7f-901d-42ad9bece4e2",
+    "document_id": "87af1dd2-7ebf-4d57-b148-60add2a548d6",
+    "type": "basic",
+    "front": "Question 89: What is the main concept?",
+    "back": "Answer 89: The main concept is...",
+    "difficulty": 0.28919681595522295,
+    "created_at": "2025-07-11T21:14:40.585993"
+  },
+  {
+    "id": "86f491d0-9bfa-4966-9e17-00fb763ac212",
+    "document_id": "6ee20e6c-cbb6-42fc-925b-bdfcce7cae58",
+    "type": "multiple_choice",
+    "front": "Question 90: What is the main concept?",
+    "back": "Answer 90: The main concept is...",
+    "difficulty": 0.17925586885021,
+    "created_at": "2025-07-08T21:14:40.586003"
+  },
+  {
+    "id": "2c6a40a2-c0e8-43b0-8113-8d9bbb52da12",
+    "document_id": "37eedddf-04d5-4c9d-8fa8-54caf12e3148",
+    "type": "multiple_choice",
+    "front": "Question 91: What is the main concept?",
+    "back": "Answer 91: The main concept is...",
+    "difficulty": 0.6285664419325192,
+    "created_at": "2025-06-11T21:14:40.586013"
+  },
+  {
+    "id": "83028057-02b2-40ad-b536-224bacca1b3d",
+    "document_id": "4b581eaa-1a85-4db3-a659-d6f2124c9d41",
+    "type": "multiple_choice",
+    "front": "Question 92: What is the main concept?",
+    "back": "Answer 92: The main concept is...",
+    "difficulty": 0.9658554193614317,
+    "created_at": "2025-07-21T21:14:40.586023"
+  },
+  {
+    "id": "ff0253a3-5011-48f5-a88d-dad86532fee8",
+    "document_id": "16dd2eeb-66b7-4332-a486-a78953015af2",
+    "type": "basic",
+    "front": "Question 93: What is the main concept?",
+    "back": "Answer 93: The main concept is...",
+    "difficulty": 0.8328746858440325,
+    "created_at": "2025-07-29T21:14:40.586034"
+  },
+  {
+    "id": "1ba1b3c2-1548-44ba-94da-491c476a565f",
+    "document_id": "4e1ce818-b521-45df-b3d5-1a41f6263438",
+    "type": "multiple_choice",
+    "front": "Question 94: What is the main concept?",
+    "back": "Answer 94: The main concept is...",
+    "difficulty": 0.8715628885754337,
+    "created_at": "2025-07-06T21:14:40.586045"
+  },
+  {
+    "id": "81cae11b-3632-482b-9a23-f6d4ba0d3c6d",
+    "document_id": "e04ebfc4-a443-450e-b634-18f1d72e1444",
+    "type": "basic",
+    "front": "Question 95: What is the main concept?",
+    "back": "Answer 95: The main concept is...",
+    "difficulty": 0.11747241279396217,
+    "created_at": "2025-07-30T21:14:40.586055"
+  },
+  {
+    "id": "3c582fd5-c2c5-4336-8956-6b703524d99b",
+    "document_id": "6abc2313-e779-45aa-bedb-89bbfb24fb33",
+    "type": "cloze",
+    "front": "Question 96: What is the main concept?",
+    "back": "Answer 96: The main concept is...",
+    "difficulty": 0.42764812122702034,
+    "created_at": "2025-06-25T21:14:40.586067"
+  },
+  {
+    "id": "447004a5-ad7c-4711-a4d3-43a00a70a87f",
+    "document_id": "a77bd46f-bea2-48af-8554-92e110ddc631",
+    "type": "multiple_choice",
+    "front": "Question 97: What is the main concept?",
+    "back": "Answer 97: The main concept is...",
+    "difficulty": 0.3940141502035789,
+    "created_at": "2025-08-02T21:14:40.586078"
+  },
+  {
+    "id": "e1bf54ec-e27c-4951-8d2c-0f0c432d2068",
+    "document_id": "76fb05fc-2174-4030-878f-5ec0eee93a70",
+    "type": "multiple_choice",
+    "front": "Question 98: What is the main concept?",
+    "back": "Answer 98: The main concept is...",
+    "difficulty": 0.4642069223930355,
+    "created_at": "2025-07-23T21:14:40.586089"
+  },
+  {
+    "id": "d402ec52-cf4f-4ebb-9340-c78380071d81",
+    "document_id": "96d22260-2d14-4b21-b958-2daa1ec1542c",
+    "type": "cloze",
+    "front": "Question 99: What is the main concept?",
+    "back": "Answer 99: The main concept is...",
+    "difficulty": 0.5988420699157117,
+    "created_at": "2025-05-30T21:14:40.586100"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "test_operation",
+    "value": 150.0,
+    "unit": "milliseconds",
+    "timestamp": "2025-08-15T21:15:21.531137",
+    "test_case": "test_case_1",
+    "environment": "test",
+    "metadata": {
+      "test": true
+    }
+  }
+]

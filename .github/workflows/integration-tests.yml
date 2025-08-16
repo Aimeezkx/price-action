@@ -1,0 +1,373 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run integration tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  backend-integration:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.9, "3.10", "3.11"]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('backend/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install backend dependencies
+      working-directory: backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-asyncio pytest-cov pytest-xdist httpx
+    
+    - name: Create test directories
+      run: |
+        mkdir -p test-results/backend
+        mkdir -p htmlcov/backend
+    
+    - name: Run backend integration tests
+      working-directory: backend
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+        PYTHONPATH: .
+      run: |
+        python run_integration_tests.py \
+          --suite all \
+          --report ../test-results/backend/integration-report.json
+    
+    - name: Upload backend test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: backend-integration-results-py${{ matrix.python-version }}
+        path: |
+          test-results/backend/
+          htmlcov/backend/
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend-integration
+        name: backend-integration-py${{ matrix.python-version }}
+
+  frontend-integration:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: npm ci
+    
+    - name: Create test directories
+      run: |
+        mkdir -p test-results/frontend
+        mkdir -p coverage/frontend
+    
+    - name: Run frontend integration tests
+      working-directory: frontend
+      run: |
+        npm run test:integration -- \
+          --reporter=junit \
+          --outputFile=../test-results/frontend/integration-results.xml \
+          --coverage \
+          --coverage.reportsDirectory=../coverage/frontend
+    
+    - name: Upload frontend test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: frontend-integration-results-node${{ matrix.node-version }}
+        path: |
+          test-results/frontend/
+          coverage/frontend/
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/frontend/lcov.info
+        flags: frontend-integration
+        name: frontend-integration-node${{ matrix.node-version }}
+
+  e2e-integration:
+    runs-on: ubuntu-latest
+    needs: [backend-integration, frontend-integration]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Set up Node.js 18
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        # Backend
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -e .
+        cd ..
+        
+        # Frontend
+        cd frontend
+        npm ci
+        cd ..
+    
+    - name: Start backend server
+      working-directory: backend
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      run: |
+        python main.py &
+        sleep 10  # Wait for server to start
+    
+    - name: Start frontend server
+      working-directory: frontend
+      run: |
+        npm run dev &
+        sleep 10  # Wait for server to start
+    
+    - name: Install Playwright
+      working-directory: frontend
+      run: npx playwright install --with-deps
+    
+    - name: Run E2E tests
+      working-directory: frontend
+      run: |
+        npx playwright test --reporter=junit
+    
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-integration-results
+        path: |
+          frontend/test-results/
+          frontend/playwright-report/
+
+  performance-integration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf-test]')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      working-directory: backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-asyncio pytest-benchmark
+    
+    - name: Run performance integration tests
+      working-directory: backend
+      run: |
+        python run_integration_tests.py --performance
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-integration-results
+        path: test-results/
+
+  security-integration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[security-test]')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      working-directory: backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-asyncio bandit safety
+    
+    - name: Run security integration tests
+      working-directory: backend
+      run: |
+        python run_integration_tests.py --pattern "security or validation"
+    
+    - name: Run security scan
+      working-directory: backend
+      run: |
+        bandit -r app/ -f json -o ../test-results/bandit-report.json
+        safety check --json --output ../test-results/safety-report.json
+      continue-on-error: true
+    
+    - name: Upload security results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-integration-results
+        path: test-results/
+
+  integration-summary:
+    runs-on: ubuntu-latest
+    needs: [backend-integration, frontend-integration, e2e-integration]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Generate integration test summary
+      run: |
+        echo "# Integration Test Summary" > integration-summary.md
+        echo "" >> integration-summary.md
+        echo "## Test Results" >> integration-summary.md
+        echo "" >> integration-summary.md
+        
+        # Check if backend tests passed
+        if [ -f backend-integration-results-*/integration-report.json ]; then
+          echo "✅ Backend Integration Tests: PASSED" >> integration-summary.md
+        else
+          echo "❌ Backend Integration Tests: FAILED" >> integration-summary.md
+        fi
+        
+        # Check if frontend tests passed
+        if [ -f frontend-integration-results-*/integration-results.xml ]; then
+          echo "✅ Frontend Integration Tests: PASSED" >> integration-summary.md
+        else
+          echo "❌ Frontend Integration Tests: FAILED" >> integration-summary.md
+        fi
+        
+        # Check if E2E tests passed
+        if [ -f e2e-integration-results/test-results.xml ]; then
+          echo "✅ E2E Integration Tests: PASSED" >> integration-summary.md
+        else
+          echo "❌ E2E Integration Tests: FAILED" >> integration-summary.md
+        fi
+        
+        echo "" >> integration-summary.md
+        echo "## Coverage Reports" >> integration-summary.md
+        echo "- Backend coverage reports available in artifacts" >> integration-summary.md
+        echo "- Frontend coverage reports available in artifacts" >> integration-summary.md
+        
+        cat integration-summary.md
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('integration-summary.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });
+    
+    - name: Upload summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: integration-test-summary
+        path: integration-summary.md
+
+  notify-results:
+    runs-on: ubuntu-latest
+    needs: [integration-summary]
+    if: always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main')
+    
+    steps:
+    - name: Notify Slack on failure
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        text: "Integration tests failed on ${{ github.ref }}"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+    - name: Notify Slack on success
+      if: success() && github.event_name == 'schedule'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: "Daily integration tests passed successfully"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
