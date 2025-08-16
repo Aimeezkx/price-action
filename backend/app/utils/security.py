@@ -1,5 +1,6 @@
 """Security utilities and functions."""
 
+import os
 import re
 import hashlib
 import secrets
@@ -9,6 +10,13 @@ from typing import Dict, List, Optional, Any
 import bcrypt
 import html
 from datetime import datetime, timedelta
+from fastapi import UploadFile
+from .file_validation import (
+    get_file_type,
+    is_supported_file_type,
+    validate_file,
+    sanitize_filename,
+)
 
 try:
     from app.core.config import settings
@@ -76,6 +84,12 @@ def sanitize_input(input_string: str) -> str:
     sanitized = sanitized.replace('DROP TABLE', '').replace('drop table', '')
     
     return sanitized.strip()
+
+
+def hash_sensitive_data(data: str) -> str:
+    """Return a short hash representation of sensitive data."""
+    digest = hashlib.sha256(data.encode("utf-8")).hexdigest()[:8]
+    return f"[hash:{digest}]"
 
 
 def escape_html(text: str) -> str:
@@ -272,8 +286,37 @@ def secure_filename(filename: str) -> str:
         name, ext = filename.rsplit('.', 1) if '.' in filename else (filename, '')
         max_name_length = 255 - len(ext) - 1 if ext else 255
         filename = name[:max_name_length] + ('.' + ext if ext else '')
-    
+
     return filename
+
+
+def generate_secure_filename(filename: str, identifier: str) -> str:
+    """Create a secure, unique filename using an identifier."""
+    safe_name = secure_filename(filename)
+    name, ext = os.path.splitext(safe_name)
+    return f"{identifier}_{name}{ext}"
+
+
+class SecurityValidator:
+    """Simple upload validator used by API endpoints."""
+
+    @staticmethod
+    async def validate_upload_file(file: UploadFile) -> tuple[str, str]:
+        """Validate uploaded file and return (type, sanitized filename)."""
+        file_type = get_file_type(file.filename)
+        if not is_supported_file_type(file.filename):
+            raise ValueError("Unsupported file type")
+
+        result = await validate_file(file)
+        if not result.is_valid:
+            raise ValueError(result.error_message or "Invalid file")
+
+        safe_name = SecurityValidator._sanitize_filename(file.filename)
+        return file_type, safe_name
+
+    @staticmethod
+    def _sanitize_filename(filename: str) -> str:
+        return sanitize_filename(filename)
 
 
 def validate_email(email: str) -> bool:

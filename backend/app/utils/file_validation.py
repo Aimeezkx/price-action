@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import List, Optional
 from dataclasses import dataclass
 
+from fastapi import UploadFile
+
 try:
     import magic
     MAGIC_AVAILABLE = True
@@ -272,3 +274,37 @@ def sanitize_filename(filename: str) -> str:
     """Sanitize filename."""
     validator = FileValidator()
     return validator._sanitize_filename(filename)
+
+
+def get_file_type(filename: str) -> str:
+    """Return file type based on extension."""
+    extension = Path(filename).suffix.lower()[1:]
+    return extension if extension in {ext.lstrip('.') for ext in FileValidator.ALLOWED_EXTENSIONS} else "unknown"
+
+
+def is_supported_file_type(filename: str) -> bool:
+    """Check if the file has an allowed extension."""
+    return Path(filename).suffix.lower() in FileValidator.ALLOWED_EXTENSIONS
+
+
+async def validate_file(upload_file: UploadFile) -> FileValidationResult:
+    """Validate an uploaded file object."""
+    file_type = get_file_type(upload_file.filename)
+    if not is_supported_file_type(upload_file.filename):
+        return FileValidationResult(False, error_message="Unsupported file type")
+
+    contents = await upload_file.read()
+    await upload_file.seek(0)
+
+    if not contents:
+        return FileValidationResult(False, error_message="File is empty")
+
+    if len(contents) > FileValidator.MAX_FILE_SIZE:
+        return FileValidationResult(
+            False,
+            error_message=f"File too large: {len(contents)} bytes (max: {FileValidator.MAX_FILE_SIZE})",
+        )
+
+    sanitized = sanitize_filename(upload_file.filename)
+    return FileValidationResult(True, error_message="", sanitized_filename=sanitized, warnings=[])
+

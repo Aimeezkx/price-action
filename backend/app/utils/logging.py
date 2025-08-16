@@ -31,6 +31,11 @@ except ImportError:
         return data
 
 
+def setup_privacy_logging() -> None:
+    """Basic logging setup respecting privacy settings."""
+    logging.basicConfig(level=logging.INFO)
+
+
 class SanitizedFormatter(logging.Formatter):
     """Custom formatter that sanitizes sensitive data."""
     
@@ -147,9 +152,9 @@ def sanitize_log_data(data: Any) -> Any:
 
 class SecurityLogger:
     """Specialized logger for security events."""
-    
-    def __init__(self):
-        self.logger = logging.getLogger('security')
+
+    def __init__(self, name: str = "security"):
+        self.logger = logging.getLogger(name)
         self._setup_security_logger()
     
     def _setup_security_logger(self):
