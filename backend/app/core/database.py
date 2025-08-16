@@ -90,6 +90,11 @@ def get_async_session():
         return SessionLocal()
 
 
+def get_db_session() -> Session:
+    """Get a synchronous database session."""
+    return SessionLocal()
+
+
 async def init_db() -> None:
     """
     Initialize database with pgvector extension

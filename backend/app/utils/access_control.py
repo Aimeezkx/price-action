@@ -1,6 +1,9 @@
 """Access control and authentication utilities."""
 
 import jwt
+import os
+import re
+from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -400,3 +403,78 @@ rate_limiter = RateLimiter()
 def check_rate_limit(identifier: str, action: str) -> bool:
     """Check rate limit for action."""
     return rate_limiter.is_rate_limited(identifier, action)
+
+
+class AccessController:
+    """Simple access control utilities."""
+
+    @staticmethod
+    def _get_client_ip(request: Request) -> str:
+        return get_client_ip(request)
+
+    @staticmethod
+    def check_rate_limit(request: Request, action: str) -> bool:
+        identifier = AccessController._get_client_ip(request)
+        return not check_rate_limit(identifier, action)
+
+
+def require_rate_limit(action: str):
+    """Decorator enforcing rate limits based on client IP."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(request: Request, *args, **kwargs):
+            if not AccessController.check_rate_limit(request, action):
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded",
+                )
+            return await func(request, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+class DataProtection:
+    """Basic data protection helpers."""
+
+    @staticmethod
+    def anonymize_document_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """Anonymize sensitive metadata fields."""
+        if not getattr(settings, "anonymize_logs", False):
+            return metadata
+
+        anonymized = metadata.copy()
+        if "author" in anonymized:
+            anonymized["author"] = "[author:anonymized]"
+        if "title" in anonymized:
+            anonymized["title"] = "[title:anonymized]"
+        if "creation_date" in anonymized:
+            anonymized["creation_date"] = "[date:anonymized]"
+        return anonymized
+
+    @staticmethod
+    def clean_text_content(text: str) -> str:
+        """Remove sensitive data like emails and phone numbers from text."""
+        if not getattr(settings, "anonymize_logs", False):
+            return text
+        text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}", "[email]", text)
+        text = re.sub(r"\b\d{3}-\d{3}-\d{4}\b", "[phone]", text)
+        return text
+
+    @staticmethod
+    def secure_delete_file(path: str | Path) -> bool:
+        """Securely delete file by overwriting before removal."""
+        try:
+            p = Path(path)
+            if not p.exists():
+                return True
+            size = p.stat().st_size
+            with open(p, "ba", buffering=0) as f:
+                f.seek(0)
+                f.write(b"\x00" * size)
+            p.unlink()
+            return True
+        except Exception:
+            return False
+

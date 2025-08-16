@@ -324,5 +324,6 @@ class PrivacyService:
         return recommendations
 
 
-# Global privacy service instance
+# Global privacy service instances
 privacy_service = PrivacyService()
+privacy_manager = privacy_service
