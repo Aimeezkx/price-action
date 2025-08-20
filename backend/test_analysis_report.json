@@ -1,0 +1,156 @@
+{
+  "analysis_timestamp": "2025-08-20T10:05:39.308017",
+  "overall_status": "critical_failure",
+  "total_execution_time": 0.17398476600646973,
+  "summary": {
+    "total_issues": 8,
+    "critical_issues": 6,
+    "high_priority_issues": 2,
+    "total_improvements": 2,
+    "high_impact_improvements": 2
+  },
+  "issues": [
+    {
+      "title": "Unit Tests Test Failures",
+      "description": "Test suite unit_tests failed with 0 failures",
+      "severity": "critical",
+      "category": "bug",
+      "test_suite": "unit_tests",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run unit_tests test suite",
+        "Check test output for specific failures",
+        "Review error logs and stack traces"
+      ],
+      "suggested_fix": "Review test logs and fix failing test cases"
+    },
+    {
+      "title": "Api Tests Test Failures",
+      "description": "Test suite api_tests failed with 0 failures",
+      "severity": "critical",
+      "category": "bug",
+      "test_suite": "api_tests",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run api_tests test suite",
+        "Check test output for specific failures",
+        "Review error logs and stack traces"
+      ],
+      "suggested_fix": "Review test logs and fix failing test cases"
+    },
+    {
+      "title": "Frontend Tests Test Failures",
+      "description": "Test suite frontend_tests failed with unknown failures",
+      "severity": "critical",
+      "category": "bug",
+      "test_suite": "frontend_tests",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run frontend_tests test suite",
+        "Check test output for specific failures",
+        "Review error logs and stack traces"
+      ],
+      "suggested_fix": "Check frontend build process and test configuration"
+    },
+    {
+      "title": "Security Tests Test Failures",
+      "description": "Test suite security_tests failed with 0 failures",
+      "severity": "critical",
+      "category": "security",
+      "test_suite": "security_tests",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run security_tests test suite",
+        "Check test output for specific failures",
+        "Review error logs and stack traces"
+      ],
+      "suggested_fix": "Review test logs and fix failing test cases"
+    },
+    {
+      "title": "Security Vulnerabilities Detected",
+      "description": "Security tests failed with 0 issues",
+      "severity": "critical",
+      "category": "security",
+      "test_suite": "security_tests",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run security test suite",
+        "Review security scan results",
+        "Identify specific vulnerabilities"
+      ],
+      "suggested_fix": "Address security vulnerabilities immediately, implement security best practices"
+    },
+    {
+      "title": "Widespread Test Failures",
+      "description": "Multiple test suites failing: unit_tests, api_tests, frontend_tests, e2e_tests, security_tests",
+      "severity": "critical",
+      "category": "infrastructure",
+      "test_suite": "multiple",
+      "priority_score": 100,
+      "reproduction_steps": [
+        "Run comprehensive test suite",
+        "Check for common failure patterns",
+        "Review test environment setup"
+      ],
+      "suggested_fix": "Review test infrastructure, check dependencies and environment configuration"
+    },
+    {
+      "title": "Low Test Coverage",
+      "description": "Unit test coverage is 0%, below the 90% target",
+      "severity": "high",
+      "category": "coverage",
+      "test_suite": "unit_tests",
+      "priority_score": 80,
+      "reproduction_steps": [
+        "Run unit tests with coverage report",
+        "Review coverage report for uncovered lines",
+        "Identify critical paths without tests"
+      ],
+      "suggested_fix": "Add unit tests for uncovered code paths, prioritizing critical business logic"
+    },
+    {
+      "title": "E2E Tests Test Failures",
+      "description": "Test suite e2e_tests failed with unknown failures",
+      "severity": "high",
+      "category": "usability",
+      "test_suite": "e2e_tests",
+      "priority_score": 70,
+      "reproduction_steps": [
+        "Run e2e_tests test suite",
+        "Check test output for specific failures",
+        "Review error logs and stack traces"
+      ],
+      "suggested_fix": "Verify application is running and accessible for E2E tests"
+    }
+  ],
+  "improvements": [
+    {
+      "title": "Enhance Security Testing Framework",
+      "description": "Security testing needs strengthening for production deployment",
+      "category": "security",
+      "impact": "Critical - Prevent security vulnerabilities",
+      "effort": "High - Requires security expertise",
+      "priority_score": 90,
+      "implementation_steps": [
+        "Implement automated security scanning",
+        "Add penetration testing procedures",
+        "Create security code review process",
+        "Set up vulnerability monitoring"
+      ]
+    },
+    {
+      "title": "Complete Test Automation Coverage",
+      "description": "Some test suites are skipped or not implemented",
+      "category": "infrastructure",
+      "impact": "High - Better quality assurance",
+      "effort": "High - Requires implementation",
+      "priority_score": 80,
+      "implementation_steps": [
+        "Implement missing test suites",
+        "Set up proper test environments",
+        "Add automated test execution",
+        "Create test data management"
+      ]
+    }
+  ]
+}

@@ -75,6 +75,69 @@ export default defineConfig({
       use: { ...devices['iPad landscape'] },
     },
     
+    // Cross-platform compatibility testing
+    {
+      name: 'cross-platform-chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 }
+      },
+      testMatch: '**/cross-platform/**/*.spec.ts'
+    },
+    {
+      name: 'cross-platform-firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1920, height: 1080 }
+      },
+      testMatch: '**/cross-platform/**/*.spec.ts'
+    },
+    {
+      name: 'cross-platform-webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1920, height: 1080 }
+      },
+      testMatch: '**/cross-platform/**/*.spec.ts'
+    },
+    
+    // Edge browser testing (if available)
+    {
+      name: 'edge',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'msedge',
+        viewport: { width: 1920, height: 1080 }
+      },
+      testMatch: '**/cross-platform/browser-compatibility.spec.ts'
+    },
+    
+    // Responsive design testing across multiple viewports
+    {
+      name: 'responsive-mobile',
+      use: {
+        ...devices['iPhone 12'],
+        viewport: { width: 390, height: 844 }
+      },
+      testMatch: '**/cross-platform/responsive-design.spec.ts'
+    },
+    {
+      name: 'responsive-tablet',
+      use: {
+        ...devices['iPad'],
+        viewport: { width: 768, height: 1024 }
+      },
+      testMatch: '**/cross-platform/responsive-design.spec.ts'
+    },
+    {
+      name: 'responsive-desktop',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 }
+      },
+      testMatch: '**/cross-platform/responsive-design.spec.ts'
+    },
+    
     // Accessibility testing (with specific settings)
     {
       name: 'accessibility',

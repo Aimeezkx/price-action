@@ -21,5 +21,5 @@ export { UploadModal } from './UploadModal';
 export { SearchInput } from './SearchInput';
 export { SearchResults } from './SearchResults';
 export { SearchFilters } from './SearchFilters';
-export { SearchHistory } from './SearchHistory';exp
-ort { PerformanceDashboard } from './PerformanceDashboard';
+export { SearchHistory } from './SearchHistory';
+export { PerformanceDashboard } from './PerformanceDashboard';

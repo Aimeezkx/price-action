@@ -1,0 +1,225 @@
+{
+  "error_handling_test_config": {
+    "test_categories": {
+      "document_processing_errors": {
+        "enabled": true,
+        "timeout": 30,
+        "test_files": {
+          "corrupted_pdf": "test_data/corrupted.pdf",
+          "unsupported_format": "test_data/document.xyz",
+          "empty_document": "test_data/empty.pdf",
+          "oversized_document": "test_data/oversized.pdf"
+        },
+        "expected_errors": {
+          "corrupted_pdf": "PDF_CORRUPTION_ERROR",
+          "unsupported_format": "UNSUPPORTED_FORMAT",
+          "empty_document": "EMPTY_DOCUMENT",
+          "oversized_document": "FILE_SIZE_EXCEEDED"
+        }
+      },
+      "network_failure_recovery": {
+        "enabled": true,
+        "timeout": 60,
+        "scenarios": {
+          "complete_network_loss": {
+            "duration": 5,
+            "expected_behavior": "offline_mode_activation"
+          },
+          "intermittent_connection": {
+            "failure_rate": 0.3,
+            "duration": 10,
+            "expected_behavior": "retry_with_backoff"
+          },
+          "slow_connection": {
+            "delay": 2.0,
+            "timeout": 1.0,
+            "expected_behavior": "timeout_handling"
+          },
+          "api_service_unavailable": {
+            "error_code": 503,
+            "duration": 8,
+            "expected_behavior": "fallback_mechanism"
+          }
+        }
+      },
+      "invalid_input_handling": {
+        "enabled": true,
+        "timeout": 15,
+        "test_cases": [
+          {
+            "endpoint": "/api/documents/upload",
+            "input": {"file": null},
+            "expected_error": "MISSING_FILE",
+            "expected_message": "Please select a file to upload"
+          },
+          {
+            "endpoint": "/api/cards/grade",
+            "input": {"card_id": "invalid", "grade": 10},
+            "expected_error": "INVALID_GRADE",
+            "expected_message": "Grade must be between 1 and 5"
+          },
+          {
+            "endpoint": "/api/search",
+            "input": {"query": ""},
+            "expected_error": "EMPTY_QUERY",
+            "expected_message": "Search query cannot be empty"
+          },
+          {
+            "endpoint": "/api/documents/process",
+            "input": {"document_id": "nonexistent"},
+            "expected_error": "DOCUMENT_NOT_FOUND",
+            "expected_message": "Document not found. Please check the document ID"
+          }
+        ]
+      },
+      "resource_exhaustion": {
+        "enabled": true,
+        "timeout": 120,
+        "resource_limits": {
+          "memory_threshold": 90,
+          "disk_threshold": 95,
+          "cpu_threshold": 95,
+          "db_connection_limit": 10
+        },
+        "test_scenarios": [
+          {
+            "name": "memory_exhaustion",
+            "resource": "memory",
+            "limit": "90%",
+            "test_action": "process_large_document"
+          },
+          {
+            "name": "disk_space_full",
+            "resource": "disk",
+            "limit": "95%",
+            "test_action": "upload_multiple_documents"
+          },
+          {
+            "name": "cpu_overload",
+            "resource": "cpu",
+            "limit": "95%",
+            "test_action": "concurrent_processing"
+          },
+          {
+            "name": "database_connections",
+            "resource": "db_connections",
+            "limit": "max_connections",
+            "test_action": "concurrent_queries"
+          }
+        ]
+      },
+      "graceful_degradation": {
+        "enabled": true,
+        "timeout": 45,
+        "degradation_scenarios": [
+          {
+            "name": "nlp_service_failure",
+            "component": "nlp_pipeline",
+            "failure_type": "service_unavailable",
+            "expected_fallback": "basic_text_extraction"
+          },
+          {
+            "name": "search_index_corruption",
+            "component": "search_service",
+            "failure_type": "index_corruption",
+            "expected_fallback": "database_search"
+          },
+          {
+            "name": "card_generation_failure",
+            "component": "card_generator",
+            "failure_type": "algorithm_error",
+            "expected_fallback": "manual_card_creation"
+          },
+          {
+            "name": "storage_service_down",
+            "component": "file_storage",
+            "failure_type": "service_down",
+            "expected_fallback": "local_storage"
+          }
+        ]
+      },
+      "error_logging": {
+        "enabled": true,
+        "timeout": 20,
+        "logging_tests": [
+          {
+            "error_type": "processing_error",
+            "trigger_action": "process_corrupted_file",
+            "expected_log_level": "ERROR",
+            "expected_fields": ["timestamp", "error_type", "stack_trace", "user_id", "document_id"]
+          },
+          {
+            "error_type": "validation_error",
+            "trigger_action": "submit_invalid_data",
+            "expected_log_level": "WARNING",
+            "expected_fields": ["timestamp", "validation_errors", "input_data", "endpoint"]
+          },
+          {
+            "error_type": "system_error",
+            "trigger_action": "trigger_system_exception",
+            "expected_log_level": "CRITICAL",
+            "expected_fields": ["timestamp", "system_state", "error_details", "recovery_actions"]
+          }
+        ]
+      },
+      "recovery_mechanisms": {
+        "enabled": true,
+        "timeout": 90,
+        "recovery_tests": [
+          {
+            "name": "automatic_retry",
+            "failure_scenario": "temporary_service_failure",
+            "expected_recovery": "exponential_backoff_retry",
+            "max_attempts": 3,
+            "base_delay": 1.0
+          },
+          {
+            "name": "circuit_breaker",
+            "failure_scenario": "repeated_service_failures",
+            "expected_recovery": "circuit_breaker_activation",
+            "failure_threshold": 5,
+            "recovery_timeout": 30.0
+          },
+          {
+            "name": "data_recovery",
+            "failure_scenario": "processing_interruption",
+            "expected_recovery": "resume_from_checkpoint",
+            "checkpoint_interval": 10
+          },
+          {
+            "name": "service_restart",
+            "failure_scenario": "component_crash",
+            "expected_recovery": "automatic_service_restart",
+            "restart_delay": 5
+          }
+        ]
+      }
+    },
+    "test_execution": {
+      "parallel_execution": false,
+      "stop_on_first_failure": false,
+      "generate_detailed_report": true,
+      "save_test_artifacts": true,
+      "cleanup_after_tests": true
+    },
+    "thresholds": {
+      "minimum_pass_rate": 80,
+      "maximum_test_duration": 300,
+      "error_recovery_time_limit": 30,
+      "resource_usage_warning_threshold": 85
+    },
+    "reporting": {
+      "output_formats": ["json", "html", "console"],
+      "include_performance_metrics": true,
+      "include_resource_usage": true,
+      "include_error_details": true,
+      "generate_recommendations": true
+    },
+    "environment": {
+      "test_data_directory": "test_data",
+      "results_directory": "test_results",
+      "log_directory": "logs",
+      "temp_directory": "temp"
+    }
+  }
+}

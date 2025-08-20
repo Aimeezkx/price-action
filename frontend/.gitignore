@@ -1,0 +1,16 @@
+# Generated reports and test results
+docs/reports/*.json
+docs/reports/*.md
+backend/reports/*.json
+backend/reports/*.md
+tests/results/
+# Temporary test files
+tests/temp/
+*_test_results.json
+*_analysis_report.json
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

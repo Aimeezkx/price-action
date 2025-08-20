@@ -1,0 +1,70 @@
+{
+  "execution_time": "2025-08-20T10:04:14.669740",
+  "test_suites": {
+    "unit_tests": {
+      "passed": false,
+      "coverage_percent": 0,
+      "test_count": 0,
+      "failed_count": 0,
+      "duration": 0,
+      "critical": true,
+      "issues": []
+    },
+    "integration_tests": {
+      "passed": true,
+      "test_count": 0,
+      "failed_count": 0,
+      "suite_results": [],
+      "critical": false
+    },
+    "api_tests": {
+      "passed": false,
+      "test_count": 0,
+      "failed_count": 0,
+      "duration": 0,
+      "critical": true
+    },
+    "frontend_tests": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "critical": true
+    },
+    "e2e_tests": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "critical": false
+    },
+    "performance_tests": {
+      "passed": true,
+      "benchmark_results": [],
+      "critical": false
+    },
+    "security_tests": {
+      "passed": false,
+      "test_count": 0,
+      "failed_count": 0,
+      "critical": true
+    },
+    "accessibility_tests": {
+      "passed": true,
+      "skipped": true,
+      "reason": "No accessibility tests configured"
+    },
+    "cross_platform_tests": {
+      "passed": true,
+      "skipped": true,
+      "reason": "Cross-platform tests not available"
+    },
+    "load_tests": {
+      "passed": true,
+      "skipped": true,
+      "reason": "Load tests not configured"
+    }
+  },
+  "overall_status": "critical_failure",
+  "critical_issues": [],
+  "performance_metrics": {},
+  "coverage_data": {},
+  "improvement_recommendations": [],
+  "total_execution_time": 0.17398476600646973
+}
