@@ -29,12 +29,14 @@ A full-stack application that transforms documents into interactive learning exp
 ### Development Setup
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd document-learning-app
 ```
 
 2. Start the development environment:
+
 ```bash
 cd infrastructure
 docker-compose up -d
