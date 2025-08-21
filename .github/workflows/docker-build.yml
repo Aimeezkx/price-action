@@ -1,0 +1,100 @@
+name: Docker Build Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'infrastructure/**'
+      - '.github/workflows/docker-build.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'infrastructure/**'
+
+jobs:
+  backend-docker-build:
+    name: Backend Docker Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: backend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+  frontend-docker-build:
+    name: Frontend Docker Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: frontend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+  docker-compose-test:
+    name: Docker Compose Test
+    runs-on: ubuntu-latest
+    needs: [backend-docker-build, frontend-docker-build]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Test docker-compose configuration
+        run: |
+          cd infrastructure
+          docker-compose config
+          
+      - name: Test docker-compose build
+        run: |
+          cd infrastructure
+          docker-compose build --no-cache
+          
+      - name: Test docker-compose up (health checks)
+        run: |
+          cd infrastructure
+          docker-compose up -d
+          
+          # Wait for services to be healthy
+          echo "Waiting for services to be healthy..."
+          timeout 300 bash -c 'until docker-compose ps | grep -E "(healthy|Up)"; do sleep 5; done'
+          
+          # Check service status
+          docker-compose ps
+          
+          # Check logs for any errors
+          docker-compose logs
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          cd infrastructure
+          docker-compose down -v
+          docker system prune -f
