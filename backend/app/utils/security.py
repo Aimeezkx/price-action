@@ -276,6 +276,31 @@ def secure_filename(filename: str) -> str:
     return filename
 
 
+def generate_secure_filename(original_filename: str) -> str:
+    """Generate secure filename with timestamp and random component."""
+    import time
+    
+    # Get secure base filename
+    secure_base = secure_filename(original_filename)
+    
+    # Split name and extension
+    if '.' in secure_base:
+        name, ext = secure_base.rsplit('.', 1)
+    else:
+        name, ext = secure_base, ''
+    
+    # Add timestamp and random component
+    timestamp = str(int(time.time()))
+    random_part = generate_secure_token(8)
+    
+    # Construct new filename
+    new_name = f"{name}_{timestamp}_{random_part}"
+    if ext:
+        new_name += f".{ext}"
+    
+    return new_name
+
+
 def validate_email(email: str) -> bool:
     """Validate email address format."""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -392,3 +417,65 @@ def mask_sensitive_data(data: str, mask_char: str = '*') -> str:
     data = re.sub(r'\b\d{4}-\d{4}-\d{4}-\d{4}\b', mask_char * 4 + '-' + mask_char * 4 + '-' + mask_char * 4 + '-' + mask_char * 4, data)
     
     return data
+
+
+class SecurityValidator:
+    """Security validation utilities."""
+    
+    def __init__(self):
+        self.max_file_size = 100 * 1024 * 1024  # 100MB
+        self.allowed_extensions = {'.pdf', '.docx', '.doc', '.txt', '.md', '.rtf'}
+    
+    def validate_file_security(self, file_path: Path) -> Dict[str, Any]:
+        """Validate file for security issues."""
+        result = {
+            'is_secure': True,
+            'issues': [],
+            'warnings': []
+        }
+        
+        try:
+            # Check file size
+            file_size = file_path.stat().st_size
+            if file_size > self.max_file_size:
+                result['is_secure'] = False
+                result['issues'].append(f'File too large: {file_size} bytes')
+            
+            # Check extension
+            extension = file_path.suffix.lower()
+            if extension not in self.allowed_extensions:
+                result['is_secure'] = False
+                result['issues'].append(f'File extension not allowed: {extension}')
+            
+            # Check for malicious content
+            if detect_malicious_content(file_path):
+                result['is_secure'] = False
+                result['issues'].append('Potentially malicious content detected')
+            
+        except Exception as e:
+            result['is_secure'] = False
+            result['issues'].append(f'Validation error: {str(e)}')
+        
+        return result
+    
+    def sanitize_user_input(self, user_input: str) -> str:
+        """Sanitize user input."""
+        return sanitize_input(user_input)
+    
+    def validate_request_headers(self, headers: Dict[str, str]) -> bool:
+        """Validate request headers for security."""
+        # Check for suspicious headers
+        suspicious_patterns = [
+            'eval(',
+            'javascript:',
+            '<script',
+            'data:text/html'
+        ]
+        
+        for header_name, header_value in headers.items():
+            if isinstance(header_value, str):
+                for pattern in suspicious_patterns:
+                    if pattern.lower() in header_value.lower():
+                        return False
+        
+        return True

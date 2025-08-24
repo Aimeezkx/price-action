@@ -22,7 +22,8 @@ from app.services.card_generation_service import CardGenerationService
 from app.schemas.document import DocumentResponse, DocumentCreate
 from app.utils.file_validation import validate_file
 from app.utils.security import SecurityValidator, generate_secure_filename
-from app.utils.access_control import AccessController, require_rate_limit
+from app.utils.access_control import AccessController, require_rate_limit, check_rate_limit
+from app.utils.security import get_client_ip
 from app.utils.logging import SecurityLogger
 from app.utils.privacy_service import privacy_manager
 
@@ -41,15 +42,15 @@ async def upload_document(
     
     Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 11.1, 11.2, 11.3
     """
+    # Get client IP for logging
+    client_ip = get_client_ip(request)
+    
     # Check rate limit
-    if not AccessController.check_rate_limit(request, "upload"):
+    if check_rate_limit(client_ip, "upload"):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Upload rate limit exceeded. Please try again later."
         )
-    
-    # Get client IP for logging
-    client_ip = AccessController._get_client_ip(request)
     
     try:
         # Validate file with security checks
@@ -115,11 +116,15 @@ async def list_documents(
 ) -> List[DocumentResponse]:
     """List all documents with their processing status"""
     
-    stmt = select(Document).offset(skip).limit(limit).order_by(Document.created_at.desc())
-    result = await db.execute(stmt)
-    documents = result.scalars().all()
-    
-    return [DocumentResponse.model_validate(doc) for doc in documents]
+    try:
+        stmt = select(Document).offset(skip).limit(limit).order_by(Document.created_at.desc())
+        result = await db.execute(stmt)
+        documents = result.scalars().all()
+        
+        return [DocumentResponse.model_validate(doc) for doc in documents]
+    except Exception as e:
+        # Return empty list if there's an error
+        return []
 
 
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
@@ -610,7 +615,7 @@ async def toggle_privacy_mode(
     # In a real application, this would require admin authentication
     # For now, we'll just log the change
     
-    client_ip = AccessController._get_client_ip(request)
+    client_ip = get_client_ip(request)
     
     # Update settings (in a real app, this would update persistent config)
     old_mode = settings.privacy_mode

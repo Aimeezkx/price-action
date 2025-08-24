@@ -43,7 +43,7 @@ docker-compose up -d
 ```
 
 3. The application will be available at:
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:3001
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
 
@@ -99,6 +99,31 @@ npm run dev
 - **Type Checking**: TypeScript
 - **Styling**: Tailwind CSS
 - **Build Tool**: Vite
+
+## CORS Configuration
+
+This application implements a hybrid CORS solution to handle API connectivity between frontend (localhost:3001) and backend (localhost:8000):
+
+### Development (Automatic)
+- **Vite Proxy**: API requests to `/api/*` are automatically proxied to the backend
+- **No CORS errors**: Browser sees same-origin requests
+- **Zero configuration**: Works out of the box with `npm run dev`
+
+### Production
+- **Environment Variable**: Set `VITE_API_BASE_URL` to your API server URL
+- **CORS Middleware**: Backend includes CORS headers for cross-origin requests
+- **Flexible Deployment**: Supports both same-origin and cross-origin setups
+
+### Verification
+To verify the CORS fix is working:
+
+1. Start both servers: `npm run dev` (frontend) and `uvicorn main:app --reload` (backend)
+2. Open browser dev tools (F12) and navigate to http://localhost:3001
+3. Check Network tab: API requests should show as `localhost:3001/api/*`
+4. Check Console tab: No CORS errors should appear
+5. Test file upload: Should complete without errors
+
+For detailed troubleshooting, see `CORS_SOLUTION_DOCUMENTATION.md`.
 
 ## Contributing
 

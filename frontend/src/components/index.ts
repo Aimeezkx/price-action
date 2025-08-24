@@ -23,3 +23,5 @@ export { SearchResults } from './SearchResults';
 export { SearchFilters } from './SearchFilters';
 export { SearchHistory } from './SearchHistory';
 export { PerformanceDashboard } from './PerformanceDashboard';
+export { ConnectionStatus, ConnectionIndicator, ConnectionStatusPanel } from './ConnectionStatus';
+export { ConnectionNotification } from './ConnectionNotification';

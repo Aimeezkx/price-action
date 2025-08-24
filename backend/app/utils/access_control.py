@@ -400,3 +400,156 @@ rate_limiter = RateLimiter()
 def check_rate_limit(identifier: str, action: str) -> bool:
     """Check rate limit for action."""
     return rate_limiter.is_rate_limited(identifier, action)
+
+
+class DataProtection:
+    """Data protection and privacy utilities."""
+    
+    def __init__(self):
+        self.privacy_mode = getattr(settings, 'privacy_mode', False)
+    
+    def anonymize_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Anonymize sensitive data."""
+        if not self.privacy_mode:
+            return data
+        
+        anonymized = data.copy()
+        
+        # Remove or mask sensitive fields
+        sensitive_fields = ['email', 'phone', 'ssn', 'credit_card', 'ip_address']
+        
+        for field in sensitive_fields:
+            if field in anonymized:
+                if field == 'email':
+                    anonymized[field] = self._mask_email(anonymized[field])
+                elif field == 'phone':
+                    anonymized[field] = self._mask_phone(anonymized[field])
+                else:
+                    anonymized[field] = '***REDACTED***'
+        
+        return anonymized
+    
+    def _mask_email(self, email: str) -> str:
+        """Mask email address."""
+        if '@' not in email:
+            return '***REDACTED***'
+        
+        local, domain = email.split('@', 1)
+        if len(local) <= 2:
+            masked_local = '*' * len(local)
+        else:
+            masked_local = local[0] + '*' * (len(local) - 2) + local[-1]
+        
+        return f"{masked_local}@{domain}"
+    
+    def _mask_phone(self, phone: str) -> str:
+        """Mask phone number."""
+        if len(phone) < 4:
+            return '*' * len(phone)
+        
+        return '*' * (len(phone) - 4) + phone[-4:]
+    
+    def check_data_retention(self, created_at: datetime, retention_days: int = 365) -> bool:
+        """Check if data should be retained."""
+        if not self.privacy_mode:
+            return True
+        
+        retention_limit = datetime.utcnow() - timedelta(days=retention_days)
+        return created_at > retention_limit
+    
+    def get_user_data(self, user_id: str) -> Dict[str, Any]:
+        """Get user data for privacy requests."""
+        # This would typically fetch from database
+        # Placeholder implementation
+        return {
+            "user_id": user_id,
+            "data_collected": [],
+            "processing_purposes": [],
+            "retention_period": "365 days",
+            "third_party_sharing": False
+        }
+    
+    def delete_user_data(self, user_id: str) -> bool:
+        """Delete user data for privacy requests."""
+        # This would typically delete from database
+        # Placeholder implementation
+        log_security_event(
+            "user_data_deletion",
+            {"user_id": user_id},
+            "INFO"
+        )
+        return True
+
+
+class AccessController:
+    """Access control utilities."""
+    
+    def __init__(self):
+        self.rate_limiter = rate_limiter
+        self.session_manager = session_manager
+    
+    def check_document_access(self, user_id: str, document_id: str, action: str) -> bool:
+        """Check if user has access to document."""
+        # This would typically check database permissions
+        # Placeholder implementation
+        return True
+    
+    def check_resource_access(self, user_id: str, resource_type: str, resource_id: str) -> bool:
+        """Check if user has access to resource."""
+        # This would typically check database permissions
+        # Placeholder implementation
+        return True
+    
+    def log_access_attempt(self, user_id: str, resource: str, action: str, success: bool):
+        """Log access attempt."""
+        log_security_event(
+            "access_attempt",
+            {
+                "user_id": user_id,
+                "resource": resource,
+                "action": action,
+                "success": success
+            },
+            "INFO" if success else "MEDIUM"
+        )
+
+
+def require_rate_limit(action: str, limit: int = None):
+    """Decorator to enforce rate limiting."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Get request from args/kwargs
+            request = None
+            for arg in args:
+                if hasattr(arg, 'client'):  # FastAPI Request object
+                    request = arg
+                    break
+            
+            if not request:
+                # If no request found, skip rate limiting
+                return await func(*args, **kwargs)
+            
+            # Get client identifier
+            client_ip = get_client_ip(request)
+            
+            # Check rate limit
+            if check_rate_limit(client_ip, action):
+                log_security_event(
+                    "rate_limit_exceeded",
+                    {
+                        "ip": client_ip,
+                        "action": action,
+                        "endpoint": func.__name__
+                    },
+                    "MEDIUM"
+                )
+                
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded"
+                )
+            
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator

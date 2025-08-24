@@ -326,3 +326,6 @@ class PrivacyService:
 
 # Global privacy service instance
 privacy_service = PrivacyService()
+
+# Alias for backward compatibility
+privacy_manager = privacy_service

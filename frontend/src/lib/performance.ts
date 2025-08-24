@@ -1,9 +1,9 @@
-import React from 'react';
-
 /**
  * Frontend Performance Monitoring Service
  * Tracks page load times, component render times, and user interactions
  */
+
+import React from "react";
 
 interface PerformanceMetric {
   name: string;

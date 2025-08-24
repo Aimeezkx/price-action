@@ -1,5 +1,5 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { ConnectionIndicator } from './ConnectionStatus';
 
 const navigation = [
   { name: 'Documents', href: '/documents' },
@@ -40,6 +40,9 @@ export function Navigation() {
                 );
               })}
             </div>
+          </div>
+          <div className="flex items-center">
+            <ConnectionIndicator className="mr-4" />
           </div>
         </div>
       </div>

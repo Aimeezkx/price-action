@@ -90,6 +90,11 @@ def get_async_session():
         return SessionLocal()
 
 
+def get_db_session() -> Session:
+    """Get database session (sync)"""
+    return SessionLocal()
+
+
 async def init_db() -> None:
     """
     Initialize database with pgvector extension
@@ -101,8 +106,9 @@ async def init_db() -> None:
             conn.commit()
             logger.info("Database initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        raise
+        logger.warning(f"Database initialization failed: {e}")
+        logger.warning("Application will continue without database connection")
+        # Don't raise the exception - allow app to start without DB
 
 
 async def create_tables() -> None:

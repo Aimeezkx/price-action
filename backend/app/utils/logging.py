@@ -148,8 +148,8 @@ def sanitize_log_data(data: Any) -> Any:
 class SecurityLogger:
     """Specialized logger for security events."""
     
-    def __init__(self):
-        self.logger = logging.getLogger('security')
+    def __init__(self, name: str = 'security'):
+        self.logger = logging.getLogger(name)
         self._setup_security_logger()
     
     def _setup_security_logger(self):
@@ -244,6 +244,19 @@ class SecurityLogger:
             },
             'HIGH'
         )
+    
+    def log_security_event(self, event_type: str, details: Dict[str, Any], severity: str = 'INFO'):
+        """Log security event - alias for log_event."""
+        self.log_event(event_type, details, severity)
+    
+    def log_error(self, error: Exception, details: Dict[str, Any] = None):
+        """Log error with details."""
+        error_details = {
+            'error_type': type(error).__name__,
+            'error_message': str(error),
+            **(details or {})
+        }
+        self.log_event('error', error_details, 'HIGH')
 
 
 class AuditLogger:
@@ -313,6 +326,40 @@ def setup_logging():
             handler.setFormatter(SanitizedFormatter(
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
             ))
+
+
+def setup_privacy_logging():
+    """Setup privacy-aware logging configuration."""
+    # Create logs directory
+    log_dir = Path('logs')
+    log_dir.mkdir(exist_ok=True)
+    
+    # Setup privacy-aware formatters
+    privacy_formatter = SanitizedFormatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Configure root logger with privacy formatter
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    
+    # Remove existing handlers to avoid duplicates
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Add file handler with privacy formatter
+    file_handler = logging.FileHandler(log_dir / 'app.log')
+    file_handler.setFormatter(privacy_formatter)
+    root_logger.addHandler(file_handler)
+    
+    # Add console handler with privacy formatter
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(privacy_formatter)
+    root_logger.addHandler(console_handler)
+    
+    # Setup security and audit loggers
+    security_logger._setup_security_logger()
+    audit_logger._setup_audit_logger()
 
 
 # Initialize logging on import

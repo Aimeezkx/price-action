@@ -272,3 +272,25 @@ def sanitize_filename(filename: str) -> str:
     """Sanitize filename."""
     validator = FileValidator()
     return validator._sanitize_filename(filename)
+
+
+def get_file_type(file_path: Path) -> str:
+    """Get file type based on extension and MIME type."""
+    extension = file_path.suffix.lower()
+    
+    # Map extensions to file types
+    extension_map = {
+        '.pdf': 'pdf',
+        '.docx': 'docx',
+        '.doc': 'doc',
+        '.txt': 'text',
+        '.md': 'markdown',
+        '.rtf': 'rtf'
+    }
+    
+    return extension_map.get(extension, 'unknown')
+
+
+def validate_file(file_path: Path) -> FileValidationResult:
+    """Validate file - alias for validate_file_upload."""
+    return file_validator.validate_file_upload(file_path)

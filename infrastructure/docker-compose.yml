@@ -18,9 +18,9 @@ services:
     volumes:
       - ../backend:/app
       - uploads:/app/uploads
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -31,11 +31,15 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     volumes:
       - ../frontend:/app
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0 --port 3000
+    environment:
+      - VITE_API_BASE_URL=http://backend:8000
+    command: npm run dev -- --host 0.0.0.0 --port 3001
+    depends_on:
+      - backend
 
   db:
     image: pgvector/pgvector:pg15
@@ -44,7 +48,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
