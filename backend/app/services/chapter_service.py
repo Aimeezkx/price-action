@@ -6,10 +6,14 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import fitz  # PyMuPDF
 
 from ..parsers.base import ParsedContent, TextBlock
+from ..models.document import Chapter
+from ..core.database import get_async_session
 
 
 @dataclass
@@ -445,3 +449,71 @@ class ChapterExtractor:
         )
         
         return [chapter]
+
+
+class ChapterService:
+    """Service for chapter operations and database integration."""
+    
+    def __init__(self):
+        """Initialize chapter service."""
+        self.extractor = ChapterExtractor()
+    
+    async def extract_chapters_from_content(
+        self, 
+        document_id: UUID, 
+        parsed_content: ParsedContent
+    ) -> List[Chapter]:
+        """
+        Extract chapters from parsed content and save to database.
+        
+        Args:
+            document_id: UUID of the document
+            parsed_content: Parsed document content
+            
+        Returns:
+            List of saved Chapter model instances
+        """
+        try:
+            # Use a dummy file path for extraction (we already have parsed content)
+            dummy_path = Path("dummy.pdf")  # The extractor will use heuristics
+            
+            # Extract chapters using the extractor
+            extracted_chapters = await self.extractor._extract_from_heuristics(parsed_content.text_blocks)
+            
+            # If no chapters found, create a single default chapter
+            if not extracted_chapters:
+                extracted_chapters = self.extractor._create_single_chapter(parsed_content.text_blocks)
+            
+            # Save chapters to database
+            saved_chapters = []
+            async with get_async_session() as session:
+                for ext_chapter in extracted_chapters:
+                    # Combine content blocks into a single text
+                    content_text = "\n\n".join(block.text for block in ext_chapter.content_blocks)
+                    
+                    chapter = Chapter(
+                        document_id=document_id,
+                        title=ext_chapter.title,
+                        level=ext_chapter.level,
+                        order_index=ext_chapter.order_index,
+                        page_start=ext_chapter.page_start,
+                        page_end=ext_chapter.page_end,
+                        content=content_text
+                    )
+                    
+                    session.add(chapter)
+                    saved_chapters.append(chapter)
+                
+                await session.commit()
+                
+                # Refresh all chapters to get their IDs
+                for chapter in saved_chapters:
+                    await session.refresh(chapter)
+            
+            return saved_chapters
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error extracting chapters for document {document_id}: {e}")
+            raise

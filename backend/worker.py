@@ -32,9 +32,9 @@ def main():
         logger.error(f"Failed to connect to Redis: {e}")
         sys.exit(1)
     
-    # Create worker
+    # Create worker that listens to both queues (priority first)
     worker = Worker(
-        ['document_processing'],  # Queue names to listen to
+        ['priority_processing', 'document_processing'],  # Queue names to listen to (priority order)
         connection=redis_conn,
         name='document-worker'
     )

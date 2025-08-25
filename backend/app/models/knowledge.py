@@ -2,13 +2,29 @@
 Knowledge extraction models
 """
 
-from sqlalchemy import Column, String, Text, JSON, ForeignKey, Float, ARRAY, Enum as SQLEnum
+from sqlalchemy import Column, String, Text, JSON, ForeignKey, Float, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
-from pgvector.sqlalchemy import Vector
 from enum import Enum
 
-from .base import BaseModel
+from .base import BaseModel, UUID
+from app.core.config import settings
+
+# Conditional imports for PostgreSQL-specific features
+IS_POSTGRESQL = settings.database_url.startswith('postgresql://')
+
+if IS_POSTGRESQL:
+    try:
+        from sqlalchemy import ARRAY
+        from pgvector.sqlalchemy import Vector
+        HAS_PGVECTOR = True
+    except ImportError:
+        HAS_PGVECTOR = False
+        ARRAY = None
+        Vector = None
+else:
+    HAS_PGVECTOR = False
+    ARRAY = None
+    Vector = None
 
 
 class KnowledgeType(str, Enum):
@@ -26,12 +42,12 @@ class Knowledge(BaseModel):
     
     __tablename__ = "knowledge"
     
-    chapter_id = Column(UUID(as_uuid=True), ForeignKey("chapters.id"), nullable=False, index=True)
+    chapter_id = Column(UUID(), ForeignKey("chapters.id"), nullable=False, index=True)
     kind = Column(SQLEnum(KnowledgeType), nullable=False, index=True)
     text = Column(Text, nullable=False)
-    entities = Column(ARRAY(String), default=list)
+    entities = Column(ARRAY(String) if IS_POSTGRESQL and ARRAY else JSON, default=list)
     anchors = Column(JSON, default=dict)  # {page, chapter, position}
-    embedding = Column(Vector(384), nullable=True)  # sentence-transformers embedding dimension
+    embedding = Column(Vector(384) if IS_POSTGRESQL and Vector else JSON, nullable=True)  # sentence-transformers embedding dimension
     confidence_score = Column(Float, default=1.0)
     
     # Relationships

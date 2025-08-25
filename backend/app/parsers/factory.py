@@ -7,6 +7,7 @@ from .base import BaseParser
 from .docx_parser import DocxParser
 from .markdown_parser import MarkdownParser
 from .pdf_parser import PDFParser
+from .txt_parser import TxtParser
 
 
 class ParserFactory:
@@ -21,6 +22,7 @@ class ParserFactory:
         self.register_parser("pdf", PDFParser)
         self.register_parser("docx", DocxParser)
         self.register_parser("markdown", MarkdownParser)
+        self.register_parser("txt", TxtParser)
     
     def register_parser(self, name: str, parser_class: Type[BaseParser]) -> None:
         """

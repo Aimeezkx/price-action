@@ -4,17 +4,19 @@ Document-related models
 
 from sqlalchemy import Column, String, Integer, Text, JSON, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from enum import Enum
 import uuid
 
-from .base import BaseModel
+from .base import BaseModel, UUID
 
 
 class ProcessingStatus(str, Enum):
     """Document processing status"""
     PENDING = "pending"
     PROCESSING = "processing"
+    PARSING = "parsing"
+    EXTRACTING = "extracting"
+    GENERATING_CARDS = "generating_cards"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -29,7 +31,7 @@ class Document(BaseModel):
     file_path = Column(String(500), nullable=False)
     file_size = Column(Integer, nullable=False)
     status = Column(SQLEnum(ProcessingStatus), default=ProcessingStatus.PENDING, nullable=False, index=True)
-    doc_metadata = Column(JSON, default=dict)
+    doc_metadata = Column(JSON, default=dict, nullable=False)
     error_message = Column(Text, nullable=True)
     
     # Relationships
@@ -44,7 +46,7 @@ class Chapter(BaseModel):
     
     __tablename__ = "chapters"
     
-    document_id = Column(UUID(as_uuid=True), ForeignKey("documents.id"), nullable=False, index=True)
+    document_id = Column(UUID(), ForeignKey("documents.id"), nullable=False, index=True)
     title = Column(String(500), nullable=False)
     level = Column(Integer, nullable=False, default=1)
     order_index = Column(Integer, nullable=False)
@@ -66,7 +68,7 @@ class Figure(BaseModel):
     
     __tablename__ = "figures"
     
-    chapter_id = Column(UUID(as_uuid=True), ForeignKey("chapters.id"), nullable=False, index=True)
+    chapter_id = Column(UUID(), ForeignKey("chapters.id"), nullable=False, index=True)
     image_path = Column(String(500), nullable=False)
     caption = Column(Text, nullable=True)
     page_number = Column(Integer, nullable=True)

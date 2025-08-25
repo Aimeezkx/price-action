@@ -4,11 +4,10 @@ Learning and flashcard models
 
 from sqlalchemy import Column, String, Text, JSON, ForeignKey, Float, Integer, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from enum import Enum
 from datetime import datetime
 
-from .base import BaseModel
+from .base import BaseModel, UUID
 
 
 class CardType(str, Enum):
@@ -23,7 +22,7 @@ class Card(BaseModel):
     
     __tablename__ = "cards"
     
-    knowledge_id = Column(UUID(as_uuid=True), ForeignKey("knowledge.id"), nullable=False, index=True)
+    knowledge_id = Column(UUID(), ForeignKey("knowledge.id"), nullable=False, index=True)
     card_type = Column(SQLEnum(CardType), nullable=False, index=True)
     front = Column(Text, nullable=False)
     back = Column(Text, nullable=False)
@@ -43,8 +42,8 @@ class SRS(BaseModel):
     
     __tablename__ = "srs"
     
-    card_id = Column(UUID(as_uuid=True), ForeignKey("cards.id"), nullable=False, index=True)
-    user_id = Column(UUID(as_uuid=True), nullable=True, index=True)  # For future multi-user support
+    card_id = Column(UUID(), ForeignKey("cards.id"), nullable=False, index=True)
+    user_id = Column(UUID(), nullable=True, index=True)  # For future multi-user support
     ease_factor = Column(Float, default=2.5, nullable=False)
     interval = Column(Integer, default=1, nullable=False)
     repetitions = Column(Integer, default=0, nullable=False)

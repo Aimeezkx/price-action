@@ -448,4 +448,35 @@ class TextSegmentationService:
             punct_complexity * 0.2
         )
         
-        return min(1.0, complexity)
+        return min(1.0, complexity) 
+   
+    async def segment_text(
+        self, 
+        text: str, 
+        chapter_id: Optional[str] = None,
+        page: int = 1
+    ) -> List[TextSegment]:
+        """
+        Convenience method to segment plain text content.
+        
+        Args:
+            text: Plain text content to segment
+            chapter_id: Optional chapter ID for anchor information
+            page: Page number for the text (default: 1)
+            
+        Returns:
+            List of text segments
+        """
+        if not text or not text.strip():
+            return []
+        
+        # Create a TextBlock from the plain text
+        # Use a default bbox that covers the whole page
+        text_block = TextBlock(
+            text=text.strip(),
+            page=page,
+            bbox={"x": 0, "y": 0, "width": 100, "height": 100}
+        )
+        
+        # Use the existing segment_text_blocks method
+        return await self.segment_text_blocks([text_block], chapter_id)

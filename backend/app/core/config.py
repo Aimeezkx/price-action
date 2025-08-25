@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = Field(
-        default="postgresql://postgres:password@localhost:5432/document_learning",
-        description="PostgreSQL database URL"
+        default="sqlite:///./document_learning.db",
+        description="Database URL - defaults to SQLite for development"
     )
     
     # Redis
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     debug: bool = Field(default=True, description="Debug mode")
     
     # File storage
-    upload_dir: str = Field(default="/app/uploads", description="Upload directory")
+    upload_dir: str = Field(default="./uploads", description="Upload directory")
     max_file_size: int = Field(default=100 * 1024 * 1024, description="Max file size in bytes (100MB)")
     
     # Processing

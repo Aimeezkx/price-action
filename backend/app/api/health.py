@@ -229,3 +229,41 @@ async def database_health_check():
         },
         status_code=status_code
     )
+
+
+@router.get("/health/deep")
+async def deep_health_check():
+    """
+    Deep health check endpoint for comprehensive system validation
+    """
+    try:
+        database_health = await check_database_health()
+        redis_health = await check_redis_health()
+        
+        # Determine overall status
+        db_ok = database_health.get("status") == "healthy"
+        redis_ok = redis_health.get("status") == "healthy"
+        
+        overall_status = "ok" if db_ok and redis_ok else "degraded"
+        
+        return {
+            "status": overall_status,
+            "checks": {
+                "db": "ok" if db_ok else f"error: {database_health.get('error', 'unknown error')}",
+                "redis": "ok" if redis_ok else f"error: {redis_health.get('error', 'unknown error')}"
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Deep health check failed: {e}")
+        return JSONResponse(
+            content={
+                "status": "error",
+                "checks": {
+                    "db": f"error: {str(e)}",
+                    "redis": f"error: {str(e)}"
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            },
+            status_code=503
+        )

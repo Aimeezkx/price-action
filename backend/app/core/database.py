@@ -15,12 +15,24 @@ from .config import settings
 logger = logging.getLogger(__name__)
 
 # Create async SQLAlchemy engine for async operations
-# For testing, we'll use a simpler sync approach
 try:
-    async_engine = create_async_engine(
-        settings.database_url.replace('postgresql://', 'postgresql+asyncpg://'),
-        echo=settings.debug,
-    )
+    if settings.database_url.startswith('postgresql://'):
+        # Use asyncpg for PostgreSQL
+        async_database_url = settings.database_url.replace('postgresql://', 'postgresql+asyncpg://')
+        async_engine = create_async_engine(
+            async_database_url,
+            echo=settings.debug,
+        )
+    elif settings.database_url.startswith('sqlite://'):
+        # Use aiosqlite for SQLite
+        async_database_url = settings.database_url.replace('sqlite://', 'sqlite+aiosqlite://')
+        async_engine = create_async_engine(
+            async_database_url,
+            echo=settings.debug,
+            connect_args={"check_same_thread": False}
+        )
+    else:
+        async_engine = None
 except ImportError:
     # Fallback to sync engine for testing
     async_engine = None
@@ -70,13 +82,19 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         async with async_session() as session:
             try:
                 yield session
+            except Exception as e:
+                await session.rollback()
+                raise
             finally:
                 await session.close()
     else:
-        # Fallback to sync session for testing
+        # Fallback to sync session wrapped in async context
         db = SessionLocal()
         try:
             yield db
+        except Exception as e:
+            db.rollback()
+            raise
         finally:
             db.close()
 
@@ -97,14 +115,17 @@ def get_db_session() -> Session:
 
 async def init_db() -> None:
     """
-    Initialize database with pgvector extension
+    Initialize database with pgvector extension (PostgreSQL only)
     """
     try:
         with engine.connect() as conn:
-            # Enable pgvector extension
-            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-            conn.commit()
-            logger.info("Database initialized successfully")
+            # Only enable pgvector extension for PostgreSQL
+            if settings.database_url.startswith('postgresql://'):
+                conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+                conn.commit()
+                logger.info("PostgreSQL database initialized with pgvector extension")
+            else:
+                logger.info("Database initialized successfully")
     except Exception as e:
         logger.warning(f"Database initialization failed: {e}")
         logger.warning("Application will continue without database connection")

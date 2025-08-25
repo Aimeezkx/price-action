@@ -10,6 +10,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/document_learning
       - REDIS_URL=redis://redis:6379
+      - UPLOAD_DIR=/app/uploads
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001
     depends_on:
       db:
         condition: service_healthy
@@ -20,10 +22,10 @@ services:
       - uploads:/app/uploads
     command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/simple"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
       start_period: 40s
 
   frontend:
@@ -31,13 +33,13 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "3000:3000"
     volumes:
       - ../frontend:/app
       - /app/node_modules
     environment:
       - VITE_API_BASE_URL=http://backend:8000
-    command: npm run dev -- --host 0.0.0.0 --port 3001
+    command: npm run dev -- --host 0.0.0.0 --port 3000
     depends_on:
       - backend
 
@@ -77,6 +79,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/document_learning
       - REDIS_URL=redis://redis:6379
+      - UPLOAD_DIR=/app/uploads
     depends_on:
       db:
         condition: service_healthy

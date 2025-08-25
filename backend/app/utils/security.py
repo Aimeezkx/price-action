@@ -5,10 +5,13 @@ import hashlib
 import secrets
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 import bcrypt
 import html
 from datetime import datetime, timedelta
+
+if TYPE_CHECKING:
+    from fastapi import UploadFile
 
 try:
     from app.core.config import settings
@@ -458,6 +461,173 @@ class SecurityValidator:
         
         return result
     
+    def validate_upload_file(self, file: "UploadFile") -> Dict[str, Any]:
+        """Validate uploaded file for security issues."""
+        result = {
+            'is_secure': True,
+            'issues': [],
+            'warnings': []
+        }
+        
+        try:
+            # Check filename
+            if not file.filename:
+                result['is_secure'] = False
+                result['issues'].append('No filename provided')
+                return result
+            
+            # Validate filename for security issues
+            filename_issues = self._validate_filename_security(file.filename)
+            if filename_issues:
+                result['is_secure'] = False
+                result['issues'].extend(filename_issues)
+            
+            # Check file size
+            if hasattr(file, 'size') and file.size is not None:
+                if file.size > self.max_file_size:
+                    result['is_secure'] = False
+                    result['issues'].append(f'File too large: {file.size:,} bytes (max: {self.max_file_size:,} bytes)')
+                elif file.size < 10:  # Minimum file size
+                    result['is_secure'] = False
+                    result['issues'].append(f'File too small: {file.size} bytes (min: 10 bytes)')
+            
+            # Check extension
+            extension = Path(file.filename).suffix.lower()
+            if extension not in self.allowed_extensions:
+                result['is_secure'] = False
+                result['issues'].append(f'File extension "{extension}" not allowed. Allowed: {", ".join(sorted(self.allowed_extensions))}')
+            
+            # Enhanced content type validation
+            if file.content_type:
+                content_type_result = self._validate_content_type(file.content_type, extension)
+                if not content_type_result['valid']:
+                    result['is_secure'] = False
+                    result['issues'].append(content_type_result['message'])
+                elif content_type_result.get('warnings'):
+                    result['warnings'].extend(content_type_result['warnings'])
+            else:
+                result['warnings'].append('No content type provided by client')
+            
+            # Check for double extensions and suspicious patterns
+            double_ext_issues = self._check_double_extensions(file.filename)
+            if double_ext_issues:
+                result['is_secure'] = False
+                result['issues'].extend(double_ext_issues)
+            
+        except Exception as e:
+            result['is_secure'] = False
+            result['issues'].append(f'Validation error: {str(e)}')
+        
+        return result
+    
+    def _validate_filename_security(self, filename: str) -> List[str]:
+        """Validate filename for security issues."""
+        issues = []
+        
+        # Check for path traversal
+        if '../' in filename or '.\\' in filename:
+            issues.append('Path traversal attempt detected in filename')
+        
+        # Check for null bytes
+        if '\x00' in filename:
+            issues.append('Null byte detected in filename')
+        
+        # Check for control characters
+        if any(ord(c) < 32 for c in filename if c not in '\t\n\r'):
+            issues.append('Control characters detected in filename')
+        
+        # Check for Windows reserved names
+        name_without_ext = Path(filename).stem.upper()
+        reserved_names = {
+            'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5',
+            'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4',
+            'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+        }
+        if name_without_ext in reserved_names:
+            issues.append(f'Reserved filename "{name_without_ext}" not allowed')
+        
+        # Check filename length
+        if len(filename) > 255:
+            issues.append('Filename too long (max 255 characters)')
+        
+        # Check for suspicious characters
+        suspicious_chars = '<>:"|?*'
+        if any(char in filename for char in suspicious_chars):
+            issues.append('Suspicious characters detected in filename')
+        
+        return issues
+    
+    def _validate_content_type(self, content_type: str, extension: str) -> Dict[str, Any]:
+        """Validate content type against file extension."""
+        # Extended allowed content types
+        allowed_content_types = {
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'text/plain',
+            'text/markdown',
+            'text/x-markdown',
+            'application/rtf',
+            'text/rtf',
+            'application/x-rtf',
+            'text/richtext',
+            'application/octet-stream'  # Generic binary, needs further validation
+        }
+        
+        # Content type to extension mapping
+        content_type_map = {
+            '.pdf': {'application/pdf'},
+            '.docx': {'application/vnd.openxmlformats-officedocument.wordprocessingml.document'},
+            '.doc': {'application/msword'},
+            '.txt': {'text/plain'},
+            '.md': {'text/markdown', 'text/x-markdown', 'text/plain'},
+            '.rtf': {'application/rtf', 'text/rtf', 'application/x-rtf', 'text/richtext'}
+        }
+        
+        if content_type not in allowed_content_types:
+            return {
+                'valid': False,
+                'message': f'Content type "{content_type}" not allowed'
+            }
+        
+        # Check if content type matches extension
+        expected_types = content_type_map.get(extension, set())
+        if expected_types and content_type not in expected_types:
+            # Special handling for octet-stream
+            if content_type == 'application/octet-stream':
+                return {
+                    'valid': True,
+                    'warnings': [f'Generic content type for {extension} file - will validate file signature']
+                }
+            else:
+                return {
+                    'valid': False,
+                    'message': f'Content type "{content_type}" does not match extension "{extension}". Expected: {", ".join(expected_types)}'
+                }
+        
+        return {'valid': True}
+    
+    def _check_double_extensions(self, filename: str) -> List[str]:
+        """Check for suspicious double extensions."""
+        issues = []
+        
+        # Split filename by dots
+        parts = filename.split('.')
+        if len(parts) > 2:  # More than one extension
+            extensions = [f".{part.lower()}" for part in parts[1:]]
+            
+            # Check for dangerous extensions in the chain
+            dangerous_extensions = {
+                '.exe', '.bat', '.cmd', '.com', '.scr', '.pif', '.js', '.vbs', 
+                '.jar', '.app', '.deb', '.pkg', '.dmg', '.php', '.asp', '.jsp'
+            }
+            
+            for ext in extensions[:-1]:  # Check all but the last extension
+                if ext in dangerous_extensions:
+                    issues.append(f'Suspicious double extension detected: {ext} in {filename}')
+        
+        return issues
+
     def sanitize_user_input(self, user_input: str) -> str:
         """Sanitize user input."""
         return sanitize_input(user_input)
