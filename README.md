@@ -26,44 +26,73 @@ A full-stack application that transforms documents into interactive learning exp
 - Python 3.11+ (for local development)
 - Node.js 18+ (for local development)
 
-### Development Setup
+### Option 1: Full Docker Setup (Recommended)
 
 1. Clone the repository:
-
 ```bash
 git clone <repository-url>
 cd document-learning-app
 ```
 
-2. Start the development environment:
-
+2. Start the complete application stack:
 ```bash
-cd infrastructure
-docker-compose up -d
+make docker-up
 ```
 
 3. The application will be available at:
-   - Frontend: http://localhost:3001
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
+   - Database: localhost:5433
+   - Redis: localhost:6379
+
+4. To stop the application:
+```bash
+make docker-down
+```
+
+### Option 2: Local Development Setup
+
+For faster development with hot reloading:
+
+1. Install dependencies:
+```bash
+make install
+```
+
+2. Start infrastructure services (database & redis):
+```bash
+make docker-up
+```
+
+3. Start backend development server:
+```bash
+make backend-dev
+# or manually: cd backend && uvicorn main:app --reload
+```
+
+4. In a new terminal, start frontend development server:
+```bash
+make frontend-dev
+# or manually: cd frontend && npm run dev
+```
+
+5. The application will be available at:
+   - Frontend: http://localhost:5173 (Vite dev server)
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
 
-### Local Development
-
-#### Backend
+### Option 3: Quick Setup with Make Commands
 
 ```bash
-cd backend
-pip install -e .[dev]
-pre-commit install
-uvicorn main:app --reload
-```
+# Set up development environment
+make dev-setup
 
-#### Frontend
+# Start all services
+make docker-up
 
-```bash
-cd frontend
-npm install
-npm run dev
+# View logs
+make docker-logs
 ```
 
 ## Project Structure
