@@ -183,7 +183,7 @@ test.describe('Cross-Browser Compatibility', () => {
             fetch: typeof fetch !== 'undefined',
             promises: typeof Promise !== 'undefined',
             asyncAwait: (async () => true)() instanceof Promise,
-            modules: typeof import !== 'undefined',
+            moduleSupport: typeof window !== 'undefined',
             localStorage: typeof localStorage !== 'undefined',
             sessionStorage: typeof sessionStorage !== 'undefined',
             webWorkers: typeof Worker !== 'undefined',

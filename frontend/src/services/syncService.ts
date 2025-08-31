@@ -128,7 +128,7 @@ class SyncService {
   }
 
   private async checkServerSyncStatus(): Promise<any> {
-    const response = await fetch(`${apiClient.baseUrl}/sync/status?client_id=${this.clientId}`);
+    const response = await fetch(`${apiClient.getBaseUrl()}/sync/status?client_id=${this.clientId}`);
     if (!response.ok) {
       throw new Error(`Sync status check failed: ${response.status}`);
     }
@@ -136,7 +136,7 @@ class SyncService {
   }
 
   private async performFullSync(): Promise<void> {
-    const response = await fetch(`${apiClient.baseUrl}/sync/full-sync?client_id=${this.clientId}&platform=web&force=true`, {
+    const response = await fetch(`${apiClient.getBaseUrl()}/sync/full-sync?client_id=${this.clientId}&platform=web&force=true`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

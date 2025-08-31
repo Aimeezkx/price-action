@@ -1,81 +1,53 @@
 #!/usr/bin/env python3
 """
-Test API endpoints without database dependency
+测试简单的API端点
 """
 
+import asyncio
+import httpx
 import sys
 from pathlib import Path
 
-# Add backend to path
-backend_path = Path(__file__).parent
-sys.path.insert(0, str(backend_path))
-
-from fastapi.testclient import TestClient
-
-def test_non_db_endpoints():
-    """Test endpoints that don't require database"""
-    try:
-        print("🔍 Testing non-database endpoints...")
-        
-        # Import the app
-        from main import app
-        
-        # Create test client
-        client = TestClient(app)
-        
-        # Test root endpoint
-        print("\n📍 Testing root endpoint...")
-        response = client.get("/")
-        print(f"   Status: {response.status_code}")
-        print(f"   Response: {response.json()}")
-        
-        # Test simple health endpoint
-        print("\n📍 Testing simple health endpoint...")
-        response = client.get("/health/simple")
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            print(f"   Response: {response.json()}")
-        else:
-            print(f"   Error: {response.text}")
-        
-        # Test OpenAPI docs
-        print("\n📍 Testing OpenAPI docs...")
-        response = client.get("/openapi.json")
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            print("✅ OpenAPI schema is available")
-            
-            # Check if documents endpoints are in the schema
-            openapi_data = response.json()
-            paths = openapi_data.get("paths", {})
-            
-            if "/api/documents" in paths:
-                print("✅ /api/documents endpoint is in OpenAPI schema")
-            else:
-                print("❌ /api/documents endpoint NOT in OpenAPI schema")
-                
-            print(f"📋 Available API paths: {list(paths.keys())}")
-        
-        return True
-        
-    except Exception as e:
-        print(f"❌ Test error: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-def main():
-    """Main test function"""
-    print("🚀 Testing Simple API Endpoints (No Database)\n")
+async def test_api_endpoints():
+    """测试API端点"""
+    print("Testing API endpoints...")
     
-    success = test_non_db_endpoints()
+    base_url = "http://localhost:8000"
+    timeout = 5.0
     
-    if success:
-        print("\n🎉 Simple API endpoint tests completed!")
-        print("💡 The backend routing is working correctly")
-        print("⚠️  Database connection needs to be fixed separately")
-    else:
-        print("\n❌ Simple API endpoint tests failed")
+    endpoints = [
+        ("/", "Root endpoint"),
+        ("/health", "Health check"),
+        ("/docs", "API documentation")
+    ]
+    
+    async with httpx.AsyncClient() as client:
+        for endpoint, description in endpoints:
+            try:
+                response = await client.get(f"{base_url}{endpoint}", timeout=timeout)
+                if response.status_code == 200:
+                    print(f"✓ {description} ({endpoint}): OK")
+                else:
+                    print(f"✗ {description} ({endpoint}): Status {response.status_code}")
+                    return False
+            except httpx.TimeoutException:
+                print(f"⚠ {description} ({endpoint}): Timeout (server may not be running)")
+                return False
+            except httpx.ConnectError:
+                print(f"⚠ {description} ({endpoint}): Connection error (server may not be running)")
+                return False
+            except Exception as e:
+                print(f"✗ {description} ({endpoint}): Error - {e}")
+                return False
+    
+    print("✓ API endpoint tests completed successfully")
+    return True
+
+async def main():
+    """主函数"""
+    success = await test_api_endpoints()
+    return 0 if success else 1
 
 if __name__ == "__main__":
-    main()
+    result = asyncio.run(main())
+    sys.exit(result)

@@ -126,8 +126,9 @@ describe('ConnectionStatus', () => {
       
       // Should not show text in compact mode
       expect(screen.queryByText('Connected')).not.toBeInTheDocument();
-      // Should show retry button for unhealthy status
-      mockHealthMonitor.getCurrentStatus.mockReturnValue(mockUnhealthyStatus);
+      // Should show retry button for unhealthy status when in compact mode
+      const container = screen.getByRole('button', { name: /retry/i, hidden: true }) || null;
+      expect(container).toBeNull(); // No retry button when healthy
     });
 
     it('should subscribe to health status changes', () => {
@@ -188,8 +189,8 @@ describe('ConnectionStatus', () => {
       
       // Should not show text in compact mode
       expect(screen.queryByText('Connected')).not.toBeInTheDocument();
-      // Should show icon
-      expect(screen.getByRole('button', { name: /retry/i })).not.toBeInTheDocument();
+      // Should not show retry button when healthy
+      expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument();
     });
 
     it('should show retry button when unhealthy', () => {

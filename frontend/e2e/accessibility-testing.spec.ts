@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { injectAxe, checkA11y, getViolations } from '@axe-core/playwright'
+import AxeBuilder from '@axe-core/playwright'
 import { TestHelpers } from './utils/test-helpers'
 
 test.describe('Accessibility Testing', () => {

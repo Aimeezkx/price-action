@@ -41,21 +41,20 @@ export function SearchFilters({
   const { data: allChapters } = useQuery({
     queryKey: ['all-chapters'],
     queryFn: async () => {
-      if (!documents || documents.length === 0) return [];
+      if (!documents || !Array.isArray(documents) || documents.length === 0) return [];
       
-      const chaptersPromises = documents.map((doc: any) =>
-        apiClient.getChapters(doc.id).then(chapters => 
-          chapters.map((chapter: any) => ({
-            ...chapter,
-            document_title: doc.filename,
-          }))
-        )
-      );
+      const chaptersPromises = documents.map(async (doc: any) => {
+        const chapters = await apiClient.getChapters(doc.id);
+        return chapters.chapters.map((chapter: any) => ({
+          ...chapter,
+          document_title: doc.filename,
+        }));
+      });
       
       const allChapters = await Promise.all(chaptersPromises);
       return allChapters.flat();
     },
-    enabled: !!documents && documents.length > 0,
+    enabled: !!documents && Array.isArray(documents) && documents.length > 0,
   });
 
   const knowledgeTypes = [
@@ -179,7 +178,7 @@ export function SearchFilters({
           )}
 
           {/* Document Filter */}
-          {documents && documents.length > 0 && (
+          {documents && Array.isArray(documents) && documents.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Documents
@@ -192,9 +191,9 @@ export function SearchFilters({
                   onFiltersChange({ document_ids: values.length > 0 ? values : undefined });
                 }}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                size={Math.min(documents.length, 4)}
+                size={Math.min(Array.isArray(documents) ? documents.length : 0, 4)}
               >
-                {documents.map((doc: any) => (
+                {(documents as any[]).map((doc: any) => (
                   <option key={doc.id} value={doc.id}>
                     {doc.filename}
                   </option>

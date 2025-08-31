@@ -1,0 +1,32 @@
+{
+  "timestamp": 1756653259.868774,
+  "reports": [
+    {
+      "suite_name": "Concurrent Users",
+      "start_time": 1756653255.9310899,
+      "end_time": 1756653259.868258,
+      "duration": 3.9371681213378906,
+      "tests_run": 1,
+      "tests_passed": 0,
+      "tests_failed": 1,
+      "system_info": {
+        "cpu_count": 8,
+        "cpu_freq": {
+          "current": 2400,
+          "min": 2400,
+          "max": 2400
+        },
+        "memory_total_gb": 8.0,
+        "memory_available_gb": 0.3021697998046875,
+        "disk_usage": {
+          "total_gb": 228.27386474609375,
+          "free_gb": 13.183685302734375
+        },
+        "python_version": "3.9.12 (main, Apr  5 2022, 01:53:17) \n[Clang 12.0.0 ]",
+        "platform": "darwin"
+      },
+      "test_results": [],
+      "overall_status": "FAILED"
+    }
+  ]
+}

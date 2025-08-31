@@ -3,9 +3,11 @@ import { apiClient } from '../lib/api';
 import type { TableOfContents, Knowledge } from '../types';
 
 export function useTableOfContents(documentId: string) {
-  return useQuery<TableOfContents>({
+  return useQuery<TableOfContents>({    
     queryKey: ['toc', documentId],
-    queryFn: () => apiClient.getChapters(documentId),
+    queryFn: async () => {
+      return await apiClient.getChapters(documentId);
+    },
     enabled: !!documentId,
   });
 }
@@ -13,7 +15,9 @@ export function useTableOfContents(documentId: string) {
 export function useChapterFigures(chapterId: string) {
   return useQuery({
     queryKey: ['chapter-figures', chapterId],
-    queryFn: () => apiClient.getChapterFigures(chapterId),
+    queryFn: async () => {
+      return await apiClient.getChapterFigures(chapterId);
+    },
     enabled: !!chapterId,
   });
 }
@@ -33,7 +37,9 @@ export function useChapterKnowledge(
     knowledge_points: Knowledge[];
   }>({
     queryKey: ['chapter-knowledge', chapterId, options],
-    queryFn: () => apiClient.getChapterKnowledge(chapterId, options),
+    queryFn: async () => {
+      return await apiClient.getChapterKnowledge(chapterId, options);
+    },
     enabled: !!chapterId,
   });
 }

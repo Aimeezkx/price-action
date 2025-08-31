@@ -113,7 +113,7 @@ export const ErrorNotificationContainer: React.FC<ErrorNotificationContainerProp
       </div>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes slideInRight {
           from {
             transform: translateX(100%);

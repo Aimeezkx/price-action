@@ -9,9 +9,9 @@ import {
   ErrorNotificationState, 
   NotificationEvent, 
   NotificationOptions,
-  errorNotificationManager,
-  ErrorContext
+  errorNotificationManager
 } from '../lib/error-notification-manager';
+import { ErrorContext } from '../lib/error-messages';
 import { ClassifiedError, NetworkErrorType } from '../lib/error-handling';
 
 export interface UseErrorNotificationsReturn {

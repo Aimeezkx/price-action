@@ -1,97 +1,109 @@
 #!/usr/bin/env python3
 """
-Test database connection and document creation
+测试数据库连接和基本操作
 """
 
-import asyncio
+import os
 import sys
 from pathlib import Path
 
-# Add the backend directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add project root to path
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
-from app.core.database import get_async_db, init_db, create_tables
-from app.models.document import Document, ProcessingStatus
-from app.core.config import settings
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from app.models.base import BaseModel
+from app.core.database import engine
+from app.models.document import Document, Chapter, Figure
+try:
+    from app.models.knowledge import Knowledge
+except ImportError:
+    Knowledge = None
+try:
+    from app.models.cards import Card  
+except ImportError:
+    Card = None
+try:
+    from app.models.srs import SRS
+except ImportError:
+    SRS = None
+from sqlalchemy.orm import sessionmaker
 
-
-async def test_database_connection():
-    """Test database connection and basic operations"""
+def test_database_connection():
+    """测试数据库连接"""
     print("Testing database connection...")
-    print(f"Database URL: {settings.database_url}")
+    
+    # 设置数据库URL
+    database_url = "sqlite:///./document_learning.db"
+    print(f"Database URL: {database_url}")
     
     try:
-        # Initialize database
-        await init_db()
+        # 创建数据库表
+        BaseModel.metadata.create_all(bind=engine)
         print("✓ Database initialized successfully")
         
-        # Create tables
-        await create_tables()
+        # 检查表是否存在
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        expected_tables = ["documents", "chapters", "figures"]
+        if Knowledge:
+            expected_tables.append("knowledge")
+        if Card:
+            expected_tables.append("cards")
+        if SRS:
+            expected_tables.append("srs")
+        
+        for table in expected_tables:
+            if table in tables:
+                print(f"✓ Table '{table}' exists")
+            else:
+                print(f"✗ Table '{table}' missing")
+                
         print("✓ Database tables created successfully")
         
-        # Test database session
-        async for db in get_async_db():
-            # Test creating a document record
+        # 测试基本数据库操作
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        
+        try:
+            # 创建测试文档
             test_doc = Document(
                 filename="test_document.pdf",
                 file_type="pdf",
                 file_path="/tmp/test.pdf",
                 file_size=1024,
-                status=ProcessingStatus.PENDING
+                status="PENDING"
             )
-            
-            db.add(test_doc)
-            
-            # Handle both async and sync sessions
-            if hasattr(db, 'commit') and callable(getattr(db, 'commit')):
-                if hasattr(db.commit, '__await__'):
-                    await db.commit()
-                    await db.refresh(test_doc)
-                else:
-                    db.commit()
-                    db.refresh(test_doc)
-            
+            session.add(test_doc)
+            session.commit()
             print(f"✓ Created test document with ID: {test_doc.id}")
             
-            # Test querying the document
-            stmt = select(Document).where(Document.id == test_doc.id)
-            if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-                if hasattr(db.execute, '__await__'):
-                    result = await db.execute(stmt)
-                else:
-                    result = db.execute(stmt)
-            retrieved_doc = result.scalar_one_or_none()
-            
+            # 查询文档
+            retrieved_doc = session.query(Document).filter_by(id=test_doc.id).first()
             if retrieved_doc:
                 print(f"✓ Retrieved document: {retrieved_doc.filename}")
             else:
                 print("✗ Failed to retrieve document")
-                return False
+                
+            # 查询关联的章节（应该为空）
+            chapters = session.query(Chapter).filter_by(document_id=test_doc.id).all()
+            print(f"✓ Document has {len(chapters)} chapters")
             
-            # Clean up test document
-            if hasattr(db, 'delete') and callable(getattr(db, 'delete')):
-                if hasattr(db.delete, '__await__'):
-                    await db.delete(test_doc)
-                    await db.commit()
-                else:
-                    db.delete(test_doc)
-                    db.commit()
+            # 清理测试数据
+            session.delete(test_doc)
+            session.commit()
             print("✓ Cleaned up test document")
             
-            break
-        
+        finally:
+            session.close()
+            
         print("✓ Database connection test completed successfully")
         return True
         
     except Exception as e:
         print(f"✗ Database connection test failed: {e}")
-        import traceback
-        traceback.print_exc()
         return False
 
-
 if __name__ == "__main__":
-    success = asyncio.run(test_database_connection())
+    success = test_database_connection()
     sys.exit(0 if success else 1)

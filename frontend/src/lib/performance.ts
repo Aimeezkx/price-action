@@ -35,9 +35,9 @@ class PerformanceMonitor {
       // Largest Contentful Paint
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
+        const lastEntry = entries[entries.length - 1] as any;
         this.recordMetric('LCP', lastEntry.startTime, {
-          element: lastEntry.element?.tagName
+          element: lastEntry.element?.tagName || 'unknown'
         });
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -78,8 +78,8 @@ class PerformanceMonitor {
         
         if (navigation) {
           const timing: NavigationTiming = {
-            pageLoadTime: navigation.loadEventEnd - navigation.navigationStart,
-            domContentLoadedTime: navigation.domContentLoadedEventEnd - navigation.navigationStart,
+            pageLoadTime: navigation.loadEventEnd - (navigation.fetchStart || 0),
+            domContentLoadedTime: navigation.domContentLoadedEventEnd - (navigation.fetchStart || 0),
             firstContentfulPaint: 0,
             largestContentfulPaint: 0,
             cumulativeLayoutShift: 0

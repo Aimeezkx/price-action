@@ -1,5 +1,5 @@
 import { Page, expect } from '@playwright/test'
-import { injectAxe, checkA11y } from '@axe-core/playwright'
+import AxeBuilder from '@axe-core/playwright'
 
 export class TestHelpers {
   constructor(private page: Page) {}

@@ -1,0 +1,79 @@
+{
+  "timestamp": 1756653264.0499089,
+  "total_suites": 5,
+  "successful_suites": 0,
+  "failed_suites": 5,
+  "total_duration_seconds": 23.545963764190674,
+  "success_rate": 0.0,
+  "suite_results": [
+    {
+      "suite_name": "Backend Document Processing",
+      "suite_type": "backend",
+      "start_time": 1756653240.498226,
+      "end_time": 1756653245.3425012,
+      "duration": 4.844275236129761,
+      "exit_code": 1,
+      "stdout": "\n============================================================\nRunning Performance Test Suite: Document Processing Performance\n============================================================\n\nTest Suite Results:\n  Duration: 2.90 seconds\n  Status: FAILED\n\nPerformance report saved to: performance_report.json\n",
+      "stderr": "ImportError while loading conftest '/Users/kaixinzheng/quant trading/priceaction/price-action/backend/tests/conftest.py'.\nbackend/tests/conftest.py:19: in <module>\n    from app.core.config import get_settings\nE   ModuleNotFoundError: No module named 'app'\n",
+      "success": false,
+      "metrics": {}
+    },
+    {
+      "suite_name": "Backend Search Performance",
+      "suite_type": "backend",
+      "start_time": 1756653245.344288,
+      "end_time": 1756653250.915037,
+      "duration": 5.570748805999756,
+      "exit_code": 1,
+      "stdout": "\n============================================================\nRunning Performance Test Suite: Search Performance\n============================================================\n\nTest Suite Results:\n  Duration: 3.03 seconds\n  Status: FAILED\n\nPerformance report saved to: performance_report.json\n",
+      "stderr": "ImportError while loading conftest '/Users/kaixinzheng/quant trading/priceaction/price-action/backend/tests/conftest.py'.\nbackend/tests/conftest.py:19: in <module>\n    from app.core.config import get_settings\nE   ModuleNotFoundError: No module named 'app'\n",
+      "success": false,
+      "metrics": {}
+    },
+    {
+      "suite_name": "Backend Memory Monitoring",
+      "suite_type": "backend",
+      "start_time": 1756653250.915978,
+      "end_time": 1756653255.1209228,
+      "duration": 4.204944849014282,
+      "exit_code": 1,
+      "stdout": "\n============================================================\nRunning Performance Test Suite: Memory Monitoring\n============================================================\n\nTest Suite Results:\n  Duration: 2.93 seconds\n  Status: FAILED\n\nPerformance report saved to: performance_report.json\n",
+      "stderr": "ImportError while loading conftest '/Users/kaixinzheng/quant trading/priceaction/price-action/backend/tests/conftest.py'.\nbackend/tests/conftest.py:19: in <module>\n    from app.core.config import get_settings\nE   ModuleNotFoundError: No module named 'app'\n",
+      "success": false,
+      "metrics": {}
+    },
+    {
+      "suite_name": "Backend Concurrent Users",
+      "suite_type": "backend",
+      "start_time": 1756653255.12154,
+      "end_time": 1756653260.134709,
+      "duration": 5.013168811798096,
+      "exit_code": 1,
+      "stdout": "\n============================================================\nRunning Performance Test Suite: Concurrent Users\n============================================================\n\nTest Suite Results:\n  Duration: 3.94 seconds\n  Status: FAILED\n\nPerformance report saved to: performance_report.json\n",
+      "stderr": "ImportError while loading conftest '/Users/kaixinzheng/quant trading/priceaction/price-action/backend/tests/conftest.py'.\nbackend/tests/conftest.py:19: in <module>\n    from app.core.config import get_settings\nE   ModuleNotFoundError: No module named 'app'\n",
+      "success": false,
+      "metrics": {}
+    },
+    {
+      "suite_name": "Frontend Performance",
+      "suite_type": "frontend",
+      "start_time": 1756653260.135606,
+      "end_time": 1756653264.048432,
+      "duration": 3.9128260612487793,
+      "exit_code": 1,
+      "stdout": "\n> document-learning-frontend@0.0.0 test\n> vitest --run frontend/src/test/performance/frontend-performance.test.ts\n\n\n RUN  v0.34.6 /Users/kaixinzheng/quant trading/priceaction/price-action/frontend\n\n",
+      "stderr": "filter:  frontend/src/test/performance/frontend-performance.test.ts\ninclude: src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}\nexclude:  node_modules, dist, .idea, .git, .cache\nwatch exclude:  **/node_modules/**, **/dist/**\n\nNo test files found, exiting with code 1\n",
+      "success": false,
+      "metrics": {}
+    }
+  ],
+  "summary_metrics": {},
+  "system_info": {
+    "cpu_count": 8,
+    "memory_total_gb": 8.0,
+    "memory_available_gb": 0.28728485107421875,
+    "disk_free_gb": 13.18179702758789,
+    "python_version": "3.9.12 (main, Apr  5 2022, 01:53:17) \n[Clang 12.0.0 ]",
+    "platform": "darwin"
+  }
+}

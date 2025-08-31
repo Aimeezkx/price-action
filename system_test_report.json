@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-08-30 14:36:38",
+  "total_tests": 4,
+  "passed_tests": 1,
+  "failed_tests": 3,
+  "success_rate": 25.0,
+  "test_results": {
+    "基础模块导入": {
+      "success": false,
+      "error": "测试失败"
+    },
+    "后端基础功能": {
+      "success": true,
+      "error": null
+    },
+    "API功能": {
+      "success": false,
+      "error": "测试失败"
+    },
+    "前端构建": {
+      "success": false,
+      "error": "测试失败"
+    }
+  }
+}

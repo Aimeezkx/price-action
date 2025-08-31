@@ -83,7 +83,7 @@ ignore = [
 [tool.black]
 target-version = ['py311']
 line-length = 88
-include = '\.pyi?$'$'
+include = '\.pyi?$'
 extend-exclude = '''
 /(
   # directories

@@ -1,0 +1,64 @@
+{
+  "timestamp": "2025-08-31 07:09:08",
+  "overall_success": false,
+  "total_validations": 7,
+  "passed_validations": 2,
+  "failed_validations": 5,
+  "results": {
+    "TypeScript配置": {
+      "passed": false,
+      "details": {},
+      "error": "Expecting property name enclosed in double quotes: line 11 column 5 (char 258)"
+    },
+    "前端构建": {
+      "passed": false,
+      "details": {
+        "build_success": false,
+        "dist_directory_exists": false,
+        "index_html_exists": false
+      },
+      "error": ""
+    },
+    "组件语法": {
+      "passed": false,
+      "details": {
+        "no_syntax_patterns": true,
+        "typescript_validates": false
+      },
+      "error": ""
+    },
+    "可访问性测试": {
+      "passed": true,
+      "details": {
+        "axe_core_in_package_json": true,
+        "axe_core_installed": true
+      },
+      "error": null
+    },
+    "测试文件语法": {
+      "passed": false,
+      "details": {
+        "src/test/integration/api-integration.test.ts": false,
+        "src/test/upload-integration.test.ts": false,
+        "src/test/performance/frontend-performance.test.ts": false
+      },
+      "error": "Some test files have syntax errors"
+    },
+    "spaCy安装": {
+      "passed": true,
+      "details": {
+        "spacy_loads": true,
+        "model_available": true
+      },
+      "error": null
+    },
+    "系统功能": {
+      "passed": false,
+      "details": {
+        "database_connection": true,
+        "api_endpoints": false
+      },
+      "error": "Backend: Testing database connection...\nDatabase URL: sqlite:///./document_learning.db\n2025-08-31 07:09:07,358 INFO sqlalchemy.engine.Engine BEGIN (implicit)\n2025-08-31 07:09:07,360 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"documents\")\n2025-08-31 07:09:07,361 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,374 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"chapters\")\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"figures\")\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"knowledge\")\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"cards\")\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine PRAGMA main.table_info(\"srs\")\n2025-08-31 07:09:07,375 INFO sqlalchemy.engine.Engine [raw sql] ()\n2025-08-31 07:09:07,376 INFO sqlalchemy.engine.Engine COMMIT\n✓ Database initialized successfully\n2025-08-31 07:09:07,376 INFO sqlalchemy.engine.Engine SELECT name FROM sqlite_master WHERE type='table' ORDER BY name\n2025-08-31 07:09:07,376 INFO sqlalchemy.engine.Engine [raw sql] ()\n✓ Table 'documents' exists\n✓ Table 'chapters' exists\n✓ Table 'figures' exists\n✓ Table 'knowledge' exists\n✓ Database tables created successfully\n2025-08-31 07:09:07,396 INFO sqlalchemy.engine.Engine BEGIN (implicit)\n2025-08-31 07:09:07,398 INFO sqlalchemy.engine.Engine INSERT INTO documents (created_at, updated_at, id, filename, file_type, file_path, file_size, status, doc_metadata, error_message) VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?)\n2025-08-31 07:09:07,400 INFO sqlalchemy.engine.Engine [generated in 0.00105s] ('763cbd4a-7651-43b6-a284-aba435cff1e1', 'test_document.pdf', 'pdf', '/tmp/test.pdf', 1024, 'PENDING', '{}', None)\n2025-08-31 07:09:07,403 INFO sqlalchemy.engine.Engine COMMIT\n2025-08-31 07:09:07,405 INFO sqlalchemy.engine.Engine BEGIN (implicit)\n2025-08-31 07:09:07,407 INFO sqlalchemy.engine.Engine SELECT documents.created_at AS documents_created_at, documents.updated_at AS documents_updated_at, documents.id AS documents_id, documents.filename AS documents_filename, documents.file_type AS documents_file_type, documents.file_path AS documents_file_path, documents.file_size AS documents_file_size, documents.status AS documents_status, documents.doc_metadata AS documents_doc_metadata, documents.error_message AS documents_error_message \nFROM documents \nWHERE documents.id = ?\n2025-08-31 07:09:07,407 INFO sqlalchemy.engine.Engine [generated in 0.00033s] ('763cbd4a-7651-43b6-a284-aba435cff1e1',)\n✓ Created test document with ID: 763cbd4a-7651-43b6-a284-aba435cff1e1\n2025-08-31 07:09:07,410 INFO sqlalchemy.engine.Engine SELECT documents.created_at AS documents_created_at, documents.updated_at AS documents_updated_at, documents.id AS documents_id, documents.filename AS documents_filename, documents.file_type AS documents_file_type, documents.file_path AS documents_file_path, documents.file_size AS documents_file_size, documents.status AS documents_status, documents.doc_metadata AS documents_doc_metadata, documents.error_message AS documents_error_message \nFROM documents \nWHERE documents.id = ?\n LIMIT ? OFFSET ?\n2025-08-31 07:09:07,410 INFO sqlalchemy.engine.Engine [generated in 0.00013s] ('763cbd4a-7651-43b6-a284-aba435cff1e1', 1, 0)\n✓ Retrieved document: test_document.pdf\n2025-08-31 07:09:07,412 INFO sqlalchemy.engine.Engine SELECT chapters.created_at AS chapters_created_at, chapters.updated_at AS chapters_updated_at, chapters.id AS chapters_id, chapters.document_id AS chapters_document_id, chapters.title AS chapters_title, chapters.level AS chapters_level, chapters.order_index AS chapters_order_index, chapters.page_start AS chapters_page_start, chapters.page_end AS chapters_page_end, chapters.content AS chapters_content \nFROM chapters \nWHERE chapters.document_id = ?\n2025-08-31 07:09:07,412 INFO sqlalchemy.engine.Engine [generated in 0.00012s] ('763cbd4a-7651-43b6-a284-aba435cff1e1',)\n✓ Document has 0 chapters\n2025-08-31 07:09:07,414 INFO sqlalchemy.engine.Engine SELECT chapters.created_at AS chapters_created_at, chapters.updated_at AS chapters_updated_at, chapters.id AS chapters_id, chapters.document_id AS chapters_document_id, chapters.title AS chapters_title, chapters.level AS chapters_level, chapters.order_index AS chapters_order_index, chapters.page_start AS chapters_page_start, chapters.page_end AS chapters_page_end, chapters.content AS chapters_content \nFROM chapters \nWHERE ? = chapters.document_id\n2025-08-31 07:09:07,414 INFO sqlalchemy.engine.Engine [generated in 0.00013s] ('763cbd4a-7651-43b6-a284-aba435cff1e1',)\n2025-08-31 07:09:07,415 INFO sqlalchemy.engine.Engine DELETE FROM documents WHERE documents.id = ?\n2025-08-31 07:09:07,415 INFO sqlalchemy.engine.Engine [generated in 0.00013s] ('763cbd4a-7651-43b6-a284-aba435cff1e1',)\n2025-08-31 07:09:07,416 INFO sqlalchemy.engine.Engine COMMIT\n✓ Cleaned up test document\n✓ Database connection test completed successfully\n, API: "
+    }
+  }
+}

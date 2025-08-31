@@ -46,7 +46,7 @@ export function ImageHotspotViewer({
   const [feedbackType, setFeedbackType] = useState<'success' | 'partial' | 'error'>('success');
   
   // Touch gesture state
-  const [touches, setTouches] = useState<TouchList | null>(null);
+  const [touches, setTouches] = useState<React.TouchList | null>(null);
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
   const [lastTouchCenter, setLastTouchCenter] = useState({ x: 0, y: 0 });
   
@@ -86,7 +86,7 @@ export function ImageHotspotViewer({
   }, []);
 
   // Calculate distance between two touches
-  const getTouchDistance = useCallback((touches: TouchList) => {
+  const getTouchDistance = useCallback((touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     const touch1 = touches[0];
     const touch2 = touches[1];
@@ -97,7 +97,7 @@ export function ImageHotspotViewer({
   }, []);
 
   // Calculate center point between two touches
-  const getTouchCenter = useCallback((touches: TouchList) => {
+  const getTouchCenter = useCallback((touches: React.TouchList) => {
     if (touches.length < 2) return { x: 0, y: 0 };
     const touch1 = touches[0];
     const touch2 = touches[1];

@@ -202,7 +202,7 @@ export const UserAcceptanceDashboard: React.FC = () => {
 
         {/* Satisfaction Tab */}
         <TabsContent value="satisfaction" className="space-y-4">
-          {dashboardData.satisfaction_overview && 'error' not in dashboardData.satisfaction_overview ? (
+          {dashboardData.satisfaction_overview && !('error' in dashboardData.satisfaction_overview) ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
@@ -269,7 +269,7 @@ export const UserAcceptanceDashboard: React.FC = () => {
 
         {/* Feedback Tab */}
         <TabsContent value="feedback" className="space-y-4">
-          {dashboardData.feedback_analysis && 'error' not in dashboardData.feedback_analysis ? (
+          {dashboardData.feedback_analysis && !('error' in dashboardData.feedback_analysis) ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>

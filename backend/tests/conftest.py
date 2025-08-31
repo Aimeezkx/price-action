@@ -18,7 +18,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
 from app.core.database import Base, get_db
-from app.main import app
+from main import app
 from tests.factories import DocumentFactory, ChapterFactory, KnowledgeFactory, CardFactory
 
 

@@ -29,7 +29,7 @@ describe('ErrorMessage', () => {
     it('applies correct styling classes', () => {
       render(<ErrorMessage message="Test error" />);
 
-      const container = screen.getByText('Something went wrong').closest('div');
+      const container = screen.getByText('Test error').closest('div');
       expect(container).toHaveClass('bg-red-50');
     });
   });

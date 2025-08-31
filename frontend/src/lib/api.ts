@@ -5,6 +5,166 @@ import { networkErrorClassifier, ClassifiedError, ErrorLogger } from './error-ha
 import { retryConfigManager } from './retry-config';
 import { apiLogger } from './api-logger';
 import { apiPerformanceMonitor } from './api-performance-monitor';
+import type { Card, Document, TableOfContents } from '../types';
+
+/**
+ * Frontend API Client
+ * Handles all communication with the backend API
+ * Includes retry mechanisms, error classification, and health monitoring
+ */
+
+// API Configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+// API Response Interface
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  error?: {
+    type: string;
+    userMessage: string;
+    technicalMessage: string;
+    canRetry: boolean;
+    requestId: string;
+    timestamp: Date;
+    statusCode?: number;
+  };
+  retryInfo?: {
+    attempts: number;
+    totalTime: number;
+    circuitBreakerTripped?: boolean;
+  };
+}
+
+// Simplified API Client
+class APIClient {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = API_BASE_URL) {
+    this.baseUrl = baseUrl;
+  }
+
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    
+    const config: RequestInit = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    try {
+      const response = await fetch(url, config);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      // For tests, simply re-throw the error
+      throw error;
+    }
+  }
+
+  // Document endpoints
+  async getDocuments(): Promise<Document[]> {
+    return this.request('/documents');
+  }
+
+  async getDocument(id: string): Promise<Document> {
+    return this.request(`/documents/${id}`);
+  }
+
+  async uploadDocument(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${this.baseUrl}/ingest`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Chapter endpoints
+  async getChapters(documentId: string): Promise<TableOfContents> {
+    return this.request(`/doc/${documentId}/toc`);
+  }
+
+  async getChapterFigures(chapterId: string): Promise<any> {
+    return this.request(`/chapter/${chapterId}/fig`);
+  }
+
+  async getChapterKnowledge(chapterId: string, params?: {
+    knowledge_type?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any> {
+    const query = params ? `?${new URLSearchParams(params as Record<string, string>)}` : '';
+    return this.request(`/chapter/${chapterId}/k${query}`);
+  }
+
+  // Card endpoints
+  async getCards(params?: Record<string, string>): Promise<Card[]> {
+    const query = params ? `?${new URLSearchParams(params)}` : '';
+    return this.request(`/cards${query}`);
+  }
+
+  async generateCards(documentId: string): Promise<any> {
+    return this.request('/card/gen', {
+      method: 'POST',
+      body: JSON.stringify({ document_id: documentId }),
+    });
+  }
+
+  // Review endpoints
+  async getTodayReview(): Promise<Card[]> {
+    return this.request('/review/today');
+  }
+
+  async gradeCard(cardId: string, grade: number): Promise<any> {
+    return this.request('/review/grade', {
+      method: 'POST',
+      body: JSON.stringify({ card_id: cardId, grade }),
+    });
+  }
+
+  // Search endpoints
+  async search(query: string, filters?: Record<string, string>) {
+    const params = new URLSearchParams({ q: query, ...filters });
+    return this.request(`/search?${params}`);
+  }
+
+  // Export endpoints
+  async exportCsv(format: 'anki' | 'notion' = 'anki') {
+    return this.request(`/export/csv?format=${format}`);
+  }
+
+  async exportJsonl() {
+    return this.request('/export/jsonl');
+  }
+
+  // Health check method
+  async checkHealth(): Promise<{ status: string; timestamp: string }> {
+    return this.request('/health');
+  }
+}
+
+// Export the API client instance
+export const apiClient = new APIClient();
+
+// Upload helper function for backward compatibility
+export async function uploadDocument(file: File): Promise<any> {
+  return apiClient.uploadDocument(file);
+}
 
 // API client configuration
 const API_BASE_URL = import.meta.env.DEV 
@@ -17,17 +177,6 @@ export interface ApiRequestOptions extends RequestInit {
   maxRetries?: number;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  success: boolean;
-  error?: ClassifiedError;
-  retryInfo?: {
-    attempts: number;
-    totalTime: number;
-    circuitBreakerTripped?: boolean;
-  };
-}
-
 export class RobustApiClient {
   private baseUrl: string;
   private retryExecutor: RetryExecutor;
@@ -35,6 +184,11 @@ export class RobustApiClient {
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || configManager.getApiConfig().baseUrl || API_BASE_URL;
     this.retryExecutor = new RetryExecutor();
+  }
+
+  // Public getter for baseUrl
+  getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   private async request<T>(
@@ -223,9 +377,9 @@ export class RobustApiClient {
   }
 
   // Helper method for handling API responses
-  private async handleResponse<T>(response: ApiResponse<T>): Promise<T> {
+  private async handleResponse<T>(response: ApiResponse<any>): Promise<T> {
     if (response.success) {
-      return response.data;
+      return response.data as T;
     } else {
       // Throw the classified error for backward compatibility
       const error = new Error(response.error?.userMessage || 'API request failed');
@@ -241,17 +395,17 @@ export class RobustApiClient {
   }
 
   // Document endpoints
-  async getDocuments() {
+  async getDocuments(): Promise<Document[]> {
     const response = await this.request('/documents');
     return this.handleResponse(response);
   }
 
-  async getDocument(id: string) {
+  async getDocument(id: string): Promise<Document> {
     const response = await this.request(`/documents/${id}`);
     return this.handleResponse(response);
   }
 
-  async uploadDocument(file: File) {
+  async uploadDocument(file: File): Promise<any> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -266,12 +420,12 @@ export class RobustApiClient {
   }
 
   // Chapter endpoints
-  async getChapters(documentId: string) {
+  async getChapters(documentId: string): Promise<TableOfContents> {
     const response = await this.request(`/doc/${documentId}/toc`);
     return this.handleResponse(response);
   }
 
-  async getChapterFigures(chapterId: string) {
+  async getChapterFigures(chapterId: string): Promise<any> {
     const response = await this.request(`/chapter/${chapterId}/fig`);
     return this.handleResponse(response);
   }
@@ -280,20 +434,20 @@ export class RobustApiClient {
     knowledge_type?: string;
     limit?: number;
     offset?: number;
-  }) {
+  }): Promise<any> {
     const query = params ? `?${new URLSearchParams(params as Record<string, string>)}` : '';
     const response = await this.request(`/chapter/${chapterId}/k${query}`);
     return this.handleResponse(response);
   }
 
   // Card endpoints
-  async getCards(params?: Record<string, string>) {
+  async getCards(params?: Record<string, string>): Promise<Card[]> {
     const query = params ? `?${new URLSearchParams(params)}` : '';
     const response = await this.request(`/cards${query}`);
     return this.handleResponse(response);
   }
 
-  async generateCards(documentId: string) {
+  async generateCards(documentId: string): Promise<any> {
     const response = await this.request('/card/gen', {
       method: 'POST',
       body: JSON.stringify({ document_id: documentId }),
@@ -303,12 +457,12 @@ export class RobustApiClient {
   }
 
   // Review endpoints
-  async getTodayReview() {
+  async getTodayReview(): Promise<Card[]> {
     const response = await this.request('/review/today');
     return this.handleResponse(response);
   }
 
-  async gradeCard(cardId: string, grade: number) {
+  async gradeCard(cardId: string, grade: number): Promise<any> {
     const response = await this.request('/review/grade', {
       method: 'POST',
       body: JSON.stringify({ card_id: cardId, grade }),
