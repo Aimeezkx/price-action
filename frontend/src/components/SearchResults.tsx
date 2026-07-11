@@ -152,6 +152,15 @@ export function SearchResults({
           key={result.id}
           className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
           onClick={() => onResultClick?.(result)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onResultClick?.(result);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${getResultTypeLabel(result.type)}: ${result.title}`}
         >
           <div className="p-6">
             <div className="flex items-start space-x-4">

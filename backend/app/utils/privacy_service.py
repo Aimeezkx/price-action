@@ -239,6 +239,33 @@ class PrivacyService:
             return PrivacyLevel.MAXIMUM
         else:
             return PrivacyLevel.MEDIUM
+
+    def get_privacy_status(self) -> Dict[str, Any]:
+        """Return the effective privacy configuration used by the UI."""
+        privacy_mode = self.is_privacy_mode_enabled()
+        use_llm = getattr(settings, 'use_llm', False)
+        return {
+            'privacy_mode': privacy_mode,
+            'anonymize_logs': getattr(settings, 'anonymize_logs', True),
+            'use_llm': use_llm,
+            'enable_file_scanning': getattr(settings, 'enable_file_scanning', True),
+            'external_services': {
+                'llm': use_llm and not privacy_mode,
+                'ocr': False,
+                'embeddings': 'Local',
+            },
+        }
+
+    def validate_privacy_settings(self) -> List[str]:
+        """Describe privacy-impacting settings without exposing secrets."""
+        warnings: List[str] = []
+        if not self.is_privacy_mode_enabled():
+            warnings.append('Privacy mode is disabled; external processing may be used.')
+        if not getattr(settings, 'anonymize_logs', True):
+            warnings.append('Log anonymization is disabled.')
+        if not getattr(settings, 'enable_file_scanning', True):
+            warnings.append('Uploaded-file scanning is disabled.')
+        return warnings
     
     def sanitize_for_logging(self, data: Any, context: str = None) -> Any:
         """Sanitize data specifically for logging."""

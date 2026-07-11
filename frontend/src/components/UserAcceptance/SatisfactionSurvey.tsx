@@ -136,7 +136,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
     }
   };
 
-  const renderRatingScale = (value: number | null, setValue: (value: number) => void, max: number = 5) => (
+  const renderRatingScale = (value: number | null, setValue: (value: number) => void, max = 5) => (
     <div className="space-y-4">
       <div className="flex justify-center gap-2">
         {Array.from({ length: max }, (_, i) => i + 1).map((rating) => (

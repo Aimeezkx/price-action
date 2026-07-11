@@ -92,10 +92,7 @@ export const DebugToolbar: React.FC<DebugToolbarProps> = ({ enabled = true }) =>
     return 'Unhealthy';
   };
 
-  // Force enable in development for testing
-  const shouldShow = enabled || import.meta.env.DEV || process.env.NODE_ENV === 'development';
-  
-  if (!shouldShow) {
+  if (!enabled) {
     return null;
   }
 

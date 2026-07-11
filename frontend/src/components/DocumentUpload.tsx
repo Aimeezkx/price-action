@@ -137,6 +137,15 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleClick}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+          }
+        }}
+        role="button"
+        tabIndex={isUploading ? -1 : 0}
+        aria-label="Choose a document to upload"
         className={`
           relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
           ${isDragActive && !isDragReject ? 'border-blue-400 bg-blue-50' : ''}
@@ -147,6 +156,8 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
       >
         <input
           ref={fileInputRef}
+          id="document-upload-input"
+          aria-label="Choose a document to upload"
           type="file"
           accept=".pdf,.docx,.md,.txt"
           onChange={handleFileInputChange}

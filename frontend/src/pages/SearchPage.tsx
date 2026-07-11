@@ -1,11 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../hooks/useSearch';
 import { SearchInput } from '../components/SearchInput';
 import { SearchResults } from '../components/SearchResults';
 import { SearchFilters } from '../components/SearchFilters';
 import { SearchHistory } from '../components/SearchHistory';
+import type { SearchResult } from '../types';
 
 export function SearchPage() {
+  const navigate = useNavigate();
   const {
     searchState,
     searchResults,
@@ -31,9 +34,17 @@ export function SearchPage() {
     setShowSuggestions,
   } = useSearch();
 
-  const handleResultClick = (result: any) => {
-    // TODO: Navigate to the specific content (knowledge point or card)
-    console.log('Clicked result:', result);
+  const handleResultClick = (result: SearchResult) => {
+    const documentId = result.metadata?.document_id;
+    const chapterId = result.metadata?.chapter_id;
+
+    if (documentId) {
+      const chapterQuery = chapterId ? `?chapter=${encodeURIComponent(chapterId)}` : '';
+      navigate(`/documents/${encodeURIComponent(documentId)}/chapters${chapterQuery}`);
+      return;
+    }
+
+    navigate(result.type === 'card' ? '/study' : '/documents');
   };
 
   return (

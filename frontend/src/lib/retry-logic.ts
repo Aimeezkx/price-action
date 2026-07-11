@@ -32,9 +32,9 @@ export enum CircuitBreakerState {
 
 export class CircuitBreaker {
   private state: CircuitBreakerState = CircuitBreakerState.CLOSED;
-  private failureCount: number = 0;
-  private lastFailureTime: number = 0;
-  private successCount: number = 0;
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private successCount = 0;
   private config: CircuitBreakerConfig;
 
   constructor(config: CircuitBreakerConfig) {

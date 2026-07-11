@@ -267,7 +267,7 @@ class ApiPerformanceMonitor {
   /**
    * Get performance trends
    */
-  getPerformanceTrends(hours: number = 24): {
+  getPerformanceTrends(hours = 24): {
     responseTimeTrend: 'improving' | 'degrading' | 'stable';
     errorRateTrend: 'improving' | 'degrading' | 'stable';
     throughputTrend: 'increasing' | 'decreasing' | 'stable';

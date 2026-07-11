@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChapterBrowser } from '../components';
 import { useDocument } from '../hooks/useDocuments';
 import { LoadingSpinner, ErrorMessage } from '../components';
@@ -7,6 +7,8 @@ import { LoadingSpinner, ErrorMessage } from '../components';
 export function ChapterBrowserPage() {
   const { documentId } = useParams<{ documentId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialChapterId = searchParams.get('chapter');
   
   const { data: document, isLoading, error } = useDocument(documentId!);
 
@@ -110,7 +112,8 @@ export function ChapterBrowserPage() {
   return (
     <div className="h-screen flex flex-col">
       <ChapterBrowser 
-        documentId={documentId} 
+        documentId={documentId}
+        initialChapterId={initialChapterId}
         onClose={() => navigate('/documents')}
       />
     </div>

@@ -7,10 +7,11 @@ import { ErrorMessage } from './ErrorMessage';
 
 interface ChapterBrowserProps {
   documentId: string;
+  initialChapterId?: string | null;
   onClose?: () => void;
 }
 
-export function ChapterBrowser({ documentId, onClose }: ChapterBrowserProps) {
+export function ChapterBrowser({ documentId, initialChapterId, onClose }: ChapterBrowserProps) {
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -19,9 +20,10 @@ export function ChapterBrowser({ documentId, onClose }: ChapterBrowserProps) {
   // Auto-select first chapter when TOC loads
   React.useEffect(() => {
     if (toc && toc.chapters.length > 0 && !selectedChapterId) {
-      setSelectedChapterId(toc.chapters[0].id);
+      const requestedChapter = toc.chapters.find(chapter => chapter.id === initialChapterId);
+      setSelectedChapterId(requestedChapter?.id ?? toc.chapters[0].id);
     }
-  }, [toc, selectedChapterId]);
+  }, [toc, selectedChapterId, initialChapterId]);
 
   const selectedChapter = toc?.chapters.find(ch => ch.id === selectedChapterId);
 

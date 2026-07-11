@@ -1,19 +1,70 @@
 import React, { useState } from 'react';
+import { apiClient } from '../lib/api';
 
 export function ExportPage() {
   const [exportFormat, setExportFormat] = useState<'anki' | 'notion' | 'jsonl'>('anki');
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
+    setMessage(null);
+    setError(null);
     try {
-      // TODO: Implement actual export functionality
-      console.log('Exporting in format:', exportFormat);
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate export
-    } catch (error) {
-      console.error('Export failed:', error);
+      const endpoint = exportFormat === 'jsonl'
+        ? '/export/jsonl'
+        : `/export/csv?format=${exportFormat}`;
+      const response = await fetch(`${apiClient.getBaseUrl()}${endpoint}`);
+      if (!response.ok) {
+        throw new Error(`Export failed (${response.status})`);
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('content-disposition') ?? '';
+      const filename = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1]
+        ?? `document-learning-export.${exportFormat === 'jsonl' ? 'jsonl' : 'csv'}`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setMessage(`${filename} is ready.`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Export failed');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${apiClient.getBaseUrl()}/export/import/jsonl`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(`Import failed (${response.status})`);
+      }
+      const result = await response.json();
+      setMessage(`Backup imported: ${result.imported_count ?? 0} records.`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Import failed');
+    } finally {
+      setIsImporting(false);
+      event.target.value = '';
     }
   };
 
@@ -46,6 +97,10 @@ export function ExportPage() {
             </div>
 
             <div className="mt-5">
+              <div aria-live="polite">
+                {message && <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800">{message}</p>}
+                {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+              </div>
               <div className="space-y-4">
                 <div className="flex items-center">
                   <input
@@ -159,11 +214,19 @@ export function ExportPage() {
                       className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                     >
                       <span>Upload a backup file</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".jsonl" />
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept=".jsonl,application/jsonl"
+                        onChange={handleImport}
+                        disabled={isImporting}
+                      />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">JSONL files only</p>
+                  <p className="text-xs text-gray-500">{isImporting ? 'Importing…' : 'JSONL files only'}</p>
                 </div>
               </div>
             </div>

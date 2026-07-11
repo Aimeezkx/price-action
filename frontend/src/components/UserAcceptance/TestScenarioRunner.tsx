@@ -86,7 +86,7 @@ export const TestScenarioRunner: React.FC<TestScenarioRunnerProps> = ({
     }
   };
 
-  const completeStep = async (success: boolean = true) => {
+  const completeStep = async (success = true) => {
     if (!session || !stepStartTime) return;
 
     const completionTime = Date.now() - stepStartTime;

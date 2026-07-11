@@ -262,9 +262,8 @@ export class UploadManager {
       }
     };
 
-    try {
-      // Use XMLHttpRequest for progress tracking
-      const result = await new Promise((resolve, reject) => {
+    // Use XMLHttpRequest for progress tracking
+    const result = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener('progress', (event) => {
@@ -309,11 +308,7 @@ export class UploadManager {
       uploadItem.progress = 100;
       options.onProgress?.(uploadItem);
 
-      return result;
-
-    } catch (error) {
-      throw error;
-    }
+    return result;
   }
 
   private processQueue(): void {

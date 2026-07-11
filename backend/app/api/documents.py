@@ -1405,7 +1405,9 @@ async def get_cards(
     cards_stmt = cards_stmt.offset(offset).limit(limit).order_by(Card.created_at.desc())
     
     # Execute query
-    cards_result = await db.execute(cards_stmt)
+    cards_result = db.execute(cards_stmt)
+    if hasattr(cards_result, "__await__"):
+        cards_result = await cards_result
     results = cards_result.all()
     
     # Format response

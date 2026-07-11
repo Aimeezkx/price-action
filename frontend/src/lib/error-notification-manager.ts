@@ -4,7 +4,7 @@
  * Provides centralized error notification handling with retry logic
  */
 
-import { ClassifiedError, NetworkErrorType } from './error-handling';
+import { ClassifiedError, NetworkErrorType, classifyError } from './error-handling';
 import { ErrorContext, getContextualErrorMessage, getQuickActions, getSupportInfo } from './error-messages';
 
 export interface NotificationOptions {
@@ -246,8 +246,6 @@ export class ErrorNotificationManager {
     context?: ErrorContext,
     options?: NotificationOptions
   ): string {
-    // Import the classifier here to avoid circular dependencies
-    const { classifyError } = require('./error-handling');
     const classifiedError = classifyError(error, statusCode);
 
     return this.addNotification(classifiedError, {
