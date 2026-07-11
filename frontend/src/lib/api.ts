@@ -91,7 +91,17 @@ class APIClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+      let message = `Upload failed: ${response.statusText}`;
+      try {
+        const payload = await response.json();
+        const detail = payload?.detail;
+        message = typeof detail === 'string'
+          ? detail
+          : (detail?.message || message);
+      } catch {
+        // Keep the HTTP status fallback when the server did not return JSON.
+      }
+      throw new Error(message);
     }
 
     return await response.json();

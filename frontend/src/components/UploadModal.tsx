@@ -110,7 +110,7 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalPro
                 <p>
                   Supported formats: PDF, DOCX, Markdown (.md)
                   <br />
-                  Maximum file size: 50MB
+                  Maximum file size: 100MB
                 </p>
               </div>
             </div>
