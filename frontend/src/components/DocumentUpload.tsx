@@ -212,12 +212,9 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
             </div>
             
             {!isDragActive && (
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <span className="inline-flex min-h-11 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 group-hover:bg-blue-700">
                 Choose File
-              </button>
+              </span>
             )}
           </div>
         )}

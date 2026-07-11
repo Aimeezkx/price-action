@@ -52,7 +52,7 @@ export function CardFilters({
             id="chapter-filter"
             value={filters.chapter || ''}
             onChange={(e) => handleFilterChange('chapter', e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block min-h-11 w-full rounded-md border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="">All Chapters</option>
             {chapters.map((chapter) => (
@@ -72,7 +72,7 @@ export function CardFilters({
             id="difficulty-filter"
             value={filters.difficulty || ''}
             onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block min-h-11 w-full rounded-md border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             {difficultyOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -91,7 +91,7 @@ export function CardFilters({
             id="type-filter"
             value={filters.cardType || ''}
             onChange={(e) => handleFilterChange('cardType', e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block min-h-11 w-full rounded-md border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             {cardTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -105,7 +105,7 @@ export function CardFilters({
         <div className="flex items-end">
           <button
             onClick={() => onFiltersChange({})}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="min-h-11 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Clear All
           </button>

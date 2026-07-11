@@ -82,7 +82,7 @@ export function SearchHistory({
             <button
               type="button"
               onClick={() => setSaveDialogOpen(true)}
-              className="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <BookmarkIcon className="h-3 w-3 mr-1" />
               Save Search
@@ -164,10 +164,12 @@ export function SearchHistory({
 
       {/* Search History */}
       <div>
+        <div className="flex items-center hover:bg-gray-50">
         <button
           type="button"
           onClick={() => setShowHistory(!showHistory)}
-          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50"
+          className="min-h-11 flex-1 px-4 py-3 flex items-center justify-between text-left focus:outline-none focus:bg-gray-50"
+          aria-expanded={showHistory}
         >
           <div className="flex items-center">
             <ClockIcon className="h-4 w-4 text-gray-500 mr-2" />
@@ -179,19 +181,6 @@ export function SearchHistory({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            {searchHistory.length > 0 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClearHistory();
-                }}
-                className="p-1 text-gray-400 hover:text-red-600 focus:outline-none"
-                title="Clear history"
-              >
-                <TrashIcon className="h-3 w-3" />
-              </button>
-            )}
             {showHistory ? (
               <ChevronUpIcon className="h-4 w-4 text-gray-400" />
             ) : (
@@ -199,6 +188,18 @@ export function SearchHistory({
             )}
           </div>
         </button>
+        {searchHistory.length > 0 && (
+          <button
+            type="button"
+            onClick={onClearHistory}
+            className="mr-2 inline-flex min-h-11 min-w-11 items-center justify-center text-gray-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+            aria-label="Clear search history"
+            title="Clear history"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+        )}
+        </div>
 
         {showHistory && (
           <div className="px-4 pb-3">

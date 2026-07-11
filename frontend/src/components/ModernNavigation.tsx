@@ -22,7 +22,7 @@ export const ModernNavigation: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Enhanced Logo */}
-          <Link to="/" className="flex-shrink-0 group">
+          <Link to="/" className="flex min-h-11 items-center flex-shrink-0 group" aria-label="Document Learning App home">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,8 +57,9 @@ export const ModernNavigation: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              className="min-h-11 min-w-11 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               aria-label="Toggle menu"
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

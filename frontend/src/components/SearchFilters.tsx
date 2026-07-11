@@ -116,7 +116,7 @@ export function SearchFilters({
             <button
               type="button"
               onClick={onToggleAdvanced}
-              className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <AdjustmentsHorizontalIcon className="h-3 w-3 mr-1" />
               {isAdvanced ? 'Simple' : 'Advanced'}
@@ -126,7 +126,7 @@ export function SearchFilters({
               <button
                 type="button"
                 onClick={onClearFilters}
-                className="inline-flex items-center px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <XMarkIcon className="h-3 w-3 mr-1" />
                 Clear
@@ -136,7 +136,9 @@ export function SearchFilters({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="min-h-11 min-w-11 p-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label={isExpanded ? 'Collapse filters' : 'Expand filters'}
+              aria-expanded={isExpanded}
             >
               {isExpanded ? (
                 <ChevronUpIcon className="h-4 w-4" />

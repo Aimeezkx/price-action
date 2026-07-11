@@ -102,7 +102,7 @@ export function ExportPage() {
                 {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-800">{error}</p>}
               </div>
               <div className="space-y-4">
-                <div className="flex items-center">
+                <label htmlFor="anki" className="flex min-h-14 cursor-pointer items-center rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
                   <input
                     id="anki"
                     name="export-format"
@@ -111,15 +111,15 @@ export function ExportPage() {
                     onChange={() => setExportFormat('anki')}
                     className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
                   />
-                  <label htmlFor="anki" className="ml-3 block text-sm font-medium text-gray-700">
+                  <span className="ml-3 block text-sm font-medium text-gray-700">
                     Anki CSV
                     <span className="block text-sm text-gray-500">
                       Compatible with Anki flashcard application
                     </span>
-                  </label>
-                </div>
+                  </span>
+                </label>
 
-                <div className="flex items-center">
+                <label htmlFor="notion" className="flex min-h-14 cursor-pointer items-center rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
                   <input
                     id="notion"
                     name="export-format"
@@ -128,15 +128,15 @@ export function ExportPage() {
                     onChange={() => setExportFormat('notion')}
                     className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
                   />
-                  <label htmlFor="notion" className="ml-3 block text-sm font-medium text-gray-700">
+                  <span className="ml-3 block text-sm font-medium text-gray-700">
                     Notion CSV
                     <span className="block text-sm text-gray-500">
                       Compatible with Notion database import
                     </span>
-                  </label>
-                </div>
+                  </span>
+                </label>
 
-                <div className="flex items-center">
+                <label htmlFor="jsonl" className="flex min-h-14 cursor-pointer items-center rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
                   <input
                     id="jsonl"
                     name="export-format"
@@ -145,13 +145,13 @@ export function ExportPage() {
                     onChange={() => setExportFormat('jsonl')}
                     className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
                   />
-                  <label htmlFor="jsonl" className="ml-3 block text-sm font-medium text-gray-700">
+                  <span className="ml-3 block text-sm font-medium text-gray-700">
                     JSONL Backup
                     <span className="block text-sm text-gray-500">
                       Complete backup with all metadata for re-import
                     </span>
-                  </label>
-                </div>
+                  </span>
+                </label>
               </div>
 
               <div className="mt-5">
@@ -159,7 +159,7 @@ export function ExportPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={isExporting}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex min-h-11 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isExporting ? (
                     <>
@@ -211,7 +211,7 @@ export function ExportPage() {
                   <div className="flex text-sm text-gray-600">
                     <label
                       htmlFor="file-upload"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                      className="relative inline-flex min-h-11 cursor-pointer items-center rounded-md bg-white px-2 font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                     >
                       <span>Upload a backup file</span>
                       <input

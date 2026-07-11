@@ -90,7 +90,7 @@ export function useSearch() {
   // Search query
   const {
     data: searchResults,
-    isLoading: isSearching,
+    isFetching: isSearching,
     error: searchError,
     refetch: performSearch,
   } = useQuery({
@@ -128,7 +128,7 @@ export function useSearch() {
         params.append('document_ids', searchState.filters.document_ids.join(','));
       }
 
-      const response = await fetch(`/api/search?${params}`);
+      const response = await fetch(`/api/search/?${params}`);
       if (!response.ok) {
         throw new Error('Search failed');
       }
@@ -284,7 +284,10 @@ export function useSearch() {
   useEffect(() => {
     if (searchResults && searchHistory.length > 0) {
       const latestHistory = searchHistory[0];
-      if (latestHistory.query === searchState.query && latestHistory.resultCount === 0) {
+      if (
+        latestHistory.query === searchState.query
+        && latestHistory.resultCount !== searchResults.total_results
+      ) {
         const updatedHistory = [
           { ...latestHistory, resultCount: searchResults.total_results },
           ...searchHistory.slice(1),

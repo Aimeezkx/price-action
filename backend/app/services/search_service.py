@@ -92,6 +92,12 @@ class SearchService:
         
         limit = min(limit or self.default_limit, self.max_limit)
         filters = filters or SearchFilters()
+        dialect = db.get_bind().dialect.name
+
+        # SQLite is the zero-config local mode. It has neither PostgreSQL text
+        # search nor pgvector, so avoid loading an embedding model only to fail.
+        if dialect != "postgresql":
+            return self._simple_search(db, query, filters, limit, offset)
         
         try:
             if search_type == SearchType.FULL_TEXT:
@@ -106,6 +112,22 @@ class SearchService:
         except Exception as e:
             logger.error(f"Search failed: {e}")
             return []
+
+    def _simple_search(
+        self,
+        db: Session,
+        query: str,
+        filters: SearchFilters,
+        limit: int,
+        offset: int,
+    ) -> List[SearchResult]:
+        """Portable text search used by the local SQLite configuration."""
+        results = self._search_knowledge_simple(db, query, filters, limit, offset)
+        remaining = limit - len(results)
+        if remaining > 0:
+            results.extend(self._search_cards_simple(db, query, filters, remaining, offset))
+        results.sort(key=lambda item: item.score, reverse=True)
+        return results[:limit]
     
     def _full_text_search(
         self,
@@ -318,7 +340,32 @@ class SearchService:
             
         except Exception as e:
             logger.error(f"Full-text search for cards failed: {e}")
-            return []
+            return self._search_cards_simple(db, query, filters, limit, offset)
+
+    def _search_cards_simple(
+        self,
+        db: Session,
+        query: str,
+        filters: SearchFilters,
+        limit: int,
+        offset: int,
+    ) -> List[SearchResult]:
+        """Portable card search using case-insensitive substring matching."""
+        card_query = db.query(Card).join(Knowledge).join(Chapter)
+        card_query = self._apply_card_filters(card_query, filters)
+        search_terms = query.lower().split()
+        for term in search_terms:
+            pattern = f'%{term}%'
+            card_query = card_query.filter(
+                or_(Card.front.ilike(pattern), Card.back.ilike(pattern))
+            )
+
+        results = []
+        for card in card_query.offset(offset).limit(limit).all():
+            content = f"{card.front} {card.back}"
+            score = self._calculate_simple_relevance(content, query)
+            results.append(self._card_to_search_result(card, score, query))
+        return results
     
     def _apply_knowledge_filters(self, query, filters: SearchFilters):
         """Apply filters to knowledge query"""
@@ -359,6 +406,7 @@ class SearchService:
             "entities": knowledge.entities or [],
             "anchors": knowledge.anchors or {},
             "chapter_id": str(knowledge.chapter_id),
+            "document_id": str(knowledge.chapter.document_id),
             "confidence_score": knowledge.confidence_score
         }
         
@@ -401,6 +449,8 @@ class SearchService:
             "card_type": card.card_type.value,
             "difficulty": card.difficulty,
             "knowledge_id": str(card.knowledge_id),
+            "chapter_id": str(card.knowledge.chapter_id),
+            "document_id": str(card.knowledge.chapter.document_id),
             "card_metadata": card.card_metadata or {}
         }
         

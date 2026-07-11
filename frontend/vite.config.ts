@@ -27,10 +27,5 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       sourcemap: true,
     },
-    css: {
-      postcss: {
-        plugins: []
-      }
-    }
   }
 })
