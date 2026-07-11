@@ -42,15 +42,12 @@ export const ModernHomePage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16">
         <div className="text-center">
-          {/* Main Title with Gradient */}
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6">
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Document Learning App
-            </span>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-blue-700 mb-6">
+            Document Learning App
           </h1>
 
           {/* Enhanced Subtitle */}
@@ -58,14 +55,14 @@ export const ModernHomePage: React.FC = () => {
             Transform your documents into interactive learning experiences with
             <span className="text-blue-600 font-semibold"> automated content extraction </span>
             and
-            <span className="text-purple-600 font-semibold"> spaced repetition</span>
+            <span className="text-indigo-700 font-semibold"> spaced repetition</span>
           </p>
 
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
             <Link
               to="/documents"
-              className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 text-lg min-w-[180px] shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="group bg-blue-700 hover:bg-blue-800 text-white font-semibold px-8 py-3 rounded-xl transition-colors duration-200 text-lg min-w-[180px] shadow-md"
             >
               <span className="flex items-center justify-center gap-2">
                 Get Started
@@ -76,7 +73,7 @@ export const ModernHomePage: React.FC = () => {
             </Link>
             <Link
               to="/study"
-              className="group bg-white hover:bg-gray-50 text-gray-800 font-semibold px-8 py-3 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 text-lg min-w-[180px] shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="group bg-white hover:bg-gray-50 text-gray-800 font-semibold px-8 py-3 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors duration-200 text-lg min-w-[180px] shadow-md"
             >
               <span className="flex items-center justify-center gap-2">
                 Start Studying
@@ -93,10 +90,10 @@ export const ModernHomePage: React.FC = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+              className="group bg-white rounded-xl p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
             >
               {/* Enhanced Icon Container */}
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl mb-4 group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-blue-100 rounded-xl mb-4">
                 {feature.icon}
               </div>
 
@@ -124,7 +121,7 @@ export const ModernHomePage: React.FC = () => {
             </p>
             <Link
               to="/documents"
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 text-base shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center gap-3 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-6 py-3 rounded-xl transition-colors duration-200 text-base shadow-md"
             >
               Start Your Journey
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
