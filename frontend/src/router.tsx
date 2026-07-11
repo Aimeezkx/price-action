@@ -1,10 +1,10 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import { Layout } from './components/Layout';
+import { ModernLayout } from './components/ModernLayout';
 import { ChapterBrowserPage } from './pages/ChapterBrowserPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ExportPage } from './pages/ExportPage';
-import { HomePage } from './pages/HomePage';
+import { ModernHomePage } from './pages/ModernHomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { SearchPage } from './pages/SearchPage';
@@ -13,12 +13,12 @@ import { StudyPage } from './pages/StudyPage';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: <ModernLayout />,
     errorElement: <NotFoundPage />,
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: <ModernHomePage />,
       },
       {
         path: 'documents',

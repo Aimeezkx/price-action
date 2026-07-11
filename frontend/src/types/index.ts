@@ -94,3 +94,16 @@ export interface SearchResult {
   rank_factors?: Record<string, number>;
   chapter_title?: string;
 }
+
+// Icon sizing types
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+export interface IconProps {
+  size?: IconSize;
+  className?: string;
+}
+
+export interface IconSizeValidation {
+  isValid: boolean;
+  warnings: string[];
+}

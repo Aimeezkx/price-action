@@ -1,7 +1,8 @@
 import { performanceMonitor } from './performance';
+
 import { configManager } from './config';
 import { RetryExecutor, RetryResult } from './retry-logic';
-import { networkErrorClassifier, ClassifiedError, ErrorLogger } from './error-handling';
+import { networkErrorClassifier, ErrorLogger } from './error-handling';
 import { retryConfigManager } from './retry-config';
 import { apiLogger } from './api-logger';
 import { apiPerformanceMonitor } from './api-performance-monitor';
@@ -28,6 +29,7 @@ export interface ApiResponse<T> {
     requestId: string;
     timestamp: Date;
     statusCode?: number;
+    suggestedAction?: string;
   };
   retryInfo?: {
     attempts: number;
@@ -44,9 +46,13 @@ class APIClient {
     this.baseUrl = baseUrl;
   }
 
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -55,18 +61,13 @@ class APIClient {
       ...options,
     };
 
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+    const response = await fetch(url, config);
 
-      return await response.json();
-    } catch (error) {
-      // For tests, simply re-throw the error
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+
+    return await response.json();
   }
 
   // Document endpoints
@@ -166,8 +167,8 @@ export async function uploadDocument(file: File): Promise<any> {
   return apiClient.uploadDocument(file);
 }
 
-// API client configuration
-const API_BASE_URL = import.meta.env.DEV 
+// Extended API client configuration for robust operations
+const ROBUST_API_BASE_URL = import.meta.env.DEV
   ? '/api'  // Relative path for proxy in development
   : (import.meta.env.VITE_API_BASE_URL || '/api'); // Use environment variable for production
 
@@ -182,7 +183,7 @@ export class RobustApiClient {
   private retryExecutor: RetryExecutor;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || configManager.getApiConfig().baseUrl || API_BASE_URL;
+    this.baseUrl = baseUrl || configManager.getApiConfig().baseUrl || ROBUST_API_BASE_URL;
     this.retryExecutor = new RetryExecutor();
   }
 
@@ -200,7 +201,7 @@ export class RobustApiClient {
     const startTime = performance.now();
     const requestId = this.generateRequestId();
     const method = fetchOptions.method || 'GET';
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -219,7 +220,7 @@ export class RobustApiClient {
     // Create the fetch operation
     const fetchOperation = async (): Promise<Response> => {
       const timeoutMs = customTimeout || retryConfigManager.getRetryConfig().timeoutMs;
-      
+
       // Create timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
@@ -227,7 +228,7 @@ export class RobustApiClient {
 
       // Race between fetch and timeout
       const response = await Promise.race([fetch(url, config), timeoutPromise]);
-      
+
       if (!response.ok) {
         const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as Error & { status: number };
         error.status = response.status;
@@ -262,7 +263,7 @@ export class RobustApiClient {
         // Execute with retry logic
         const retryConfig = maxRetries ? { maxAttempts: maxRetries } : undefined;
         result = await this.retryExecutor.executeWithRetry(
-          fetchOperation, 
+          fetchOperation,
           retryConfig,
           { url, method, requestId }
         );
@@ -286,7 +287,7 @@ export class RobustApiClient {
 
         // Parse JSON response
         const jsonData = await result.data.json();
-        
+
         return {
           data: jsonData,
           success: true,
@@ -346,24 +347,24 @@ export class RobustApiClient {
       // Fallback error handling
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       const classifiedError = networkErrorClassifier.classifyError(error as Error, undefined, url);
-      
+
       // Log network error
       apiLogger.logNetworkError(url, method, requestId, error as Error, {
         duration,
         fallbackError: true
       });
-      
+
       ErrorLogger.addLog(classifiedError);
-      
+
       performanceMonitor.trackAPICall(endpoint, duration, 0);
 
       // Record performance metric for fallback error
       apiPerformanceMonitor.recordMetric(endpoint, method, duration, 0, {
         error: (error as Error).message
       });
-      
+
       return {
         data: {} as T,
         success: false,
@@ -530,16 +531,16 @@ export class RobustApiClient {
 
   private sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
     if (!headers) return {};
-    
+
     const sanitized = { ...headers };
     const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
-    
+
     for (const key of Object.keys(sanitized)) {
       if (sensitiveHeaders.some(sensitive => key.toLowerCase().includes(sensitive))) {
         sanitized[key] = '[REDACTED]';
       }
     }
-    
+
     return sanitized;
   }
 
@@ -547,7 +548,7 @@ export class RobustApiClient {
     if (body instanceof FormData) {
       return '[FormData]';
     }
-    
+
     if (typeof body === 'string') {
       try {
         const parsed = JSON.parse(body);
@@ -556,7 +557,7 @@ export class RobustApiClient {
         return '[String Body]';
       }
     }
-    
+
     return this.sanitizeObject(body);
   }
 
@@ -590,6 +591,7 @@ export class ApiClient extends RobustApiClient {
   }
 }
 
-// Export both the robust client and the backward-compatible client
+// Export the robust client instance
 export const robustApiClient = new RobustApiClient();
-export const apiClient = new ApiClient();
+
+// Note: apiClient is already exported earlier in the file as the simple APIClient instance

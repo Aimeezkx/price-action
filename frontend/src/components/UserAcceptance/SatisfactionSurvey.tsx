@@ -260,7 +260,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between mb-4">
           <CardTitle className="flex items-center gap-2">
-            <Icon className="h-5 w-5" />
+            <Icon className="h-4 w-4" />
             Satisfaction Survey
           </CardTitle>
           <span className="text-sm text-gray-600">
@@ -273,7 +273,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
       <CardContent className="space-y-8">
         <div className="text-center space-y-4">
           <div className="bg-blue-50 p-6 rounded-lg">
-            <Icon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+            <Icon className="h-6 w-6 text-blue-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">{currentStepData.title}</h3>
             <p className="text-gray-700">{currentStepData.question}</p>
             {currentStepData.subtitle && (

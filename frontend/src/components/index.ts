@@ -14,6 +14,8 @@ export { KnowledgePointBrowser } from './KnowledgePointBrowser';
 export { Layout } from './Layout';
 export { LoadingSpinner } from './LoadingSpinner';
 export { Navigation } from './Navigation';
+export { ModernLayout } from './ModernLayout';
+export { ModernNavigation } from './ModernNavigation';
 export { PrivacySettings } from './PrivacySettings';
 export { ReviewSession } from './ReviewSession';
 export { TableOfContents } from './TableOfContents';

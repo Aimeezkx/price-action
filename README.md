@@ -154,6 +154,41 @@ To verify the CORS fix is working:
 
 For detailed troubleshooting, see `CORS_SOLUTION_DOCUMENTATION.md`.
 
+## Documentation
+
+### Frontend Design System
+
+#### Icon Sizing System
+The frontend implements a comprehensive icon sizing system for consistent visual hierarchy:
+
+- **[Complete Documentation](./frontend/ICON_SYSTEM_DOCUMENTATION.md)** - Overview of all icon system documentation
+- **[Style Guide](./frontend/docs/ICON_STYLE_GUIDE.md)** - Design principles and guidelines
+- **[Developer Guide](./frontend/docs/DEVELOPER_GUIDE.md)** - Technical implementation guide
+- **[Usage Examples](./frontend/docs/ICON_EXAMPLES.md)** - Practical implementation patterns
+
+**Quick Reference:**
+- `xs` (12px) - Status indicators, badges
+- `sm` (16px) - Navigation, buttons
+- `md` (20px) - Primary actions, features
+- `lg` (24px) - Section headers, highlights
+- `xl` (32px) - Empty states, major indicators
+
+```tsx
+// Quick usage example
+import { getIconProps } from './frontend/src/lib/icon-component-helpers';
+const iconProps = getIconProps('sm', 'navigation', 'text-gray-600');
+<Home {...iconProps} />
+```
+
+### Backend Documentation
+- **[API Documentation](http://localhost:8000/docs)** - Interactive API documentation (when running)
+- **[Database Schema](./backend/DATABASE.md)** - Database structure and relationships
+- **[Security Implementation](./backend/SECURE_FILE_UPLOAD_IMPLEMENTATION.md)** - File upload security measures
+
+### Infrastructure
+- **[CORS Solution](./CORS_SOLUTION_DOCUMENTATION.md)** - Cross-origin request handling
+- **[Docker Setup](./infrastructure/docker-compose.yml)** - Container configuration
+
 ## Contributing
 
 1. Install pre-commit hooks: `pre-commit install`

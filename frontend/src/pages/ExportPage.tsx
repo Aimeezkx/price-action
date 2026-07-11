@@ -18,17 +18,24 @@ export function ExportPage() {
   };
 
   return (
-    <div>
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Export</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Export your flashcards to other platforms or create backups
-          </p>
+    <div className="min-h-screen">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="sm:flex sm:items-center">
+            <div className="sm:flex-auto">
+              <h1 className="text-3xl font-bold text-gray-900">Export</h1>
+              <p className="mt-2 text-lg text-gray-600">
+                Export your flashcards to other platforms or create backups
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mt-8 max-w-2xl">
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-2xl">
         <div className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -134,7 +141,7 @@ export function ExportPage() {
               <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
                   <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
+                    className="mx-auto h-8 w-8 text-gray-400"
                     stroke="currentColor"
                     fill="none"
                     viewBox="0 0 48 48"
@@ -161,6 +168,7 @@ export function ExportPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

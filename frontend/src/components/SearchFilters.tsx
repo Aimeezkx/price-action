@@ -103,7 +103,7 @@ export function SearchFilters({
       <div className="px-4 py-3 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <FunnelIcon className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-900">Filters</span>
             {hasActiveFilters() && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

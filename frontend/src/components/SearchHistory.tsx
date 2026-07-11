@@ -262,7 +262,7 @@ export function SearchHistory({
                 onClick={() => setSaveDialogOpen(false)}
                 className="text-gray-400 hover:text-gray-600 focus:outline-none"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <XMarkIcon className="h-4 w-4" />
               </button>
             </div>
             

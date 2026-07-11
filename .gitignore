@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -258,6 +258,14 @@ public
 .vscode/
 .idea/
 *.swp
+
+# OS and generated test artifacts
+.DS_Store
+tmp/
+allure-results/
+test-results/
+frontend_test_report.json
+quick_test_report.json
 *.swo
 *~
 

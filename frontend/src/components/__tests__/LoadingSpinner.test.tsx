@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '../../../test/utils';
+import { render, screen } from '../../test/utils';
 import { LoadingSpinner } from '../LoadingSpinner';
 
 describe('LoadingSpinner', () => {
@@ -9,7 +9,7 @@ describe('LoadingSpinner', () => {
 
       const spinner = screen.getByRole('status', { hidden: true });
       expect(spinner).toBeInTheDocument();
-      expect(spinner).toHaveClass('h-8', 'w-8'); // Default md size
+      expect(spinner).toHaveClass('h-6', 'w-6'); // Default md size
     });
 
     it('has spinning animation', () => {
@@ -39,14 +39,14 @@ describe('LoadingSpinner', () => {
       render(<LoadingSpinner size="md" />);
 
       const spinner = screen.getByRole('status', { hidden: true });
-      expect(spinner).toHaveClass('h-8', 'w-8');
+      expect(spinner).toHaveClass('h-6', 'w-6');
     });
 
     it('renders large size correctly', () => {
       render(<LoadingSpinner size="lg" />);
 
       const spinner = screen.getByRole('status', { hidden: true });
-      expect(spinner).toHaveClass('h-12', 'w-12');
+      expect(spinner).toHaveClass('h-8', 'w-8');
     });
   });
 
@@ -69,7 +69,7 @@ describe('LoadingSpinner', () => {
       render(<LoadingSpinner size="lg" className="border-red-500" />);
 
       const spinner = screen.getByRole('status', { hidden: true });
-      expect(spinner).toHaveClass('h-12', 'w-12', 'border-red-500');
+      expect(spinner).toHaveClass('h-8', 'w-8', 'border-red-500');
     });
   });
 
@@ -105,7 +105,7 @@ describe('LoadingSpinner', () => {
       render(<LoadingSpinner size={undefined} />);
 
       const spinner = screen.getByRole('status', { hidden: true });
-      expect(spinner).toHaveClass('h-8', 'w-8'); // Should default to md
+      expect(spinner).toHaveClass('h-6', 'w-6'); // Should default to md
     });
 
     it('handles empty className', () => {

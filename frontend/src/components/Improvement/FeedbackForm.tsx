@@ -122,7 +122,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSubmit, className }) => {
       <Card className={className}>
         <CardContent className="p-6">
           <div className="text-center space-y-4">
-            <CheckCircle className="mx-auto text-green-500" size={48} />
+            <CheckCircle className="mx-auto text-green-500 h-6 w-6" />
             <h3 className="text-lg font-semibold text-green-700">Thank You!</h3>
             <p className="text-gray-600">
               Your feedback has been submitted successfully. We appreciate your input and will use it to improve the system.
@@ -137,7 +137,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSubmit, className }) => {
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Send size={20} />
+          <Send className="h-4 w-4" />
           Submit Feedback
         </CardTitle>
         <p className="text-sm text-gray-600">
@@ -182,7 +182,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSubmit, className }) => {
                   }`}
                 >
                   <Star 
-                    size={24} 
+                    className="h-5 w-5"
                     fill={star <= formData.rating ? 'currentColor' : 'none'}
                   />
                 </button>
@@ -280,7 +280,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSubmit, className }) => {
               </>
             ) : (
               <>
-                <Send size={16} className="mr-2" />
+                <Send className="h-4 w-4 mr-2" />
                 Submit Feedback
               </>
             )}

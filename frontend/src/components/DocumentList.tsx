@@ -33,24 +33,26 @@ export function DocumentList({ onDocumentSelect }: DocumentListProps) {
 
   if (!documents || documents.length === 0) {
     return (
-      <div className="text-center py-12">
-        <svg
-          className="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-          />
-        </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No documents</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Get started by uploading your first document.
-        </p>
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div className="text-center py-12">
+          <svg
+            className="mx-auto h-8 w-8 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+          <h3 className="mt-4 text-lg font-medium text-gray-900">No documents</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Get started by uploading your first document.
+          </p>
+        </div>
       </div>
     );
   }
@@ -91,25 +93,25 @@ export function DocumentList({ onDocumentSelect }: DocumentListProps) {
     switch (extension) {
       case 'pdf':
         return (
-          <svg className="h-8 w-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-6 w-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
           </svg>
         );
       case 'docx':
         return (
-          <svg className="h-8 w-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-6 w-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
           </svg>
         );
       case 'md':
         return (
-          <svg className="h-8 w-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-6 w-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
           </svg>
         );
       default:
         return (
-          <svg className="h-8 w-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
           </svg>
         );
@@ -126,7 +128,7 @@ export function DocumentList({ onDocumentSelect }: DocumentListProps) {
   }
 
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-md">
+    <div className="bg-white shadow-sm overflow-hidden sm:rounded-lg border border-gray-200">
       <ul className="divide-y divide-gray-200">
         {documents.map((document) => (
           <li key={document.id}>
