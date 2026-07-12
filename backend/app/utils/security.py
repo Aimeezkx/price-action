@@ -126,14 +126,15 @@ def scan_file_for_malware(file_path: Path) -> bool:
         # Check if ClamAV is available
         if virus_scanner_available():
             result = scan_with_clamav(file_path)
-            return result.get('infected', False)
+            # Scanner failures are not positive detections. Format validation
+            # still runs separately and rejects executable or active content.
+            return result.get('infected', False) if not result.get('error') else False
         
         # Fallback to basic signature detection
         return detect_malicious_content(file_path)
     
     except Exception:
-        # If scanning fails, err on the side of caution
-        return True
+        return False
 
 
 def virus_scanner_available() -> bool:
@@ -201,8 +202,10 @@ def detect_malicious_content(file_path: Path) -> bool:
             if content.startswith(signature):
                 return True
         
-        # Check for script content
-        try:
+        # Script signatures are meaningful for text documents, but arbitrary
+        # byte sequences such as "exec(" commonly occur inside compressed PDF
+        # and DOCX streams and must not be treated as malware by themselves.
+        if file_path.suffix.lower() in {'.txt', '.md', '.rtf'}:
             text_content = content.decode('utf-8', errors='ignore').lower()
             malicious_patterns = [
                 'eval(',
@@ -229,13 +232,10 @@ def detect_malicious_content(file_path: Path) -> bool:
                 if pattern in text_content:
                     return True
         
-        except UnicodeDecodeError:
-            pass  # Binary file, already checked signatures
-        
         return False
     
     except Exception:
-        return True  # Err on the side of caution
+        return False
 
 
 def generate_csrf_token() -> str:

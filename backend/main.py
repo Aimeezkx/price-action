@@ -14,10 +14,15 @@ import traceback
 from app.api.health import router as health_router
 from app.api.documents import router as documents_router
 from app.api.queue import router as queue_router
+from app.api.export import router as export_router
+from app.api.reviews import router as reviews_router
+from app.api.search import router as search_router
+from app.api.sync import router as sync_router
 from app.routes.cards import router as cards_router
 
 # Import database initialization
-from app.core.database import init_db, create_tables
+from app.core.database import create_tables, get_db_session, init_db
+from app.services.srs_service import SRSService
 
 # Ensure upload directory exists and is consistent with Docker volume
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "uploads"))
@@ -36,6 +41,13 @@ async def startup_event():
     try:
         await init_db()
         await create_tables()
+        db = get_db_session()
+        try:
+            restored_srs = SRSService(db).backfill_missing_records()
+            if restored_srs:
+                logging.info("Created %s missing SRS records", restored_srs)
+        finally:
+            db.close()
         logging.info("Database initialized successfully")
     except Exception as e:
         logging.warning(f"Database initialization failed: {e}")
@@ -87,6 +99,10 @@ app.include_router(health_router, prefix="/api", tags=["health"])
 app.include_router(documents_router, tags=["documents"])
 app.include_router(queue_router, tags=["queue"])
 app.include_router(cards_router)
+app.include_router(search_router, prefix="/api")
+app.include_router(reviews_router, prefix="/api")
+app.include_router(export_router, prefix="/api")
+app.include_router(sync_router)
 
 @app.get("/")
 async def root():

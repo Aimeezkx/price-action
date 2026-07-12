@@ -3,7 +3,7 @@
  * Shows toast-style notifications for connection status changes
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { healthMonitor, type HealthStatus } from '../lib/health-monitor';
 
 interface ConnectionNotificationProps {
@@ -17,6 +17,7 @@ export function ConnectionNotification({
   autoHide = true,
   hideDelay = 5000
 }: ConnectionNotificationProps) {
+  const previousHealthy = useRef<boolean | null>(null);
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     status: HealthStatus;
@@ -28,6 +29,13 @@ export function ConnectionNotification({
     let notificationId = 0;
 
     const unsubscribe = healthMonitor.onHealthChange((status) => {
+      const previous = previousHealthy.current;
+      previousHealthy.current = status.isHealthy;
+
+      // A successful initial health check is expected, not a restoration event.
+      if (previous === null && status.isHealthy) return;
+      if (previous === status.isHealthy) return;
+
       const id = `notification-${++notificationId}`;
       const notification = {
         id,

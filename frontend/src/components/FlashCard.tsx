@@ -33,7 +33,7 @@ export function FlashCard({ card, isFlipped, onFlip, onHotspotValidation, classN
     }, 1500);
   };
 
-  const renderCardContent = (content: string, isBack: boolean = false) => {
+  const renderCardContent = (content: string, isBack = false) => {
     if (card.card_type === 'image_hotspot' && !isBack) {
       // Parse hotspots from metadata
       const hotspots: Hotspot[] = card.metadata?.hotspots || [];

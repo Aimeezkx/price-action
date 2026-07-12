@@ -7,12 +7,13 @@ import { PerformanceDashboard } from './components/PerformanceDashboard';
 import { ConnectionNotification } from './components/ConnectionNotification';
 import { DebugToolbar } from './components/DebugToolbar';
 import { performanceMonitor } from './lib/performance';
-import './lib/test-monitoring'; // Auto-test monitoring system
 
 // Track app initialization time
 const appStartTime = performance.now();
 
 function App() {
+  const showDebugTools = import.meta.env.DEV && import.meta.env.VITE_SHOW_DEBUG_TOOLS === 'true';
+
   React.useEffect(() => {
     const appLoadTime = performance.now() - appStartTime;
     performanceMonitor.recordMetric('AppInitialization', appLoadTime);
@@ -20,10 +21,10 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
       <ConnectionNotification />
-      <DebugToolbar enabled={process.env.NODE_ENV === 'development'} />
-      {process.env.NODE_ENV === 'development' && <PerformanceDashboard />}
+      <DebugToolbar enabled={showDebugTools} />
+      {showDebugTools && <PerformanceDashboard />}
     </QueryClientProvider>
   );
 }

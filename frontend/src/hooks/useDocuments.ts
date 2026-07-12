@@ -8,6 +8,13 @@ export function useDocuments() {
     queryFn: async () => {
       return await apiClient.getDocuments();
     },
+    refetchInterval: (documents) =>
+      documents?.some((document) =>
+        ['pending', 'processing', 'parsing', 'extracting', 'generating_cards'].includes(document.status)
+      )
+        ? 2000
+        : false,
+    refetchOnWindowFocus: true,
   });
 }
 

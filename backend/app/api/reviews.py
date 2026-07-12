@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 from ..core.database import get_db
+from ..models.learning import SRS
 from ..services.review_service import ReviewService, ReviewCard, ReviewSession
 from ..services.srs_service import SRSService
 
@@ -77,6 +78,7 @@ class ReviewStatsResponse(BaseModel):
 
 
 @router.get("/review/today", response_model=List[ReviewCardResponse])
+@router.get("/today", response_model=List[ReviewCardResponse])
 async def get_daily_review_cards(
     user_id: Optional[str] = Query(None, description="User ID filter"),
     max_cards: int = Query(50, ge=1, le=100, description="Maximum number of cards"),
@@ -100,6 +102,34 @@ async def get_daily_review_cards(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get daily review cards: {str(e)}")
+
+
+@router.post("/cards/{card_id}/grade", response_model=GradeCardResponse)
+async def grade_card_by_id(
+    card_id: str,
+    grade_request: GradeCardRequest,
+    db: Session = Depends(get_db),
+):
+    """Grade a card directly from the web review session."""
+    try:
+        srs_service = SRSService(db)
+        srs = db.query(SRS).filter(SRS.card_id == card_id).first()
+        if not srs:
+            srs = srs_service.create_srs_record(card_id)
+        updated = srs_service.grade_card(str(srs.id), grade_request.grade)
+        return GradeCardResponse(
+            success=True,
+            graded_card={
+                "card_id": card_id,
+                "srs_id": str(updated.id),
+                "grade": updated.last_grade,
+                "due_date": updated.due_date.isoformat(),
+                "interval": updated.interval,
+                "repetitions": updated.repetitions,
+            },
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to grade card: {exc}") from exc
 
 
 @router.post("/session/start", response_model=ReviewSessionResponse)

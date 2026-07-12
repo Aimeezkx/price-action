@@ -2,8 +2,9 @@
 Document upload and management API endpoints
 """
 
-import os
 import aiofiles
+import logging
+import os
 from pathlib import Path
 from typing import List, Optional
 from uuid import UUID
@@ -30,6 +31,7 @@ from app.utils.logging import SecurityLogger
 from app.utils.privacy_service import privacy_manager
 
 router = APIRouter(prefix="/api", tags=["documents"])
+logger = logging.getLogger(__name__)
 security_logger = SecurityLogger(__name__)
 
 
@@ -341,14 +343,7 @@ async def upload_document(
             # Test database connection
             from sqlalchemy import text
             
-            # Handle both async and sync sessions
-            if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-                if hasattr(db.execute, '__await__'):
-                    await db.execute(text("SELECT 1"))
-                else:
-                    db.execute(text("SELECT 1"))
-            else:
-                db.execute(text("SELECT 1"))
+            await db.execute(text("SELECT 1"))
             
             # Create document service
             doc_service = DocumentService(db)
@@ -647,9 +642,12 @@ async def list_documents(
         documents = result.scalars().all()
         
         return [DocumentResponse.model_validate(doc) for doc in documents]
-    except Exception as e:
-        # Return empty list if there's an error
-        return []
+    except Exception as exc:
+        logger.exception("Failed to list documents")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to load documents",
+        ) from exc
 
 
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
@@ -661,14 +659,7 @@ async def get_document(
     
     stmt = select(Document).where(Document.id == document_id)
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            result = await db.execute(stmt)
-        else:
-            result = db.execute(stmt)
-    else:
-        result = db.execute(stmt)
+    result = await db.execute(stmt)
     
     document = result.scalar_one_or_none()
     
@@ -694,14 +685,7 @@ async def get_document_by_id(
     
     stmt = select(Document).where(Document.id == document_id)
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            result = await db.execute(stmt)
-        else:
-            result = db.execute(stmt)
-    else:
-        result = db.execute(stmt)
+    result = await db.execute(stmt)
     
     document = result.scalar_one_or_none()
     
@@ -963,11 +947,7 @@ async def get_processing_overview(
             .group_by(Document.status)
         )
         
-        if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-            if hasattr(db.execute, '__await__'):
-                result = await db.execute(status_counts_stmt)
-            else:
-                result = db.execute(status_counts_stmt)
+        result = await db.execute(status_counts_stmt)
         
         status_counts = {}
         for status, count in result.fetchall():
@@ -984,11 +964,7 @@ async def get_processing_overview(
             .limit(10)
         )
         
-        if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-            if hasattr(db.execute, '__await__'):
-                recent_result = await db.execute(recent_docs_stmt)
-            else:
-                recent_result = db.execute(recent_docs_stmt)
+        recent_result = await db.execute(recent_docs_stmt)
         
         recent_docs = recent_result.scalars().all()
         
@@ -1040,14 +1016,7 @@ async def get_document_table_of_contents(
     # Verify document exists
     doc_stmt = select(Document).where(Document.id == document_id)
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            doc_result = await db.execute(doc_stmt)
-        else:
-            doc_result = db.execute(doc_stmt)
-    else:
-        doc_result = db.execute(doc_stmt)
+    doc_result = await db.execute(doc_stmt)
     
     document = doc_result.scalar_one_or_none()
     
@@ -1064,14 +1033,7 @@ async def get_document_table_of_contents(
         .order_by(Chapter.order_index)
     )
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            chapters_result = await db.execute(chapters_stmt)
-        else:
-            chapters_result = db.execute(chapters_stmt)
-    else:
-        chapters_result = db.execute(chapters_stmt)
+    chapters_result = await db.execute(chapters_stmt)
     
     chapters = chapters_result.scalars().all()
     
@@ -1112,14 +1074,7 @@ async def get_chapter_figures(
     # Verify chapter exists
     chapter_stmt = select(Chapter).where(Chapter.id == chapter_id)
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            chapter_result = await db.execute(chapter_stmt)
-        else:
-            chapter_result = db.execute(chapter_stmt)
-    else:
-        chapter_result = db.execute(chapter_stmt)
+    chapter_result = await db.execute(chapter_stmt)
     
     chapter = chapter_result.scalar_one_or_none()
     
@@ -1136,14 +1091,7 @@ async def get_chapter_figures(
         .order_by(Figure.page_number, Figure.id)
     )
     
-    # Handle both async and sync sessions
-    if hasattr(db, 'execute') and callable(getattr(db, 'execute')):
-        if hasattr(db.execute, '__await__'):
-            figures_result = await db.execute(figures_stmt)
-        else:
-            figures_result = db.execute(figures_stmt)
-    else:
-        figures_result = db.execute(figures_stmt)
+    figures_result = await db.execute(figures_stmt)
     
     figures = figures_result.scalars().all()
     figures = figures_result.scalars().all()

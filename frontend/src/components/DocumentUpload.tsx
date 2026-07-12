@@ -27,10 +27,10 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
       return 'Unsupported file type. Please upload PDF, DOCX, or Markdown files.';
     }
 
-    // Validate file size (50MB limit)
-    const maxSize = 50 * 1024 * 1024;
+    // Keep the browser limit aligned with the backend upload policy.
+    const maxSize = 100 * 1024 * 1024;
     if (file.size > maxSize) {
-      return 'File too large. Maximum size is 50MB.';
+      return 'File too large. Maximum size is 100MB.';
     }
 
     return null;
@@ -43,11 +43,12 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
       return;
     }
 
+    let progressInterval: ReturnType<typeof setInterval> | undefined;
     try {
       setUploadProgress(0);
       
       // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev === null) return 0;
           if (prev >= 90) return prev;
@@ -57,7 +58,6 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
 
       const result = await uploadMutation.mutateAsync(file);
       
-      clearInterval(progressInterval);
       setUploadProgress(100);
       
       setTimeout(() => {
@@ -69,6 +69,8 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
       setUploadProgress(null);
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       onUploadError?.(errorMessage);
+    } finally {
+      if (progressInterval) clearInterval(progressInterval);
     }
   }, [uploadMutation, onUploadSuccess, onUploadError]);
 
@@ -137,6 +139,15 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleClick}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+          }
+        }}
+        role="button"
+        tabIndex={isUploading ? -1 : 0}
+        aria-label="Choose a document to upload"
         className={`
           relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
           ${isDragActive && !isDragReject ? 'border-blue-400 bg-blue-50' : ''}
@@ -147,6 +158,8 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
       >
         <input
           ref={fileInputRef}
+          id="document-upload-input"
+          aria-label="Choose a document to upload"
           type="file"
           accept=".pdf,.docx,.md,.txt"
           onChange={handleFileInputChange}
@@ -195,18 +208,15 @@ export function DocumentUpload({ onUploadSuccess, onUploadError }: DocumentUploa
               <p className="text-xs text-gray-500 mt-1">
                 {isDragActive
                   ? ''
-                  : 'Drag and drop or click to select • PDF, DOCX, Markdown • Max 50MB'
+                  : 'Drag and drop or click to select • PDF, DOCX, Markdown • Max 100MB'
                 }
               </p>
             </div>
             
             {!isDragActive && (
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <span className="inline-flex min-h-11 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 group-hover:bg-blue-700">
                 Choose File
-              </button>
+              </span>
             )}
           </div>
         )}

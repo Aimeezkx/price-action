@@ -121,7 +121,8 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
     }
   };
 
-  const severity = contextualMessage.severity;
+  const severity = error.statusCode && error.statusCode >= 500 ? 'high' : 'medium';
+  const troubleshootingSteps = supportInfo.troubleshooting ?? [];
   const severityStyles = getSeverityStyles(severity);
   const buttonStyles = getButtonStyles(severity);
 
@@ -175,7 +176,7 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
                 </button>
               ))}
               
-              {contextualMessage.troubleshootingSteps.length > 0 && (
+              {troubleshootingSteps.length > 0 && (
                 <button
                   onClick={() => setShowTroubleshooting(!showTroubleshooting)}
                   className={`inline-flex items-center px-3 py-1.5 border rounded-md text-xs font-medium transition-colors ${buttonStyles} opacity-75`}
@@ -199,21 +200,10 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
               <div className="mt-3 p-3 bg-black bg-opacity-5 rounded text-xs">
                 <h4 className="font-medium mb-2">Troubleshooting Steps:</h4>
                 <ol className="list-decimal list-inside space-y-1">
-                  {contextualMessage.troubleshootingSteps.map((step, index) => (
+                  {troubleshootingSteps.map((step, index) => (
                     <li key={index}>{step}</li>
                   ))}
                 </ol>
-                
-                {contextualMessage.preventionTips && contextualMessage.preventionTips.length > 0 && (
-                  <div className="mt-2">
-                    <h5 className="font-medium mb-1">Prevention Tips:</h5>
-                    <ul className="list-disc list-inside space-y-1">
-                      {contextualMessage.preventionTips.map((tip, index) => (
-                        <li key={index}>{tip}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
             )}
 
@@ -240,12 +230,12 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
             )}
 
             {/* Support Information */}
-            {supportInfo.shouldContactSupport && (
+            {supportInfo.contactSupport && (
               <div className="mt-3 p-2 bg-black bg-opacity-5 rounded text-xs">
-                <p className="font-medium text-red-700">⚠️ {supportInfo.supportMessage}</p>
+                <p className="font-medium text-red-700">⚠️ Contact support if the problem persists.</p>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(JSON.stringify(supportInfo.debugInfo, null, 2));
+                    navigator.clipboard.writeText(JSON.stringify({ error, context: options.context }, null, 2));
                     // Could show a toast here
                   }}
                   className="mt-1 text-blue-600 hover:text-blue-800 underline"

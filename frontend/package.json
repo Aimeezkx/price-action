@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "check:styles": "node scripts/check-built-styles.mjs",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives",
+    "test:core": "vitest --run src/components/__tests__/ModernNavigation.test.tsx src/components/__tests__/LoadingSpinner.test.tsx src/lib/__tests__/icon-utils.test.ts src/lib/__tests__/icon-component-helpers.test.ts src/lib/__tests__/icon-size-comprehensive.test.ts",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -38,7 +40,12 @@
     "test:cross-platform:mobile": "npm run test:cross-platform -- --devices='iPhone 12,iPad Pro'",
     "test:cross-platform:sync": "npm run test:cross-platform -- --features=web-to-ios,ios-to-web,offline-sync",
     "test:cross-platform:responsive": "npm run test:cross-platform -- --features=layout_validation,navigation_testing",
-    "test:cross-platform:report": "npm run test:cross-platform && open test-results/cross-platform/cross-platform-report.html"
+    "test:cross-platform:report": "npm run test:cross-platform && open test-results/cross-platform/cross-platform-report.html",
+    "test:icon": "npm run test -- --run src/lib/__tests__/icon-size-comprehensive.test.ts",
+    "test:icon:unit": "npm run test -- --run src/lib/__tests__/icon-utils.test.ts src/lib/__tests__/icon-component-helpers.test.ts src/lib/__tests__/icon-size-comprehensive.test.ts",
+    "test:icon:visual": "playwright test e2e/icon-visual-regression.spec.ts --reporter=json",
+    "test:icon:responsive": "playwright test e2e/icon-responsive-behavior.spec.ts --reporter=json",
+    "test:icon:all": "npm run test:icon:unit && npm run test:icon:visual && npm run test:icon:responsive"
   },
   "dependencies": {
     "@heroicons/react": "^2.0.16",

@@ -47,12 +47,17 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalPro
         />
 
         {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div
+          className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="upload-dialog-title"
+        >
           <div className="absolute top-0 right-0 pt-4 pr-4">
             <button
               type="button"
               onClick={handleClose}
-              className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <span className="sr-only">Close</span>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +68,7 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalPro
 
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <h3 id="upload-dialog-title" className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Upload Document
               </h3>
 
@@ -105,7 +110,7 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalPro
                 <p>
                   Supported formats: PDF, DOCX, Markdown (.md)
                   <br />
-                  Maximum file size: 50MB
+                  Maximum file size: 100MB
                 </p>
               </div>
             </div>

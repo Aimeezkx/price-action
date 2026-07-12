@@ -86,7 +86,7 @@ export const UserAcceptanceDashboard: React.FC = () => {
                 </p>
               )}
             </div>
-            <Icon className="h-8 w-8 text-gray-400" />
+            <Icon className="h-5 w-5 text-gray-400" />
           </div>
         </CardContent>
       </Card>
@@ -97,7 +97,7 @@ export const UserAcceptanceDashboard: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p>Loading dashboard...</p>
         </div>
       </div>
@@ -145,7 +145,7 @@ export const UserAcceptanceDashboard: React.FC = () => {
         <Card className="border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-800">
-              <AlertTriangle className="h-5 w-5" />
+              <AlertTriangle className="h-4 w-4" />
               Active Alerts ({dashboardData.alerts.length})
             </CardTitle>
           </CardHeader>

@@ -35,6 +35,21 @@ class SRSService:
         self.db.refresh(srs)
         
         return srs
+
+    def backfill_missing_records(self) -> int:
+        """Create due-now SRS rows for cards created by older pipelines."""
+        missing_card_ids = (
+            self.db.query(Card.id)
+            .outerjoin(SRS, SRS.card_id == Card.id)
+            .filter(SRS.id.is_(None))
+            .all()
+        )
+        if not missing_card_ids:
+            return 0
+
+        self.db.add_all(SRS(card_id=card_id) for (card_id,) in missing_card_ids)
+        self.db.commit()
+        return len(missing_card_ids)
     
     def grade_card(self, srs_id: str, grade: int) -> SRS:
         """

@@ -2,6 +2,7 @@
 Document service for business logic
 """
 
+import asyncio
 import os
 import aiofiles
 from uuid import UUID
@@ -20,13 +21,15 @@ from app.utils.security import generate_secure_filename
 from app.utils.access_control import DataProtection
 from app.utils.logging import SecurityLogger
 
+_LOCAL_PROCESSING_TASKS: set[asyncio.Task] = set()
+
 
 class DocumentService:
     """Service for document operations"""
     
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.queue_service = QueueService()
+        self.queue_service: Optional[QueueService] = None
         self.security_logger = SecurityLogger(__name__)
     
     async def create_document(self, file: UploadFile, safe_filename: Optional[str] = None) -> Document:
@@ -57,12 +60,7 @@ class DocumentService:
         
         self.db.add(document)
         
-        # Handle both async and sync sessions for flush
-        if hasattr(self.db, 'flush') and callable(getattr(self.db, 'flush')):
-            if hasattr(self.db.flush, '__await__'):
-                await self.db.flush()  # Get the ID without committing
-            else:
-                self.db.flush()  # Get the ID without committing
+        await self.db.flush()  # Get the ID without committing
         
         # Generate secure filename for storage using document ID
         secure_filename = f"{document.id}_{generate_secure_filename(original_filename)}"
@@ -106,14 +104,8 @@ class DocumentService:
         document.file_size = file_size
         document.doc_metadata = metadata
         
-        # Commit the transaction
-        if hasattr(self.db, 'commit') and callable(getattr(self.db, 'commit')):
-            if hasattr(self.db.commit, '__await__'):
-                await self.db.commit()
-                await self.db.refresh(document)
-            else:
-                self.db.commit()
-                self.db.refresh(document)
+        await self.db.commit()
+        await self.db.refresh(document)
         
         return document
     
@@ -134,11 +126,46 @@ class DocumentService:
             # Update document status to queued
             await self.update_status(document_id, ProcessingStatus.PENDING)
             
-            # Enqueue for processing
-            job_id = await self.queue_service.enqueue_document_processing(
-                document_id, 
-                priority=priority
-            )
+            # Connect to Redis only when work is actually queued. The local
+            # zero-config mode can process in the background without Redis.
+            try:
+                if self.queue_service is None:
+                    self.queue_service = QueueService()
+                job_id = await self.queue_service.enqueue_document_processing(
+                    document_id,
+                    priority=priority,
+                )
+            except Exception as queue_error:
+                from app.workers.document_processor import process_document
+
+                task = asyncio.create_task(
+                    asyncio.to_thread(process_document, str(document_id))
+                )
+                _LOCAL_PROCESSING_TASKS.add(task)
+
+                def log_completion(completed: asyncio.Task) -> None:
+                    _LOCAL_PROCESSING_TASKS.discard(completed)
+                    error = None if completed.cancelled() else completed.exception()
+                    self.security_logger.log_security_event(
+                        "local_document_processing_finished",
+                        {
+                            "document_id": str(document_id),
+                            "error": str(error) if error else None,
+                        },
+                        "ERROR" if error else "INFO",
+                    )
+
+                task.add_done_callback(log_completion)
+                job_id = f"local_{document_id}"
+                self.security_logger.log_security_event(
+                    "document_queue_local_fallback",
+                    {
+                        "document_id": str(document_id),
+                        "queue_error": str(queue_error),
+                        "job_id": job_id,
+                    },
+                    "WARNING",
+                )
             
             self.security_logger.log_security_event(
                 "document_queued_for_processing",
@@ -184,12 +211,7 @@ class DocumentService:
         """
         stmt = select(Document).where(Document.id == document_id)
         
-        # Handle both async and sync sessions
-        if hasattr(self.db, 'execute') and callable(getattr(self.db, 'execute')):
-            if hasattr(self.db.execute, '__await__'):
-                result = await self.db.execute(stmt)
-            else:
-                result = self.db.execute(stmt)
+        result = await self.db.execute(stmt)
         document = result.scalar_one_or_none()
         
         if not document:
@@ -229,14 +251,8 @@ class DocumentService:
                 "INFO"
             )
         
-        # Handle both async and sync sessions
-        if hasattr(self.db, 'commit') and callable(getattr(self.db, 'commit')):
-            if hasattr(self.db.commit, '__await__'):
-                await self.db.commit()
-                await self.db.refresh(document)
-            else:
-                self.db.commit()
-                self.db.refresh(document)
+        await self.db.commit()
+        await self.db.refresh(document)
         
         return document
     
@@ -287,12 +303,7 @@ class DocumentService:
         """Get document by ID"""
         stmt = select(Document).where(Document.id == document_id)
         
-        # Handle both async and sync sessions
-        if hasattr(self.db, 'execute') and callable(getattr(self.db, 'execute')):
-            if hasattr(self.db.execute, '__await__'):
-                result = await self.db.execute(stmt)
-            else:
-                result = self.db.execute(stmt)
+        result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
     
     async def delete_document(self, document_id: UUID) -> bool:
@@ -323,14 +334,8 @@ class DocumentService:
             )
         
         # Delete from database
-        # Handle both async and sync sessions
-        if hasattr(self.db, 'delete') and callable(getattr(self.db, 'delete')):
-            if hasattr(self.db.delete, '__await__'):
-                await self.db.delete(document)
-                await self.db.commit()
-            else:
-                self.db.delete(document)
-                self.db.commit()
+        await self.db.delete(document)
+        await self.db.commit()
         
         return True
     
@@ -346,8 +351,13 @@ class DocumentService:
             if not document:
                 return {"error": "Document not found"}
             
-            # Get job status from queue
-            job_status = self.queue_service.get_job_by_document_id(document_id)
+            # Redis is optional in local mode. Processing status remains
+            # available from the document record when work runs in-process.
+            job_status = (
+                self.queue_service.get_job_by_document_id(document_id)
+                if self.queue_service is not None
+                else None
+            )
             
             # Extract progress information from metadata
             progress_info = {}
@@ -422,6 +432,9 @@ class DocumentService:
             job_id = f"doc_process_{document_id}"
             
             # Check both queues
+            if self.queue_service is None:
+                return None
+
             for queue in [self.queue_service.priority_queue, self.queue_service.queue]:
                 job_ids = queue.job_ids
                 if job_id in job_ids:
@@ -445,7 +458,8 @@ class DocumentService:
             
             # Cancel any existing job
             job_id = f"doc_process_{document_id}"
-            self.queue_service.cancel_job(job_id)
+            if self.queue_service is not None:
+                self.queue_service.cancel_job(job_id)
             
             # Reset document status
             await self.update_status(document_id, ProcessingStatus.PENDING)
@@ -487,11 +501,7 @@ class DocumentService:
             # Get all documents in one query
             stmt = select(Document).where(Document.id.in_(document_ids))
             
-            if hasattr(self.db, 'execute') and callable(getattr(self.db, 'execute')):
-                if hasattr(self.db.execute, '__await__'):
-                    result = await self.db.execute(stmt)
-                else:
-                    result = self.db.execute(stmt)
+            result = await self.db.execute(stmt)
             documents = result.scalars().all()
             
             # Build status dictionary
@@ -532,4 +542,10 @@ class DocumentService:
         
         Requirements: 6.2, 6.3 - System responsiveness monitoring
         """
+        if self.queue_service is None:
+            return {
+                "status": "available",
+                "mode": "local",
+                "message": "Redis queue is not connected; local background processing is enabled",
+            }
         return self.queue_service.health_check()

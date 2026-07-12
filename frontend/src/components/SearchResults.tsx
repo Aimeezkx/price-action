@@ -64,11 +64,11 @@ export function SearchResults({
   const getResultIcon = (type: string) => {
     switch (type) {
       case 'knowledge':
-        return <DocumentTextIcon className="h-5 w-5 text-blue-500" />;
+        return <DocumentTextIcon className="h-4 w-4 text-blue-500" />;
       case 'card':
-        return <AcademicCapIcon className="h-5 w-5 text-green-500" />;
+        return <AcademicCapIcon className="h-4 w-4 text-green-500" />;
       default:
-        return <BookOpenIcon className="h-5 w-5 text-gray-500" />;
+        return <BookOpenIcon className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -124,7 +124,7 @@ export function SearchResults({
   if (results.length === 0 && query) {
     return (
       <div className="text-center py-12">
-        <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
+        <DocumentTextIcon className="mx-auto h-8 w-8 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">No results found</h3>
         <p className="mt-1 text-sm text-gray-500">
           Try adjusting your search terms or filters to find what you're looking for.
@@ -152,6 +152,15 @@ export function SearchResults({
           key={result.id}
           className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
           onClick={() => onResultClick?.(result)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onResultClick?.(result);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${getResultTypeLabel(result.type)}: ${result.title}`}
         >
           <div className="p-6">
             <div className="flex items-start space-x-4">

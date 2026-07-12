@@ -1,11 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../hooks/useSearch';
 import { SearchInput } from '../components/SearchInput';
 import { SearchResults } from '../components/SearchResults';
 import { SearchFilters } from '../components/SearchFilters';
 import { SearchHistory } from '../components/SearchHistory';
+import type { SearchResult } from '../types';
 
 export function SearchPage() {
+  const navigate = useNavigate();
   const {
     searchState,
     searchResults,
@@ -31,31 +34,50 @@ export function SearchPage() {
     setShowSuggestions,
   } = useSearch();
 
-  const handleResultClick = (result: any) => {
-    // TODO: Navigate to the specific content (knowledge point or card)
-    console.log('Clicked result:', result);
+  const handleResultClick = (result: SearchResult) => {
+    const documentId = result.metadata?.document_id;
+    const chapterId = result.metadata?.chapter_id;
+
+    if (documentId) {
+      const chapterQuery = chapterId ? `?chapter=${encodeURIComponent(chapterId)}` : '';
+      navigate(`/documents/${encodeURIComponent(documentId)}/chapters${chapterQuery}`);
+      return;
+    }
+
+    navigate(result.type === 'card' ? '/study' : '/documents');
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="sm:flex sm:items-center mb-8">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Search</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Find knowledge points and flashcards across your documents
-          </p>
-        </div>
-        
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            onClick={resetSearch}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Reset Search
-          </button>
+    <div className="min-h-screen">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="sm:flex sm:items-center sm:justify-between">
+            <div className="sm:flex-auto">
+              <h1 className="text-3xl font-bold text-gray-900">Search</h1>
+              <p className="mt-2 text-lg text-gray-600">
+                Find knowledge points and flashcards across your documents
+              </p>
+            </div>
+
+            <div className="mt-6 sm:mt-0 sm:flex-none">
+              <button
+                type="button"
+                onClick={resetSearch}
+                className="inline-flex min-h-11 items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset Search
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
@@ -122,6 +144,7 @@ export function SearchPage() {
             onResultClick={handleResultClick}
           />
         </div>
+      </div>
       </div>
     </div>
   );

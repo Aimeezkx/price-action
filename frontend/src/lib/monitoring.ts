@@ -28,7 +28,7 @@ class MonitoringService {
   private userId?: string;
   private performanceObserver?: PerformanceObserver;
   private metricsBuffer: PerformanceMetric[] = [];
-  private flushInterval: number = 30000; // 30 seconds
+  private flushInterval = 30000; // 30 seconds
 
   constructor() {
     this.analyticsUrl = import.meta.env.VITE_ANALYTICS_URL || 'http://localhost:8080/api';

@@ -29,6 +29,24 @@ npm run dev
 - **Type Checking**: TypeScript compiler
 - **Styling**: Tailwind CSS
 
+### Design System
+
+#### Icon Sizing System
+The application uses a standardized icon sizing system for consistent visual hierarchy:
+
+- **Quick Reference**: `xs` (12px), `sm` (16px), `md` (20px), `lg` (24px), `xl` (32px)
+- **Context Guidelines**: Navigation (`sm`), Buttons (`sm`-`md`), Features (`md`-`lg`), Empty States (`lg`-`xl`)
+- **Documentation**: See [Icon Style Guide](./docs/ICON_STYLE_GUIDE.md) for complete guidelines
+- **Developer Guide**: See [Developer Guide](./docs/DEVELOPER_GUIDE.md) for implementation details
+- **Examples**: See [Icon Examples](./docs/ICON_EXAMPLES.md) for practical usage patterns
+
+```tsx
+// Quick usage example
+import { getIconProps } from './src/lib/icon-component-helpers';
+const iconProps = getIconProps('sm', 'navigation', 'text-gray-600');
+<Home {...iconProps} />
+```
+
 ### Environment Variables
 
 The application uses Vite's proxy feature for API requests in development. Configure the following environment variables:

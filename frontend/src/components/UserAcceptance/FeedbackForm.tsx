@@ -95,7 +95,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
                 : 'text-gray-300 hover:text-yellow-400'
             }`}
           >
-            <Star className="h-5 w-5 fill-current" />
+            <Star className="h-4 w-4 fill-current" />
           </button>
         ))}
       </div>
@@ -115,7 +115,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-4 w-4" />
           Share Your Feedback
         </CardTitle>
       </CardHeader>

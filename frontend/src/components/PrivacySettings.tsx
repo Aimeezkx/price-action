@@ -71,7 +71,7 @@ export const PrivacySettings: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
         <span className="ml-2 text-gray-600">Loading privacy settings...</span>
       </div>
     );
@@ -131,13 +131,19 @@ export const PrivacySettings: React.FC = () => {
             <button
               onClick={() => togglePrivacyMode(!privacy_configuration.privacy_mode)}
               disabled={toggling}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                privacy_configuration.privacy_mode ? 'bg-green-600' : 'bg-gray-300'
-              } ${toggling ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`relative inline-flex h-11 w-14 flex-shrink-0 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                toggling ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              role="switch"
+              aria-checked={privacy_configuration.privacy_mode}
+              aria-label="Toggle privacy mode"
             >
+              <span className={`absolute h-6 w-11 rounded-full transition-colors ${
+                privacy_configuration.privacy_mode ? 'bg-green-600' : 'bg-gray-300'
+              }`} />
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  privacy_configuration.privacy_mode ? 'translate-x-6' : 'translate-x-1'
+                className={`absolute left-2.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                  privacy_configuration.privacy_mode ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
             </button>
@@ -256,7 +262,7 @@ export const PrivacySettings: React.FC = () => {
           <div className="flex justify-end">
             <button
               onClick={fetchPrivacyStatus}
-              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex min-h-11 items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <Settings className="h-4 w-4 mr-2" />
               Refresh Status

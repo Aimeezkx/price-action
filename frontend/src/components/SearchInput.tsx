@@ -103,7 +103,7 @@ export function SearchInput({
     <div className={`relative ${className}`}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
         </div>
         
         <input
@@ -132,7 +132,7 @@ export function SearchInput({
             <button
               type="button"
               onClick={clearQuery}
-              className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+              className="min-h-11 min-w-11 p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
               aria-label="Clear search"
             >
               <XMarkIcon className="h-4 w-4" />
@@ -143,7 +143,7 @@ export function SearchInput({
             type="button"
             onClick={onSearch}
             disabled={!query.trim() || isSearching}
-            className="ml-1 mr-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="min-h-11 ml-1 mr-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Search"
           >
             {isSearching ? (

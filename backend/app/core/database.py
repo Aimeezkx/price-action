@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
-from typing import Generator, AsyncGenerator
+from typing import Any, AsyncGenerator, Generator
 import logging
 
 from .config import settings
@@ -88,24 +88,70 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
             finally:
                 await session.close()
     else:
-        # Fallback to sync session wrapped in async context
-        db = SessionLocal()
+        # Keep one async-facing session contract for API routes even when the
+        # optional async SQLite driver is unavailable.
+        db = SyncSessionAsyncAdapter(SessionLocal())
         try:
             yield db
-        except Exception as e:
-            db.rollback()
+        except Exception:
+            await db.rollback()
             raise
         finally:
-            db.close()
+            await db.close()
 
 
 def get_async_session():
     """Get async session for workers (context manager)"""
     if async_session:
         return async_session()
-    else:
-        # Fallback to sync session
-        return SessionLocal()
+
+    # Worker services consistently use ``async with`` and await transaction
+    # methods.  When the optional async SQLite driver is unavailable, expose
+    # the synchronous SQLAlchemy session through the same small async contract
+    # instead of leaking a sync Session into the processing pipeline.
+    return SyncSessionAsyncAdapter(SessionLocal())
+
+
+class SyncSessionAsyncAdapter:
+    """Async-compatible facade for a synchronous SQLAlchemy session."""
+
+    def __init__(self, session: Session):
+        self._session = session
+
+    async def __aenter__(self) -> "SyncSessionAsyncAdapter":
+        return self
+
+    async def __aexit__(self, exc_type, exc, traceback) -> None:
+        if exc_type is not None:
+            self._session.rollback()
+        self._session.close()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._session, name)
+
+    def add(self, instance: Any) -> None:
+        self._session.add(instance)
+
+    async def execute(self, statement: Any, *args: Any, **kwargs: Any) -> Any:
+        return self._session.execute(statement, *args, **kwargs)
+
+    async def flush(self, *args: Any, **kwargs: Any) -> None:
+        self._session.flush(*args, **kwargs)
+
+    async def commit(self) -> None:
+        self._session.commit()
+
+    async def refresh(self, instance: Any, *args: Any, **kwargs: Any) -> None:
+        self._session.refresh(instance, *args, **kwargs)
+
+    async def rollback(self) -> None:
+        self._session.rollback()
+
+    async def delete(self, instance: Any) -> None:
+        self._session.delete(instance)
+
+    async def close(self) -> None:
+        self._session.close()
 
 
 def get_db_session() -> Session:

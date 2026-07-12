@@ -47,7 +47,7 @@ export interface Card {
   front: string;
   back: string;
   difficulty: number;
-  due_date: string;
+  due_date?: string;
   metadata: Record<string, any>;
 }
 
@@ -93,4 +93,17 @@ export interface SearchResult {
   highlights?: string[];
   rank_factors?: Record<string, number>;
   chapter_title?: string;
+}
+
+// Icon sizing types
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+export interface IconProps {
+  size?: IconSize;
+  className?: string;
+}
+
+export interface IconSizeValidation {
+  isValid: boolean;
+  warnings: string[];
 }

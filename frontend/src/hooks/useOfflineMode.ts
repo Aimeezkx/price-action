@@ -116,7 +116,7 @@ export const useOfflineMode = (): UseOfflineModeReturn => {
 export const useOfflineUpload = () => {
   const { isOnline, addToQueue, processQueue } = useOfflineMode();
 
-  const queueUpload = useCallback((file: File, endpoint: string = '/api/documents/upload', options: any = {}) => {
+  const queueUpload = useCallback((file: File, endpoint = '/api/documents/upload', options: any = {}) => {
     return addToQueue({
       type: 'upload',
       data: { file, endpoint, options },

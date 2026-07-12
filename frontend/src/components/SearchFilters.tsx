@@ -103,7 +103,7 @@ export function SearchFilters({
       <div className="px-4 py-3 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <FunnelIcon className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-900">Filters</span>
             {hasActiveFilters() && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -116,7 +116,7 @@ export function SearchFilters({
             <button
               type="button"
               onClick={onToggleAdvanced}
-              className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <AdjustmentsHorizontalIcon className="h-3 w-3 mr-1" />
               {isAdvanced ? 'Simple' : 'Advanced'}
@@ -126,7 +126,7 @@ export function SearchFilters({
               <button
                 type="button"
                 onClick={onClearFilters}
-                className="inline-flex items-center px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <XMarkIcon className="h-3 w-3 mr-1" />
                 Clear
@@ -136,7 +136,9 @@ export function SearchFilters({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="min-h-11 min-w-11 p-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label={isExpanded ? 'Collapse filters' : 'Expand filters'}
+              aria-expanded={isExpanded}
             >
               {isExpanded ? (
                 <ChevronUpIcon className="h-4 w-4" />

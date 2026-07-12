@@ -53,10 +53,10 @@ export const EnhancedUploadModal: React.FC<EnhancedUploadModalProps> = ({
       return 'Unsupported file type. Please upload PDF, DOCX, or Markdown files.';
     }
 
-    // Validate file size (50MB limit)
-    const maxSize = 50 * 1024 * 1024;
+    // Keep the browser limit aligned with the backend upload policy.
+    const maxSize = 100 * 1024 * 1024;
     if (file.size > maxSize) {
-      return 'File too large. Maximum size is 50MB.';
+      return 'File too large. Maximum size is 100MB.';
     }
 
     return null;
@@ -253,7 +253,7 @@ export const EnhancedUploadModal: React.FC<EnhancedUploadModalProps> = ({
                   <p className="text-xs text-gray-500 mt-1">
                     {isDragActive
                       ? ''
-                      : `Drag and drop or click to select • PDF, DOCX, Markdown • Max 50MB${allowMultiple ? ` • Up to ${maxFiles} files` : ''}`
+                      : `Drag and drop or click to select • PDF, DOCX, Markdown • Max 100MB${allowMultiple ? ` • Up to ${maxFiles} files` : ''}`
                     }
                   </p>
                 </div>
