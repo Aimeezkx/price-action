@@ -128,7 +128,8 @@ class APIClient {
   // Card endpoints
   async getCards(params?: Record<string, string>): Promise<Card[]> {
     const query = params ? `?${new URLSearchParams(params)}` : '';
-    return this.request(`/cards${query}`);
+    const payload = await this.request<Card[] | { cards: Card[] }>(`/cards${query}`);
+    return Array.isArray(payload) ? payload : payload.cards;
   }
 
   async generateCards(documentId: string): Promise<any> {
@@ -140,13 +141,14 @@ class APIClient {
 
   // Review endpoints
   async getTodayReview(): Promise<Card[]> {
-    return this.request('/review/today');
+    const cards = await this.request<Array<Card & { card_id?: string }>>('/reviews/today');
+    return cards.map((card) => ({ ...card, id: card.card_id || card.id }));
   }
 
   async gradeCard(cardId: string, grade: number): Promise<any> {
-    return this.request('/review/grade', {
+    return this.request(`/reviews/cards/${cardId}/grade`, {
       method: 'POST',
-      body: JSON.stringify({ card_id: cardId, grade }),
+      body: JSON.stringify({ grade }),
     });
   }
 
@@ -457,7 +459,8 @@ export class RobustApiClient {
   async getCards(params?: Record<string, string>): Promise<Card[]> {
     const query = params ? `?${new URLSearchParams(params)}` : '';
     const response = await this.request(`/cards${query}`);
-    return this.handleResponse(response);
+    const payload = await this.handleResponse<Card[] | { cards: Card[] }>(response);
+    return Array.isArray(payload) ? payload : payload.cards;
   }
 
   async generateCards(documentId: string): Promise<any> {
@@ -471,14 +474,15 @@ export class RobustApiClient {
 
   // Review endpoints
   async getTodayReview(): Promise<Card[]> {
-    const response = await this.request('/review/today');
-    return this.handleResponse(response);
+    const response = await this.request('/reviews/today');
+    const cards = await this.handleResponse<Array<Card & { card_id?: string }>>(response);
+    return cards.map((card) => ({ ...card, id: card.card_id || card.id }));
   }
 
   async gradeCard(cardId: string, grade: number): Promise<any> {
-    const response = await this.request('/review/grade', {
+    const response = await this.request(`/reviews/cards/${cardId}/grade`, {
       method: 'POST',
-      body: JSON.stringify({ card_id: cardId, grade }),
+      body: JSON.stringify({ grade }),
     });
     return this.handleResponse(response);
   }

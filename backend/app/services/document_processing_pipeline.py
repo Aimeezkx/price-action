@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models.document import Document, ProcessingStatus, Chapter, Figure
 from ..models.knowledge import Knowledge
-from ..models.learning import Card
+from ..models.learning import Card, SRS
 from ..parsers.factory import get_parser_for_file
 from ..services.text_segmentation_service import TextSegmentationService
 from ..services.knowledge_extraction_service import KnowledgeExtractionService
@@ -475,7 +475,7 @@ class DocumentProcessingPipeline:
                         front=gen_card.front,
                         back=gen_card.back,
                         difficulty=gen_card.difficulty,
-                        metadata=gen_card.metadata
+                        card_metadata=gen_card.metadata,
                     )
                     session.add(card)
                     saved_cards.append(card)
@@ -483,6 +483,12 @@ class DocumentProcessingPipeline:
                     logger.error(f"Error saving card: {e}")
                     continue
             
+            # Assign card IDs in one batch, then make every generated card
+            # immediately available to the spaced-repetition review queue.
+            await session.flush()
+            for card in saved_cards:
+                session.add(SRS(card_id=card.id))
+
             await session.commit()
             
             logger.info(

@@ -47,7 +47,7 @@ export interface Card {
   front: string;
   back: string;
   difficulty: number;
-  due_date: string;
+  due_date?: string;
   metadata: Record<string, any>;
 }
 

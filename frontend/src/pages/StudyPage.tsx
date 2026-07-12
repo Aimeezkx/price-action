@@ -18,12 +18,12 @@ export function StudyPage() {
   if (filters.cardType) filterParams.card_type = filters.cardType;
   if (filters.difficulty) {
     if (filters.difficulty === 'easy') {
-      filterParams.max_difficulty = '1.5';
+      filterParams.difficulty_max = '1.5';
     } else if (filters.difficulty === 'medium') {
-      filterParams.min_difficulty = '1.5';
-      filterParams.max_difficulty = '2.5';
+      filterParams.difficulty_min = '1.5';
+      filterParams.difficulty_max = '2.5';
     } else if (filters.difficulty === 'hard') {
-      filterParams.min_difficulty = '2.5';
+      filterParams.difficulty_min = '2.5';
     }
   }
   
